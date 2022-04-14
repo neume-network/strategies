@@ -1,5 +1,8 @@
 // @format
-import { exit } from "process";
+import { exit, env } from "process";
+
+import { call, encodeCallSignature, decodeCallOutput, toHex } from "eth-fun";
+
 import { write } from "../disc.mjs";
 
 let worker, log;
@@ -15,11 +18,46 @@ const msgBoilerplate = {
   error: null,
 };
 
-export function transform(response) {
-  return response.data.nfts
-    .map(({ id }) => {
-      const [address, tokenId] = id.split("/");
-      return `${address},${tokenId}`;
+export function tokenURIMsgGen(address, tokenId) {
+  const options = {
+    url: env.RPC_HTTP_HOST,
+  };
+  if (env.RPC_API_KEY) {
+    options.headers = {
+      Authorization: `Bearer ${env.RPC_API_KEY}`,
+    };
+  }
+  const data = encodeCallSignature("tokenURI(uint256)", ["uint256"], [tokenId]);
+  const from = null;
+  return {
+    type: "json-rpc",
+    options,
+    version: "0.0.1",
+    method: "eth_call",
+    params: [
+      {
+        from,
+        to: address,
+        data,
+      },
+      "latest",
+    ],
+    results: null,
+    errors: null,
+  };
+}
+
+export function toJSON(list) {
+  return list.map(({ id }) => {
+    const [address, tokenId] = id.split("/");
+    return { address, tokenId };
+  });
+}
+
+export function toCSV(list) {
+  return list
+    .map(({ address, tokenId, tokenURI }) => {
+      return `${address},${tokenId},${tokenURI}`;
     })
     .join("\n");
 }
@@ -36,24 +74,38 @@ function messageGen(skip, first) {
 }
 
 async function handle(message) {
-  if (message.results.errors) {
+  if (message && message.results && message.results.errors) {
     log(message.results.errors);
     return exit(1);
   }
-  if (message.error) {
+  if (message && message.error) {
     log(message.error);
     return exit(1);
   }
 
-  const header = "address,tokenId";
-  const rows = transform(message.results);
-  await write(path, header, rows);
+  if (message.type === "https") {
+    const ids = toJSON(message.results.data.nfts);
+    ids.forEach(({ address, tokenId }) =>
+      worker.postMessage({
+        ...{ metadata: { address, tokenId } },
+        ...tokenURIMsgGen(address, tokenId),
+      })
+    );
 
-  const { first } = message.graphql;
-  const skip = message.graphql.skip + first;
+    const { first } = message.graphql;
+    const skip = message.graphql.skip + first;
 
-  const nextMessage = messageGen(skip, first);
-  worker.postMessage(nextMessage);
+    const nextMessage = messageGen(skip, first);
+    worker.postMessage(nextMessage);
+  } else if (message.type === "json-rpc") {
+    if (message.method === "eth_call") {
+      const [tokenURI] = decodeCallOutput(["string"], message.results);
+      const row = toCSV([{ tokenURI, ...message.metadata }]);
+      const header = "address,tokenId,tokenURI";
+      console.log(row);
+      //await write(path, header, row);
+    }
+  }
 }
 
 export function run(inputs, _log) {
