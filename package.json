@@ -4,7 +4,8 @@
   "description": "",
   "main": "./src/index.mjs",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,12 @@
   },
   "homepage": "https://github.com/music-os/music-os-strategies#readme",
   "devDependencies": {
-    "ava": "4.2.0"
+    "ava": "4.2.0",
+    "husky": "7.0.4",
+    "lint-staged": "12.3.8",
+    "prettier": "2.6.2"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
   }
 }
