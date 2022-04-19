@@ -3,7 +3,7 @@ import { exit, env } from "process";
 
 import { call, encodeCallSignature, decodeCallOutput, toHex } from "eth-fun";
 
-import { write } from "../disc.mjs";
+import { toJSON, toCSV, write } from "../disc.mjs";
 
 let worker, log;
 const path = "musicdata.csv";
@@ -46,21 +46,6 @@ export function tokenURIMsgGen(address, tokenId) {
   };
 }
 
-export function toJSON(list) {
-  return list.map(({ id }) => {
-    const [address, tokenId] = id.split("/");
-    return { address, tokenId };
-  });
-}
-
-export function toCSV(list) {
-  return list
-    .map(({ address, tokenId, tokenURI }) => {
-      return `${address},${tokenId},${tokenURI}`;
-    })
-    .join("\n");
-}
-
 function queryGen(skip, first) {
   return JSON.stringify({
     query: `{ nfts(first: ${first}, skip: ${skip}) { id } }`,
@@ -79,7 +64,13 @@ async function handle(message) {
   }
 
   if (message.type === "https") {
-    const ids = toJSON(message.results.data.nfts);
+    const expr = new RegExp(
+      "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
+    );
+    const ids = toJSON(
+      message.results.data.nfts.map((entry) => entry.id),
+      expr
+    );
     ids.forEach(({ address, tokenId }) =>
       worker.postMessage({
         ...{ metadata: { address, tokenId } },

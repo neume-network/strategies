@@ -10,3 +10,14 @@ export async function write(path, header, rows) {
   }
   await appendFile(path, rows);
 }
+
+export function toCSV(list) {
+  return list.map((entry) => Object.values(entry).join(",")).join("\n");
+}
+
+export function toJSON(list, expr) {
+  return list.map((entry) => {
+    const match = expr.exec(entry);
+    return match.groups;
+  });
+}
