@@ -63,7 +63,7 @@ async function handle(message) {
     return exit(1);
   }
 
-  if (message.type === "https") {
+  if (message.type === "graphql") {
     const expr = new RegExp(
       "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
     );
