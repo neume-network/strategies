@@ -9,10 +9,9 @@ let worker, log;
 const path = "musicdata.csv";
 const optionsBoilerplate = {
   url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",
-  method: "POST",
 };
 const msgBoilerplate = {
-  type: "https",
+  type: "graphql",
   version: "0.0.1",
   results: null,
   error: null,
@@ -74,10 +73,6 @@ function messageGen(skip, first) {
 }
 
 async function handle(message) {
-  if (message && message.results && message.results.errors) {
-    log(message.results.errors);
-    return exit(1);
-  }
   if (message && message.error) {
     log(message.error);
     return exit(1);
