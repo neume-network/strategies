@@ -68,12 +68,16 @@ function messageGen(skip, first) {
 }
 
 async function handle(message) {
-  if (message && message.error) {
-    log(message.error);
-    return exit(1);
-  }
-
   if (message.type === "graphql") {
+    // NOTE: We only want to stop the strategy when a `graphql` message fails
+    // as it means we've reached the last page of NFTs
+    if (message && message.error) {
+      log(message.error);
+      // NOTE: Once we get an error message from graphql that we reached the
+      // last page, we return that branch.
+      return;
+    }
+
     const expr = new RegExp(
       "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
     );
@@ -95,12 +99,34 @@ async function handle(message) {
     worker.postMessage(nextMessage);
   } else if (message.type === "json-rpc") {
     if (message.method === "eth_call") {
-      const [tokenURI] = decodeCallOutput(["string"], message.results);
-      const row = toCSV([{ tokenURI, ...message.metadata }]);
+      let tokenURI;
+      try {
+        [tokenURI] = decodeCallOutput(["string"], message.results);
+      } catch (err) {
+        log(err.toString());
+        return;
+      }
       const header = "address,tokenId,tokenURI";
-      console.log(row);
-      //await write(path, header, row);
+      worker.postMessage({
+        type: "https",
+        version: "0.0.1",
+        options: {
+          url: tokenURI,
+          method: "GET",
+        },
+        results: null,
+        error: null,
+        metadata: {
+          ...message.metadata,
+          tokenURI,
+        },
+      });
     }
+  } else if (message.type === "https") {
+    const row = toCSV([
+      { metadata: JSON.stringify(message.results), ...message.metadata },
+    ]);
+    console.log(row);
   }
 }
 
