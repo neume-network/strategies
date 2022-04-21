@@ -6,9 +6,11 @@ import { call, encodeCallSignature, decodeCallOutput, toHex } from "eth-fun";
 import { toJSON, toCSV, write } from "../disc.mjs";
 
 let worker, log;
-const path = "musicdata.csv";
 const optionsBoilerplate = {
   url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",
+};
+const zora = {
+  address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
 };
 const msgBoilerplate = {
   type: "graphql",
@@ -26,7 +28,15 @@ export function tokenURIMsgGen(address, tokenId) {
       Authorization: `Bearer ${env.RPC_API_KEY}`,
     };
   }
-  const data = encodeCallSignature("tokenURI(uint256)", ["uint256"], [tokenId]);
+
+  let signature = "tokenURI(uint256)";
+  // NOTE: Zora isn't compatible to the ERC721 standard and so to get their
+  // tokens's metadata, we need to call `tokenMetadataURI`.
+  if (address === zora.address) {
+    signature = "tokenMetadataURI(uint256)";
+  }
+
+  const data = encodeCallSignature(signature, ["uint256"], [tokenId]);
   const from = null;
   return {
     type: "json-rpc",
