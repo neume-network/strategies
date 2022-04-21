@@ -18,6 +18,7 @@ const msgBoilerplate = {
   results: null,
   error: null,
 };
+const first = 1000;
 
 export function tokenURIMsgGen(address, tokenId) {
   const options = {
@@ -56,15 +57,24 @@ export function tokenURIMsgGen(address, tokenId) {
   };
 }
 
-function queryGen(skip, first) {
+function queryGen(first, lastId) {
   return JSON.stringify({
-    query: `{ nfts(first: ${first}, skip: ${skip}) { id } }`,
+    query: `
+      query manyNFTs($lastId: String) {
+        nfts(first: ${first}, where: { id_gt: $lastId }) {
+          id
+        }
+      }`,
+    variables: { lastId },
   });
 }
 
-function messageGen(skip, first) {
-  const options = { ...optionsBoilerplate, ...{ body: queryGen(skip, first) } };
-  return { ...msgBoilerplate, options, graphql: { skip, first } };
+function messageGen(first, lastId) {
+  const options = {
+    ...optionsBoilerplate,
+    ...{ body: queryGen(first, lastId) },
+  };
+  return { ...msgBoilerplate, options };
 }
 
 async function handle(message) {
@@ -92,10 +102,8 @@ async function handle(message) {
       })
     );
 
-    const { first } = message.graphql;
-    const skip = message.graphql.skip + first;
-
-    const nextMessage = messageGen(skip, first);
+    const lastId = message.results.data.nfts.pop().id;
+    const nextMessage = messageGen(first, lastId);
     worker.postMessage(nextMessage);
   } else if (message.type === "json-rpc") {
     if (message.method === "eth_call") {
@@ -135,10 +143,8 @@ export function run(inputs, _log) {
   log = _log;
   log("Start web3-subgraph strategy");
 
-  const skip = 0;
-  const maxStep = 1000;
-  const first = maxStep;
-  const message0 = messageGen(skip, first);
+  const lastId = "";
+  const message0 = messageGen(first, lastId);
   worker.postMessage(message0);
   worker.on("message", handle);
 }
