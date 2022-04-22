@@ -1,10 +1,35 @@
 //@format
 import { constants } from "fs";
 import { access, unlink } from "fs/promises";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
 import test from "ava";
 
-import { toJSON, toCSV, write } from "../src/disc.mjs";
+import { toJSON, toCSV, write, getdirdirs, load } from "../src/disc.mjs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+test("test loading & validating primitives", async (t) => {
+  const path = resolve(__dirname, "../src/primitives");
+  const dirs = await getdirdirs(path);
+  const primitives = await load(dirs);
+  t.truthy(primitives);
+  t.plan(primitives.length * 3 + 1);
+  for (const primitive of primitives) {
+    t.is(typeof primitive.init, "function");
+    t.is(typeof primitive.update, "function");
+    t.is(typeof primitive.props, "object");
+  }
+});
+
+test("reading directory files", async (t) => {
+  const path = resolve(__dirname, "../");
+  const dirs = await getdirdirs(path);
+  t.true(dirs.includes("src"));
+  t.true(dirs.includes("test"));
+  t.false(dirs.includes("readme.md"));
+});
 
 test("writing csv to disk", async (t) => {
   const path = "data.csv";

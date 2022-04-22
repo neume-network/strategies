@@ -102,7 +102,7 @@ async function handle(message) {
       })
     );
 
-    const lastId = message.results.data.nfts.pop().id;
+    const lastId = message.results.data.nfts.pop()?.id;
     const nextMessage = messageGen(first, lastId);
     worker.postMessage(nextMessage);
   } else if (message.type === "json-rpc") {
