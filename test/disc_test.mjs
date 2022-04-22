@@ -19,6 +19,7 @@ test("test loading & validating primitives", async (t) => {
   for (const primitive of primitives) {
     t.is(typeof primitive.init, "function");
     t.is(typeof primitive.update, "function");
+    t.is(typeof primitive.transform, "function");
     t.is(typeof primitive.props, "object");
   }
 });
@@ -26,9 +27,9 @@ test("test loading & validating primitives", async (t) => {
 test("reading directory files", async (t) => {
   const path = resolve(__dirname, "../");
   const dirs = await getdirdirs(path);
-  t.true(dirs.includes("src"));
-  t.true(dirs.includes("test"));
-  t.false(dirs.includes("readme.md"));
+  t.true(dirs.includes(resolve(path, "src")));
+  t.true(dirs.includes(resolve(path, "test")));
+  t.false(dirs.includes(resolve(path, "readme.md")));
 });
 
 test("writing csv to disk", async (t) => {

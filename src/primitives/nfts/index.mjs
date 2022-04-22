@@ -1,5 +1,4 @@
 // @format
-import jsonata from "jsonata";
 
 function generate(first, lastId) {
   return {
@@ -9,11 +8,11 @@ function generate(first, lastId) {
       url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",
       body: JSON.stringify({
         query: `
-      query manyNFTs($lastId: String) {
-        nfts(first: ${first}, where: { id_gt: $lastId }) {
-          id
-        }
-      }`,
+          query manyNFTs($lastId: String) {
+            nfts(first: ${first}, where: { id_gt: $lastId }) {
+              id
+            }
+          }`,
         variables: { lastId },
       }),
     },
@@ -27,22 +26,23 @@ export const props = {
   lastId: "",
 };
 
-export function init(message, props, state) {
+export function init(state) {
   return {
     message: generate(props.first, props.lastId),
-    props,
     state,
   };
 }
 
-export function update(message, props, state) {
-  const expr = `message.results.data.nfts[id ~> /(?<address>0x[a-fA-F0-9]{40})/(?<tokenId>[0-9]+)/ ].id`;
-  const results = jsonata(expr).evaluate(data);
-  const { address, tokenId } = results[results.length - 1];
+export function transform(results) {
+  const expr = new RegExp("(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]+)");
+  return results.data.nfts.map(({ id }) => id.match(expr).groups);
+}
+
+export function update(message, state) {
+  const { address, tokenId } = message.results[message.results.length - 1];
   const lastId = `${address}/${tokenId}`;
   return {
     message: generate(props.first, lastId),
-    props,
     state,
   };
 }
