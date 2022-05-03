@@ -2,7 +2,7 @@
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
-import { getdirdirs, load } from "./disc.mjs";
+import { getdirdirs, loadAll } from "./disc.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -25,11 +25,15 @@ export function extract(worker, extractor) {
   worker.postMessage(step0.message);
 }
 
-export async function run(worker, logger) {
+export async function init(worker) {
   const path = resolve(__dirname, "./strategies");
   const paths = await getdirdirs(path);
-  const extractors = await load(paths, "extractor.mjs");
+  const extractors = await loadAll(paths, "extractor.mjs");
   for (const extractor of extractors) {
     extract(worker, extractor);
   }
+}
+
+export async function run(worker) {
+  init(worker);
 }

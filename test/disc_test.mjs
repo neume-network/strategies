@@ -6,14 +6,14 @@ import { fileURLToPath } from "url";
 
 import test from "ava";
 
-import { toJSON, toCSV, write, getdirdirs, load } from "../src/disc.mjs";
+import { toJSON, toCSV, write, getdirdirs, loadAll } from "../src/disc.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 test("test loading & validating extractors", async (t) => {
   const path = resolve(__dirname, "../src/strategies");
   const dirs = await getdirdirs(path);
-  const extractors = await load(dirs, "extractor.mjs");
+  const extractors = await loadAll(dirs, "extractor.mjs");
   t.truthy(extractors);
   t.plan(extractors.length * 3 + 1);
   for (const extractor of extractors) {
