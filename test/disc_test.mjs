@@ -10,17 +10,16 @@ import { toJSON, toCSV, write, getdirdirs, load } from "../src/disc.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-test("test loading & validating primitives", async (t) => {
-  const path = resolve(__dirname, "../src/primitives");
+test("test loading & validating extractors", async (t) => {
+  const path = resolve(__dirname, "../src/strategies");
   const dirs = await getdirdirs(path);
-  const primitives = await load(dirs);
-  t.truthy(primitives);
-  t.plan(primitives.length * 3 + 1);
-  for (const primitive of primitives) {
-    t.is(typeof primitive.init, "function");
-    t.is(typeof primitive.update, "function");
-    t.is(typeof primitive.transform, "function");
-    t.is(typeof primitive.props, "object");
+  const extractors = await load(dirs, "extractor.mjs");
+  t.truthy(extractors);
+  t.plan(extractors.length * 3 + 1);
+  for (const extractor of extractors) {
+    t.is(typeof extractor.init, "function");
+    t.is(typeof extractor.update, "function");
+    t.is(typeof extractor.props, "object");
   }
 });
 

@@ -33,14 +33,9 @@ export function init(state) {
   };
 }
 
-export function transform(results) {
-  const expr = new RegExp("(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]+)");
-  return results.data.nfts.map(({ id }) => id.match(expr).groups);
-}
-
 export function update(message, state) {
-  const { address, tokenId } = message.results[message.results.length - 1];
-  const lastId = `${address}/${tokenId}`;
+  const { nfts } = message.results.data;
+  const lastId = nfts[nfts.length - 1].id;
   return {
     message: generate(props.first, lastId),
     state,

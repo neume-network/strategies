@@ -6,10 +6,10 @@ import { getdirdirs, load } from "./disc.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export function start(worker, primitive) {
+export function extract(worker, extractor) {
   let state = {};
 
-  const step0 = primitive.init(state);
+  const step0 = extractor.init(state);
   state = step0.state;
 
   worker.on("message", (message) => {
@@ -17,11 +17,7 @@ export function start(worker, primitive) {
       throw new Error(message.error);
     }
 
-    message = {
-      ...message,
-      results: primitive.transform(message.results),
-    };
-    const stepN = primitive.update(message, state);
+    const stepN = extractor.update(message, state);
 
     state = stepN.state;
     worker.postMessage(stepN.message);
@@ -30,10 +26,10 @@ export function start(worker, primitive) {
 }
 
 export async function run(worker, logger) {
-  const path = resolve(__dirname, "./primitives");
+  const path = resolve(__dirname, "./strategies");
   const paths = await getdirdirs(path);
-  const primitives = await load(paths);
-  for (const primitive of primitives) {
-    start(worker, primitive);
+  const extractors = await load(paths, "extractor.mjs");
+  for (const extractor of extractors) {
+    extract(worker, extractor);
   }
 }

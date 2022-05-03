@@ -4,9 +4,9 @@ import { readdir, stat, appendFile, access } from "fs/promises";
 import { statSync } from "fs";
 import { resolve } from "path";
 
-export async function load(paths) {
+export async function load(paths, filename) {
   const pImports = paths.map(
-    async (path) => await import(resolve(path, "index.mjs"))
+    async (path) => await import(resolve(path, filename))
   );
   return await Promise.all(pImports);
 }
