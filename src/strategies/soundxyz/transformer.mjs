@@ -1,7 +1,8 @@
 // @format
 const version = "0.0.1";
 
-export function transform(datum) {
+export function transform(line) {
+  const datum = JSON.parse(line);
   return {
     version,
     title: datum.name,
