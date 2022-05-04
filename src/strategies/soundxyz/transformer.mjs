@@ -2,7 +2,12 @@
 const version = "0.0.1";
 
 export function transform(line) {
-  const datum = JSON.parse(line);
+  let datum;
+  try {
+    datum = JSON.parse(line);
+  } catch (err) {
+    return null;
+  }
   return {
     version,
     title: datum.name,
