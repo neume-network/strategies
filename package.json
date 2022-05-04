@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/index.mjs",
   "scripts": {
-    "test": "ava",
+    "test": "ava --verbose",
     "prepare": "husky install"
   },
   "repository": {
@@ -27,6 +27,7 @@
   "homepage": "https://github.com/music-os/music-os-strategies#readme",
   "devDependencies": {
     "ava": "4.2.0",
+    "debug": "4.3.4",
     "husky": "7.0.4",
     "lint-staged": "12.3.8",
     "prettier": "2.6.2"
@@ -36,5 +37,10 @@
   },
   "dependencies": {
     "eth-fun": "0.6.0"
+  },
+  "ava": {
+    "environmentVariables": {
+      "DEBUG": "music-os-strategies:*"
+    }
   }
 }

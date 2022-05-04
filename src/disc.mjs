@@ -4,7 +4,9 @@ import { readdir, stat, appendFile, access } from "fs/promises";
 import { statSync } from "fs";
 import { resolve } from "path";
 
-import log from "./logger.mjs";
+import logger from "./logger.mjs";
+
+const log = logger("disc");
 
 export async function loadAll(paths, filename) {
   const pImports = paths.map(
