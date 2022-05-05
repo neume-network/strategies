@@ -27,7 +27,7 @@ async function lineReader(path, onLineHandler) {
 
 function applyOnLine(strategies) {
   return (line) => {
-    return strategies[0].transform(line);
+    return strategies[1].transform(line);
   };
 }
 
