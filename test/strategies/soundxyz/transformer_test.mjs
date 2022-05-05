@@ -36,5 +36,4 @@ test("soundxyz transformer", (t) => {
   const validate = ajv.compile(track);
   const valid = validate(result);
   t.true(valid);
-  t.log(valid.errors);
 });

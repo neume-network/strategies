@@ -19,7 +19,7 @@ export function transform(line) {
     platform: {
       version,
       name: "Sound",
-      uri: datum.external_url,
+      uri: "https://sound.xyz",
     },
     erc721: {
       version,
