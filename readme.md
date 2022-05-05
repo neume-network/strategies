@@ -17,7 +17,7 @@ WARNING: This repository is under active development and APIs aren't stable.
 
 ## implementing new strategies
 
-### checklist for implementation
+### high-level checklist for implementation
 
 - Any external request message passed to @music-os/extraction-worker must
   result in an idempotent response (aka. if the request is repeated the same
@@ -30,3 +30,28 @@ WARNING: This repository is under active development and APIs aren't stable.
 To implement a strategy with maximum efficiency, we recommend doing all
 on-chain and off-chain requests using music-os-core's [Extraction Worker
 API](https://github.com/music-os/music-os-core/tree/main/src/services/extractor#extractor-worker-api).
+
+### extractor strategy interface definition
+
+An extractor strategy must implement the following interface:
+
+```ts
+interface Extractor {
+  props: object;
+  init(state: object): object;
+  update(message: object, state: object): object;
+}
+```
+
+### transformer strategy interface definition
+
+A transformer strategy must implement the following interface:
+
+```ts
+interface Transformer {
+  transform(line: string): object;
+}
+```
+
+Where `transform`'s return value `object` must comply with `@music-os/schema`'
+JSON schema.

@@ -8,6 +8,26 @@ import { transformation, loadStrategies } from "../src/lifecycle.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+test("interface compliance of transformer strategies", async (t) => {
+  const transformers = await loadStrategies("./strategies", "transformer.mjs");
+  t.truthy(transformers);
+  t.plan(transformers.length + 1);
+  for (const transformer of transformers) {
+    t.is(typeof transformer.transform, "function");
+  }
+});
+
+test("interface compliance of extractors strategies", async (t) => {
+  const extractors = await loadStrategies("./strategies", "extractor.mjs");
+  t.truthy(extractors);
+  t.plan(extractors.length * 3 + 1);
+  for (const extractor of extractors) {
+    t.is(typeof extractor.init, "function");
+    t.is(typeof extractor.update, "function");
+    t.is(typeof extractor.props, "object");
+  }
+});
+
 test("reading a file by line using the line reader", async (t) => {
   const path = resolve(__dirname, "./fixtures/file0.data");
   let count = 0;
