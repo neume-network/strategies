@@ -26,6 +26,9 @@
   },
   "homepage": "https://github.com/music-os/music-os-strategies#readme",
   "devDependencies": {
+    "@music-os/schema": "0.1.0",
+    "ajv": "8.11.0",
+    "ajv-formats": "2.1.1",
     "ava": "4.2.0",
     "debug": "4.3.4",
     "husky": "7.0.4",

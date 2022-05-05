@@ -11,7 +11,7 @@ export function transform(line) {
   return {
     version,
     title: datum.name,
-    duration: "P", // TODO: Duration needs to be inferred from the audio file
+    duration: "PT0M", // TODO: Duration needs to be inferred from the audio file
     artist: {
       version,
       name: datum.artist_name,
@@ -36,13 +36,13 @@ export function transform(line) {
         version,
         uri: datum.audio_url,
         // TODO
-        mimetype: "audio",
+        mimetype: "audio/mp3",
       },
       {
         version,
         uri: datum.image,
         // TODO
-        mimetype: "image",
+        mimetype: "image/jpeg",
       },
       {
         version,
