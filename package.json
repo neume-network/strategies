@@ -39,7 +39,8 @@
     "*.{js,css,md}": "prettier --write"
   },
   "dependencies": {
-    "eth-fun": "0.6.0"
+    "eth-fun": "0.6.0",
+    "lodash.partition": "4.6.0"
   },
   "ava": {
     "environmentVariables": {

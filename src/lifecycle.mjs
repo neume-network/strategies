@@ -5,6 +5,8 @@ import { createInterface } from "readline";
 import { createReadStream } from "fs";
 import { once } from "events";
 
+import partition from "lodash.partition";
+
 import { getdirdirs, loadAll } from "./disc.mjs";
 import logger from "./logger.mjs";
 
@@ -36,9 +38,7 @@ export const transformation = {
   applyOnLine,
 };
 
-function extract(worker, extractor) {
-  let state = {};
-
+function extract(worker, extractor, state) {
   const step0 = extractor.init(state);
   state = step0.state;
 
@@ -50,9 +50,18 @@ function extract(worker, extractor) {
     const stepN = extractor.update(message, state);
 
     state = stepN.state;
-    stepN.messages.forEach((message) => worker.postMessage(message));
+    const [internal, external] = partition(
+      stepN.messages,
+      ({ type }) => type === "extraction"
+    );
+    external.forEach((message) => worker.postMessage(message));
   });
-  step0.messages.forEach((message) => worker.postMessage(message));
+
+  const [internal, external] = partition(
+    step0.messages,
+    ({ type }) => type === "extraction"
+  );
+  external.forEach((message) => worker.postMessage(message));
 }
 
 export async function loadStrategies(pathTip, fileName) {
@@ -64,7 +73,10 @@ export async function loadStrategies(pathTip, fileName) {
 async function init(worker) {
   const extractors = await loadStrategies(strategyDir, fileNames.extractor);
   for (const extractor of extractors) {
-    extract(worker, extractor);
+    if (extractor.props.autoStart) {
+      let state = {};
+      extract(worker, extractor, state);
+    }
   }
 }
 

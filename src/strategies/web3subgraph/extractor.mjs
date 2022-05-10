@@ -1,9 +1,12 @@
 // @format
+import { toJSON } from "../../disc.mjs";
+
+const version = "0.0.1";
 
 function generate(first, lastId) {
   return {
     type: "graphql",
-    version: "0.0.1",
+    version,
     options: {
       url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",
       body: JSON.stringify({
@@ -22,6 +25,7 @@ function generate(first, lastId) {
 }
 
 export const props = {
+  autoStart: true,
   first: 1000,
   lastId: "",
 };
@@ -36,8 +40,23 @@ export function init(state) {
 export function update(message, state) {
   const { nfts } = message.results.data;
   const lastId = nfts[nfts.length - 1].id;
+  const expr = new RegExp(
+    "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
+  );
+  const ids = toJSON(
+    nfts.map((entry) => entry.id),
+    expr
+  );
+  const messages = ids.map(({ address, tokenId }) => ({
+    type: "extraction",
+    version,
+    params: {
+      address,
+      tokenId,
+    },
+  }));
   return {
-    messages: [generate(props.first, lastId)],
+    messages: [...messages, generate(props.first, lastId)],
     state,
   };
 }
