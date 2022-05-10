@@ -62,7 +62,7 @@ export async function loadStrategies(pathTip, fileName) {
 }
 
 async function init(worker) {
-  const extractors = await loadStrategies(strategyDir, fileName.extractor);
+  const extractors = await loadStrategies(strategyDir, fileNames.extractor);
   for (const extractor of extractors) {
     extract(worker, extractor);
   }
