@@ -50,9 +50,9 @@ function extract(worker, extractor) {
     const stepN = extractor.update(message, state);
 
     state = stepN.state;
-    worker.postMessage(stepN.message);
+    stepN.messages.forEach((message) => worker.postMessage(message));
   });
-  worker.postMessage(step0.message);
+  step0.messages.forEach((message) => worker.postMessage(message));
 }
 
 export async function loadStrategies(pathTip, fileName) {

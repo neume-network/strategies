@@ -28,7 +28,7 @@ export const props = {
 
 export function init(state) {
   return {
-    message: generate(props.first, props.lastId),
+    messages: [generate(props.first, props.lastId)],
     state,
   };
 }
@@ -37,7 +37,7 @@ export function update(message, state) {
   const { nfts } = message.results.data;
   const lastId = nfts[nfts.length - 1].id;
   return {
-    message: generate(props.first, lastId),
+    messages: [generate(props.first, lastId)],
     state,
   };
 }
