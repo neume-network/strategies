@@ -134,7 +134,7 @@ export function route(worker, launcher) {
   };
 }
 
-async function init(worker) {
+export async function init(worker) {
   const lch = new LifeCycleHandler();
   lch.on("message", route(worker, launch));
   lch.emit("message", {
@@ -148,6 +148,5 @@ async function init(worker) {
 }
 
 export const extraction = {
-  init,
   extract,
 };
