@@ -4,8 +4,14 @@ import { fileURLToPath } from "url";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
 import { once } from "events";
+import EventEmitter from "events";
 
+import Ajv from "ajv";
 import partition from "lodash.partition";
+import {
+  extraction as extractionMsg,
+  transformation as transformationMsg,
+} from "@music-os/message-schema";
 
 import { getdirdirs, loadAll } from "./disc.mjs";
 import logger from "./logger.mjs";
@@ -17,6 +23,11 @@ const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
 };
+const ajv = new Ajv();
+const validate = ajv.compile({
+  oneOf: [extractionMsg, transformationMsg],
+});
+class LifeCycleHandler extends EventEmitter {}
 
 async function lineReader(path, onLineHandler) {
   const rl = createInterface({
@@ -70,14 +81,56 @@ export async function loadStrategies(pathTip, fileName) {
   return await loadAll(paths, fileName);
 }
 
-async function init(worker) {
-  const extractors = await loadStrategies(strategyDir, fileNames.extractor);
-  for (const extractor of extractors) {
-    if (extractor.module.props.autoStart) {
-      //let state = {};
-      //extract(worker, extractor, state);
+export function route(worker) {
+  return async (message) => {
+    const valid = validate(message);
+    if (!valid) {
+      // TODO: Add proper error
+      throw new Error("invalid message schema");
     }
-  }
+
+    const extractors = await loadStrategies(strategyDir, fileNames.extractor);
+    const transformers = await loadStrategies(
+      strategyDir,
+      fileNames.transformer
+    );
+    if (message.type === "extraction") {
+      const strategy = extractors.find(({ name }) => name === message.name);
+      if (strategy && strategy.module) {
+        extract(worker, strategy.module, message.state);
+      } else {
+        throw new Error("couldn't find matching strategy");
+      }
+    } else if (message.type === "transformation") {
+      const strategy = transformers.find(({ name }) => name === message.name);
+      if (strategy && strategy.module) {
+        // TODO
+        //const dataPath = resolve(__dirname, "../data");
+        //const strategies = await loadStrategies("./strategies", "transformer.mjs");
+        //const onLineHandler = transformation.applyOnLine(strategies);
+        //const onLineHandlerProxy = (line) => {
+        //  const result = onLineHandler(line);
+        //  log(result);
+        //};
+        //await transformation.lineReader(dataPath, onLineHandlerProxy);
+      } else {
+        throw new Error("couldn't find matching strategy");
+      }
+    }
+  };
+}
+
+async function init(worker) {
+  const lch = new LifeCycleHandler();
+  lch.on("message", route(worker));
+  lch.emit("message", {
+    type: "extraction",
+    version: "0.0.1",
+    name: "web3subgraph",
+    state: null,
+    results: null,
+    error: null,
+  });
 }
 
 export const extraction = {
