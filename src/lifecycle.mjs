@@ -5,6 +5,7 @@ import { createInterface } from "readline";
 import { createReadStream } from "fs";
 import { once } from "events";
 import EventEmitter from "events";
+import { env } from "process";
 
 import Ajv from "ajv";
 import partition from "lodash.partition";
@@ -18,12 +19,14 @@ import {
   NotFoundError,
   ValidationError,
 } from "./errors.mjs";
-import { getdirdirs, loadAll } from "./disc.mjs";
+import { getdirdirs, loadAll, write } from "./disc.mjs";
 import logger from "./logger.mjs";
 
 const log = logger("lifecycle");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const strategyDir = "./strategies";
+// TODO: https://github.com/music-os/music-os-core/issues/33
+const dataDir = resolve(__dirname, "../../..", env.DATA_DIR);
 const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
@@ -55,16 +58,17 @@ export const transformation = {
 };
 
 function extract(worker, extractor, state) {
-  const step0 = extractor.init(state);
+  const step0 = extractor.module.init(state);
   state = step0.state;
 
-  worker.on("message", (message) => {
+  worker.on("message", async (message) => {
     if (message.error) {
       throw new Error(message.error);
     }
 
-    const stepN = extractor.update(message, state);
+    const stepN = extractor.module.update(message, state);
 
+    await write(resolve(dataDir, extractor.name), `${stepN.write}\n`);
     state = stepN.state;
     const [internal, external] = partition(
       stepN.messages,
@@ -91,7 +95,7 @@ export function launch(message, worker, extractors, transformers) {
     const strategy = extractors.find(({ name }) => name === message.name);
     if (strategy && strategy.module) {
       // TODO: Figure out how to test invoking this function
-      extract(worker, strategy.module, message.state);
+      extract(worker, strategy, message.state);
     } else {
       throw new NotFoundError("Failed to find matching extraction strategy.");
     }

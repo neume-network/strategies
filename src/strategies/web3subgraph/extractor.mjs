@@ -32,6 +32,7 @@ export function init(state) {
   return {
     messages: [generate(props.first, props.lastId)],
     state,
+    write: null,
   };
 }
 
@@ -41,5 +42,6 @@ export function update(message, state) {
   return {
     messages: [generate(props.first, lastId)],
     state,
+    write: JSON.stringify(nfts),
   };
 }

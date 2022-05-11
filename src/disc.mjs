@@ -35,12 +35,7 @@ export async function getdirdirs(path) {
     .map((file) => resolve(path, file));
 }
 
-export async function write(path, header, rows) {
-  try {
-    await access(path, constants.R_OK);
-  } catch (err) {
-    await appendFile(path, `${header}\n`);
-  }
+export async function write(path, rows) {
   await appendFile(path, rows);
 }
 

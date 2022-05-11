@@ -11,14 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/music-os/music-os-strategies.git"
   },
-  "keywords": [
-    "data",
-    "music",
-    "web3",
-    "decentralized",
-    "tokens",
-    "nfts"
-  ],
+  "keywords": ["data", "music", "web3", "decentralized", "tokens", "nfts"],
   "author": "Tim Daubenschütz <tim@daubenschuetz.de> (https://timdaub.github.io/)",
   "license": "GPL-3.0-only",
   "bugs": {
@@ -45,7 +38,8 @@
   },
   "ava": {
     "environmentVariables": {
-      "DEBUG": "music-os-strategies:*"
+      "DEBUG": "music-os-strategies:*",
+      "DATA_DIR": "data"
     }
   }
 }
