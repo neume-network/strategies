@@ -2,28 +2,30 @@
 import { constants } from "fs";
 import { readdir, stat, appendFile, access } from "fs/promises";
 import { statSync } from "fs";
-import { resolve } from "path";
+import { resolve, basename } from "path";
 
 import logger from "./logger.mjs";
 
 const log = logger("disc");
 
 export async function loadAll(paths, filename) {
+  const names = paths.map((path) => basename(path));
   const pImports = paths.map(
     async (path) => await import(resolve(path, filename))
   );
   const results = await Promise.allSettled(pImports);
 
   return results
-    .filter((result) => {
+    .filter((result, i) => {
       if (result.status === "rejected") {
+        names.splice(i, 1);
         log(`Rejected loading strategy with reason: "${result.reason}"`);
         return false;
       } else {
         return true;
       }
     })
-    .map(({ value }) => value);
+    .map(({ value }, i) => ({ module: value, name: names[i] }));
 }
 
 export async function getdirdirs(path) {

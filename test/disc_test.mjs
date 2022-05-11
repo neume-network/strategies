@@ -15,11 +15,12 @@ test("test loading & validating extractors", async (t) => {
   const dirs = await getdirdirs(path);
   const extractors = await loadAll(dirs, "extractor.mjs");
   t.truthy(extractors);
-  t.plan(extractors.length * 3 + 1);
+  t.plan(extractors.length * 4 + 1);
   for (const extractor of extractors) {
-    t.is(typeof extractor.init, "function");
-    t.is(typeof extractor.update, "function");
-    t.is(typeof extractor.props, "object");
+    t.truthy(extractor.name);
+    t.is(typeof extractor.module.init, "function");
+    t.is(typeof extractor.module.update, "function");
+    t.is(typeof extractor.module.props, "object");
   }
 });
 

@@ -29,7 +29,7 @@ async function lineReader(path, onLineHandler) {
 
 function applyOnLine(strategies) {
   return (line) => {
-    return strategies[1].transform(line);
+    return strategies[1].module.transform(line);
   };
 }
 
@@ -73,9 +73,9 @@ export async function loadStrategies(pathTip, fileName) {
 async function init(worker) {
   const extractors = await loadStrategies(strategyDir, fileNames.extractor);
   for (const extractor of extractors) {
-    if (extractor.props.autoStart) {
-      let state = {};
-      extract(worker, extractor, state);
+    if (extractor.module.props.autoStart) {
+      //let state = {};
+      //extract(worker, extractor, state);
     }
   }
 }

@@ -13,7 +13,7 @@ test("interface compliance of transformer strategies", async (t) => {
   t.truthy(transformers);
   t.plan(transformers.length + 1);
   for (const transformer of transformers) {
-    t.is(typeof transformer.transform, "function");
+    t.is(typeof transformer.module.transform, "function");
   }
 });
 
@@ -22,9 +22,9 @@ test("interface compliance of extractors strategies", async (t) => {
   t.truthy(extractors);
   t.plan(extractors.length * 3 + 1);
   for (const extractor of extractors) {
-    t.is(typeof extractor.init, "function");
-    t.is(typeof extractor.update, "function");
-    t.is(typeof extractor.props, "object");
+    t.is(typeof extractor.module.init, "function");
+    t.is(typeof extractor.module.update, "function");
+    t.is(typeof extractor.module.props, "object");
   }
 });
 
