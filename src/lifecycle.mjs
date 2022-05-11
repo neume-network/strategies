@@ -13,6 +13,11 @@ import {
   transformation as transformationMsg,
 } from "@music-os/message-schema";
 
+import {
+  NotImplementedError,
+  NotFoundError,
+  ValidationError,
+} from "./errors.mjs";
 import { getdirdirs, loadAll } from "./disc.mjs";
 import logger from "./logger.mjs";
 
@@ -81,12 +86,39 @@ export async function loadStrategies(pathTip, fileName) {
   return await loadAll(paths, fileName);
 }
 
-export function route(worker) {
+export function launch(message, worker, extractors, transformers) {
+  if (message.type === "extraction") {
+    const strategy = extractors.find(({ name }) => name === message.name);
+    if (strategy && strategy.module) {
+      // TODO: Figure out how to test invoking this function
+      extract(worker, strategy.module, message.state);
+    } else {
+      throw new NotFoundError("Failed to find matching extraction strategy.");
+    }
+  } else if (message.type === "transformation") {
+    const strategy = transformers.find(({ name }) => name === message.name);
+    if (strategy && strategy.module) {
+      // TODO
+    } else {
+      throw new NotFoundError(
+        "Failed to find matching transformation strategy."
+      );
+    }
+  } else {
+    throw new NotImplementedError(
+      `Failed to find strategy type for corresponding type submission: "${message.type}"`
+    );
+  }
+}
+
+export function route(worker, launcher) {
   return async (message) => {
     const valid = validate(message);
     if (!valid) {
-      // TODO: Add proper error
-      throw new Error("invalid message schema");
+      log(validate.errors);
+      throw new ValidationError(
+        "Found 1 or more validation error when checking lifecycle message."
+      );
     }
 
     const extractors = await loadStrategies(strategyDir, fileNames.extractor);
@@ -94,35 +126,13 @@ export function route(worker) {
       strategyDir,
       fileNames.transformer
     );
-    if (message.type === "extraction") {
-      const strategy = extractors.find(({ name }) => name === message.name);
-      if (strategy && strategy.module) {
-        extract(worker, strategy.module, message.state);
-      } else {
-        throw new Error("couldn't find matching strategy");
-      }
-    } else if (message.type === "transformation") {
-      const strategy = transformers.find(({ name }) => name === message.name);
-      if (strategy && strategy.module) {
-        // TODO
-        //const dataPath = resolve(__dirname, "../data");
-        //const strategies = await loadStrategies("./strategies", "transformer.mjs");
-        //const onLineHandler = transformation.applyOnLine(strategies);
-        //const onLineHandlerProxy = (line) => {
-        //  const result = onLineHandler(line);
-        //  log(result);
-        //};
-        //await transformation.lineReader(dataPath, onLineHandlerProxy);
-      } else {
-        throw new Error("couldn't find matching strategy");
-      }
-    }
+    launcher(message, worker, extractors, transformers);
   };
 }
 
 async function init(worker) {
   const lch = new LifeCycleHandler();
-  lch.on("message", route(worker));
+  lch.on("message", route(worker, launch));
   lch.emit("message", {
     type: "extraction",
     version: "0.0.1",

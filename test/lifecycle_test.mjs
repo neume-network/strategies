@@ -4,9 +4,72 @@ import { fileURLToPath } from "url";
 
 import test from "ava";
 
-import { transformation, loadStrategies } from "../src/lifecycle.mjs";
+import {
+  transformation,
+  loadStrategies,
+  route,
+  launch,
+} from "../src/lifecycle.mjs";
+import {
+  ValidationError,
+  NotFoundError,
+  NotImplementedError,
+} from "../src/errors.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+test("if launcher throws errors on invalid type submission", (t) => {
+  t.throws(() => launch({ type: "non-existent" }), {
+    instanceOf: NotImplementedError,
+  });
+});
+
+test("if launcher throws errors on invalid strategy name submission", (t) => {
+  const message0 = { type: "extraction", name: "non-existent" };
+  const message1 = { type: "extraction", name: "non-existent" };
+  const worker = "worker";
+  const extractors = [{ module: null, name: "strategyx" }];
+  const transformers = [{ module: null, name: "strategyy" }];
+  t.throws(() => launch(message0, worker, extractors), {
+    instanceOf: NotFoundError,
+  });
+  t.throws(() => launch(message1, worker, extractors, transformers), {
+    instanceOf: NotFoundError,
+  });
+});
+
+test("if lifecycle router throws on incorrect message", async (t) => {
+  const worker = "worker";
+  const message = {
+    type: "extraction",
+  };
+  const launcher = () => t.fail();
+  await t.throwsAsync(async () => await route(worker, launcher)(message), {
+    instanceOf: ValidationError,
+  });
+});
+
+test("if lifecycle router can handle routing message", async (t) => {
+  const worker = "worker";
+  const message = {
+    type: "extraction",
+    version: "0.0.1",
+    name: "web3subgraph",
+    state: null,
+    results: null,
+    error: null,
+  };
+  t.plan(5);
+  const launcher = (...args) => {
+    t.truthy(args);
+    const [launcherMessage, launcherWorker, extractors, transformers] = args;
+    t.deepEqual(launcherMessage, message);
+    t.is(launcherWorker, worker);
+    t.truthy(extractors);
+    t.truthy(transformers);
+  };
+  await route(worker, launcher)(message);
+});
 
 test("interface compliance of transformer strategies", async (t) => {
   const transformers = await loadStrategies("./strategies", "transformer.mjs");
