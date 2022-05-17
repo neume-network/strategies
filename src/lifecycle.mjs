@@ -9,10 +9,7 @@ import { env } from "process";
 
 import Ajv from "ajv";
 import partition from "lodash.partition";
-import {
-  extraction as extractionMsg,
-  transformation as transformationMsg,
-} from "@music-os/message-schema";
+import { extraction, transformation } from "@music-os/message-schema";
 
 import {
   NotImplementedError,
@@ -33,11 +30,11 @@ const fileNames = {
 };
 const ajv = new Ajv();
 const validate = ajv.compile({
-  oneOf: [extractionMsg, transformationMsg],
+  oneOf: [extraction, transformation],
 });
 class LifeCycleHandler extends EventEmitter {}
 
-async function lineReader(path, onLineHandler) {
+export async function lineReader(path, onLineHandler) {
   const rl = createInterface({
     input: createReadStream(path),
     crlfDelay: Infinity,
@@ -46,16 +43,15 @@ async function lineReader(path, onLineHandler) {
   return await once(rl, "close");
 }
 
-function applyOnLine(strategies) {
-  return (line) => {
-    return strategies[1].module.transform(line);
+async function transform(worker, strategy) {
+  const filePath = resolve(dataDir, strategy.name);
+  const onLineHandler = (line) => {
+    const result = strategy.module.transform(line);
+    log(JSON.stringify(result));
+    return result;
   };
+  return await lineReader(filePath, onLineHandler);
 }
-
-export const transformation = {
-  lineReader,
-  applyOnLine,
-};
 
 function extract(worker, extractor, state) {
   const step0 = extractor.module.init(state);
@@ -90,7 +86,7 @@ export async function loadStrategies(pathTip, fileName) {
   return await loadAll(paths, fileName);
 }
 
-export function route(message, worker, extractors, transformers) {
+export async function route(message, worker, extractors, transformers) {
   if (message.type === "extraction") {
     const strategy = extractors.find(({ name }) => name === message.name);
     if (strategy && strategy.module) {
@@ -102,7 +98,7 @@ export function route(message, worker, extractors, transformers) {
   } else if (message.type === "transformation") {
     const strategy = transformers.find(({ name }) => name === message.name);
     if (strategy && strategy.module) {
-      // TODO
+      await transform(worker, strategy);
     } else {
       throw new NotFoundError(
         "Failed to find matching transformation strategy."
@@ -115,7 +111,7 @@ export function route(message, worker, extractors, transformers) {
   }
 }
 
-export function launch(worker, router) {
+export async function launch(worker, router) {
   return async (message) => {
     const valid = validate(message);
     if (!valid) {
@@ -130,13 +126,13 @@ export function launch(worker, router) {
       strategyDir,
       fileNames.transformer
     );
-    router(message, worker, extractors, transformers);
+    return await router(message, worker, extractors, transformers);
   };
 }
 
 export async function init(worker) {
   const lch = new LifeCycleHandler();
-  lch.on("message", launch(worker, route));
+  lch.on("message", await launch(worker, route));
   //lch.emit("message", {
   //  type: "extraction",
   //  version: "0.0.1",
@@ -154,7 +150,3 @@ export async function init(worker) {
     error: null,
   });
 }
-
-export const extraction = {
-  extract,
-};

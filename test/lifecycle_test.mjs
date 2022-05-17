@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import test from "ava";
 
 import {
-  transformation,
+  lineReader,
   loadStrategies,
   route,
   launch,
@@ -18,24 +18,27 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-test("if launcher throws errors on invalid type submission", (t) => {
-  t.throws(() => route({ type: "non-existent" }), {
+test("if launcher throws errors on invalid type submission", async (t) => {
+  await t.throwsAsync(async () => await route({ type: "non-existent" }), {
     instanceOf: NotImplementedError,
   });
 });
 
-test("if launcher throws errors on invalid strategy name submission", (t) => {
+test("if launcher throws errors on invalid strategy name submission", async (t) => {
   const message0 = { type: "extraction", name: "non-existent" };
   const message1 = { type: "extraction", name: "non-existent" };
   const worker = "worker";
   const extractors = [{ module: null, name: "strategyx" }];
   const transformers = [{ module: null, name: "strategyy" }];
-  t.throws(() => route(message0, worker, extractors), {
+  await t.throwsAsync(async () => await route(message0, worker, extractors), {
     instanceOf: NotFoundError,
   });
-  t.throws(() => route(message1, worker, extractors, transformers), {
-    instanceOf: NotFoundError,
-  });
+  await t.throwsAsync(
+    async () => await route(message1, worker, extractors, transformers),
+    {
+      instanceOf: NotFoundError,
+    }
+  );
 });
 
 test("if lifecycle launcher throws on incorrect message", async (t) => {
@@ -43,8 +46,8 @@ test("if lifecycle launcher throws on incorrect message", async (t) => {
   const message = {
     type: "extraction",
   };
-  const router = () => t.fail();
-  await t.throwsAsync(async () => await launch(worker, router)(message), {
+  const router = async () => t.fail();
+  await t.throwsAsync(async () => (await launch(worker, router))(message), {
     instanceOf: ValidationError,
   });
 });
@@ -60,7 +63,7 @@ test("if lifecycle launcher can handle routing message", async (t) => {
     error: null,
   };
   t.plan(5);
-  const router = (...args) => {
+  const router = async (...args) => {
     t.truthy(args);
     const [routerMessage, routerWorker, extractors, transformers] = args;
     t.deepEqual(routerMessage, message);
@@ -68,7 +71,9 @@ test("if lifecycle launcher can handle routing message", async (t) => {
     t.truthy(extractors);
     t.truthy(transformers);
   };
-  await launch(worker, router)(message);
+  await (
+    await launch(worker, router)
+  )(message);
 });
 
 test("interface compliance of transformer strategies", async (t) => {
@@ -100,20 +105,18 @@ test("reading a file by line using the line reader", async (t) => {
     if (count === 1) t.is(line, "line1");
     count++;
   };
-  await transformation.lineReader(path, onLineHandler);
+  await lineReader(path, onLineHandler);
   t.is(count, 2);
 });
 
 test("applying transformation strategies to a file", async (t) => {
   const dataPath = resolve(__dirname, "./fixtures/file1.data");
-  const strategies = await loadStrategies("./strategies", "transformer.mjs");
-  const onLineHandler = transformation.applyOnLine(strategies);
-  t.plan(2);
-  const onLineHandlerProxy = (line) => {
-    const result = onLineHandler(line);
-    t.truthy(result);
-  };
-  await transformation.lineReader(dataPath, onLineHandlerProxy);
+  const strategies = (
+    await loadStrategies("./strategies", "transformer.mjs")
+  ).filter((strategy) => strategy && strategy.name === "soundxyz");
+  const onLineHandler = (line) => strategies[0].module.transform(line);
+  await lineReader(dataPath, onLineHandler);
+  t.pass();
 });
 
 test("loading strategies", async (t) => {
