@@ -19,7 +19,7 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 test("if launcher throws errors on invalid type submission", (t) => {
-  t.throws(() => launch({ type: "non-existent" }), {
+  t.throws(() => route({ type: "non-existent" }), {
     instanceOf: NotImplementedError,
   });
 });
@@ -30,26 +30,26 @@ test("if launcher throws errors on invalid strategy name submission", (t) => {
   const worker = "worker";
   const extractors = [{ module: null, name: "strategyx" }];
   const transformers = [{ module: null, name: "strategyy" }];
-  t.throws(() => launch(message0, worker, extractors), {
+  t.throws(() => route(message0, worker, extractors), {
     instanceOf: NotFoundError,
   });
-  t.throws(() => launch(message1, worker, extractors, transformers), {
+  t.throws(() => route(message1, worker, extractors, transformers), {
     instanceOf: NotFoundError,
   });
 });
 
-test("if lifecycle router throws on incorrect message", async (t) => {
+test("if lifecycle launcher throws on incorrect message", async (t) => {
   const worker = "worker";
   const message = {
     type: "extraction",
   };
-  const launcher = () => t.fail();
-  await t.throwsAsync(async () => await route(worker, launcher)(message), {
+  const router = () => t.fail();
+  await t.throwsAsync(async () => await launch(worker, router)(message), {
     instanceOf: ValidationError,
   });
 });
 
-test("if lifecycle router can handle routing message", async (t) => {
+test("if lifecycle launcher can handle routing message", async (t) => {
   const worker = "worker";
   const message = {
     type: "extraction",
@@ -60,15 +60,15 @@ test("if lifecycle router can handle routing message", async (t) => {
     error: null,
   };
   t.plan(5);
-  const launcher = (...args) => {
+  const router = (...args) => {
     t.truthy(args);
-    const [launcherMessage, launcherWorker, extractors, transformers] = args;
-    t.deepEqual(launcherMessage, message);
-    t.is(launcherWorker, worker);
+    const [routerMessage, routerWorker, extractors, transformers] = args;
+    t.deepEqual(routerMessage, message);
+    t.is(routerWorker, worker);
     t.truthy(extractors);
     t.truthy(transformers);
   };
-  await route(worker, launcher)(message);
+  await launch(worker, router)(message);
 });
 
 test("interface compliance of transformer strategies", async (t) => {

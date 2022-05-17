@@ -90,7 +90,7 @@ export async function loadStrategies(pathTip, fileName) {
   return await loadAll(paths, fileName);
 }
 
-export function launch(message, worker, extractors, transformers) {
+export function route(message, worker, extractors, transformers) {
   if (message.type === "extraction") {
     const strategy = extractors.find(({ name }) => name === message.name);
     if (strategy && strategy.module) {
@@ -115,7 +115,7 @@ export function launch(message, worker, extractors, transformers) {
   }
 }
 
-export function route(worker, launcher) {
+export function launch(worker, router) {
   return async (message) => {
     const valid = validate(message);
     if (!valid) {
@@ -130,18 +130,26 @@ export function route(worker, launcher) {
       strategyDir,
       fileNames.transformer
     );
-    launcher(message, worker, extractors, transformers);
+    router(message, worker, extractors, transformers);
   };
 }
 
 export async function init(worker) {
   const lch = new LifeCycleHandler();
-  lch.on("message", route(worker, launch));
+  lch.on("message", launch(worker, route));
+  //lch.emit("message", {
+  //  type: "extraction",
+  //  version: "0.0.1",
+  //  name: "web3subgraph",
+  //  state: null,
+  //  results: null,
+  //  error: null,
+  //});
   lch.emit("message", {
-    type: "extraction",
+    type: "transformation",
     version: "0.0.1",
     name: "web3subgraph",
-    state: null,
+    args: null,
     results: null,
     error: null,
   });
