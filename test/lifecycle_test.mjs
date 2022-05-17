@@ -9,6 +9,7 @@ import {
   loadStrategies,
   route,
   launch,
+  extract,
 } from "../src/lifecycle.mjs";
 import {
   ValidationError,
@@ -17,6 +18,99 @@ import {
 } from "../src/errors.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+test("running a lifecycle that throws", async (t) => {
+  const [strategy] = (
+    await loadStrategies("./strategies", "extractor.mjs")
+  ).filter((strategy) => strategy.name === "web3subgraph");
+  let callback;
+  const mockWorker = {
+    on: async (eventName, cb) => {
+      callback = cb;
+    },
+    postMessage: (message) => {
+      message = {
+        ...message,
+        error: new Error("STOP THE PROCESS!"),
+      };
+      return callback(message);
+    },
+  };
+  const state = {};
+
+  await t.throwsAsync(async () => await extract(mockWorker, strategy, state), {
+    instanceOf: Error,
+  });
+});
+
+test("running a non-iterative extractor lifecycle that can end", async (t) => {
+  const [strategy] = (
+    await loadStrategies("./strategies", "extractor.mjs")
+  ).filter((strategy) => strategy.name === "web3subgraph");
+  let callback;
+  const mockWorker = {
+    on: async (eventName, cb) => {
+      callback = cb;
+    },
+    postMessage: (message) => {
+      message = {
+        ...message,
+        results: {
+          data: {
+            nfts: [],
+          },
+        },
+      };
+      return callback(message);
+    },
+  };
+  const state = {};
+
+  await extract(mockWorker, strategy, state);
+  t.truthy(callback);
+  t.pass();
+});
+
+test("running an iterative extractor lifecycle that can end", async (t) => {
+  const [strategy] = (
+    await loadStrategies("./strategies", "extractor.mjs")
+  ).filter((strategy) => strategy.name === "web3subgraph");
+  let callback;
+  let end = false;
+  const mockWorker = {
+    on: async (eventName, cb) => {
+      callback = cb;
+    },
+    postMessage: (message) => {
+      if (end) {
+        message = {
+          ...message,
+          results: {
+            data: {
+              nfts: [],
+            },
+          },
+        };
+      } else {
+        message = {
+          ...message,
+          results: {
+            data: {
+              nfts: [{ id: "0xabc/0" }],
+            },
+          },
+        };
+      }
+      end = true;
+      return callback(message);
+    },
+  };
+  const state = {};
+
+  await extract(mockWorker, strategy, state);
+  t.truthy(callback);
+  t.pass();
+});
 
 test("if launcher throws errors on invalid type submission", async (t) => {
   await t.throwsAsync(async () => await route({ type: "non-existent" }), {

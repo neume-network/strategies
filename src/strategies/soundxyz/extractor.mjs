@@ -50,5 +50,7 @@ export function init(state) {
 }
 
 export function update(message, state) {
-  console.log(message);
+  return {
+    messages: [],
+  };
 }

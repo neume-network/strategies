@@ -38,10 +38,17 @@ export function init(state) {
 
 export function update(message, state) {
   const { nfts } = message.results.data;
-  const lastId = nfts[nfts.length - 1].id;
+
+  let messages = [];
+  let write = null;
+  if (nfts.length) {
+    const lastId = nfts[nfts.length - 1].id;
+    messages = [generate(props.first, lastId)];
+    write = JSON.stringify(nfts);
+  }
   return {
-    messages: [generate(props.first, lastId)],
+    messages,
     state,
-    write: JSON.stringify(nfts),
+    write,
   };
 }

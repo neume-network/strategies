@@ -1,5 +1,5 @@
 //@format
-import { resolve, dirname } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
@@ -20,10 +20,10 @@ import { getdirdirs, loadAll, write } from "./disc.mjs";
 import logger from "./logger.mjs";
 
 const log = logger("lifecycle");
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const strategyDir = "./strategies";
 // TODO: https://github.com/music-os/music-os-core/issues/33
-const dataDir = resolve(__dirname, "../../..", env.DATA_DIR);
+const dataDir = path.resolve(__dirname, "../../..", env.DATA_DIR);
 const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
@@ -44,7 +44,7 @@ export async function lineReader(path, onLineHandler) {
 }
 
 async function transform(worker, strategy) {
-  const filePath = resolve(dataDir, strategy.name);
+  const filePath = path.resolve(dataDir, strategy.name);
   const onLineHandler = (line) => {
     const result = strategy.module.transform(line);
     log(JSON.stringify(result));
@@ -53,37 +53,46 @@ async function transform(worker, strategy) {
   return await lineReader(filePath, onLineHandler);
 }
 
-function extract(worker, extractor, state) {
-  const step0 = extractor.module.init(state);
-  state = step0.state;
+export async function extract(worker, extractor, state) {
+  return new Promise((resolve, reject) => {
+    const step0 = extractor.module.init(state);
+    state = step0.state;
 
-  worker.on("message", async (message) => {
-    if (message.error) {
-      throw new Error(message.error);
-    }
+    worker.on("message", async (message) => {
+      if (message.error) {
+        return reject(new Error(message.error));
+      }
 
-    const stepN = extractor.module.update(message, state);
+      const stepN = extractor.module.update(message, state);
+      const filePath = path.resolve(dataDir, extractor.name);
+      await write(filePath, `${stepN.write}\n`);
+      state = stepN.state;
 
-    await write(resolve(dataDir, extractor.name), `${stepN.write}\n`);
-    state = stepN.state;
+      const [internal, external] = partition(
+        stepN.messages,
+        ({ type }) => type === "extraction"
+      );
+      if (!internal.length && !external.length) {
+        return resolve();
+      }
+      external.forEach((message) => worker.postMessage(message));
+    });
+
     const [internal, external] = partition(
-      stepN.messages,
+      step0.messages,
       ({ type }) => type === "extraction"
     );
+    if (!internal.length && !external.length) {
+      return resolve();
+    }
     external.forEach((message) => worker.postMessage(message));
   });
-
-  const [internal, external] = partition(
-    step0.messages,
-    ({ type }) => type === "extraction"
-  );
-  external.forEach((message) => worker.postMessage(message));
 }
 
 export async function loadStrategies(pathTip, fileName) {
-  const path = resolve(__dirname, pathTip);
-  const paths = await getdirdirs(path);
-  return await loadAll(paths, fileName);
+  const strategyDir = path.resolve(__dirname, pathTip);
+  const strategies = await getdirdirs(strategyDir);
+  return await loadAll(strategies, fileName);
 }
 
 export async function route(message, worker, extractors, transformers) {
@@ -91,7 +100,7 @@ export async function route(message, worker, extractors, transformers) {
     const strategy = extractors.find(({ name }) => name === message.name);
     if (strategy && strategy.module) {
       // TODO: Figure out how to test invoking this function
-      extract(worker, strategy, message.state);
+      await extract(worker, strategy, message.state);
     } else {
       throw new NotFoundError("Failed to find matching extraction strategy.");
     }
@@ -133,20 +142,20 @@ export async function launch(worker, router) {
 export async function init(worker) {
   const lch = new LifeCycleHandler();
   lch.on("message", await launch(worker, route));
-  //lch.emit("message", {
-  //  type: "extraction",
-  //  version: "0.0.1",
-  //  name: "web3subgraph",
-  //  state: null,
-  //  results: null,
-  //  error: null,
-  //});
   lch.emit("message", {
-    type: "transformation",
+    type: "extraction",
     version: "0.0.1",
     name: "web3subgraph",
-    args: null,
+    state: null,
     results: null,
     error: null,
   });
+  //lch.emit("message", {
+  //  type: "transformation",
+  //  version: "0.0.1",
+  //  name: "web3subgraph",
+  //  args: null,
+  //  results: null,
+  //  error: null,
+  //});
 }
