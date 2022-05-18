@@ -1,0 +1,14 @@
+title Extractor Component Lifecycle
+
+core->core: Mount extractor-component
+core->extractor-component: Calling `init`
+extractor-component->extractor-component: Run `init`
+extractor-component->core: Return list of new messages
+core->extractor-worker: Dispatch received messages list
+extractor-worker->core: Return messages results
+core->extractor-component: Call `update` with message results
+extractor-component->extractor-component: Run `update`
+extractor-component->core: Return list of new messages
+core->core: ... one `update` cycle later ...
+extractor-component->core: Return empty list of new messages
+core->core: Dismount extractor-component

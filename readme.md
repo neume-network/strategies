@@ -37,11 +37,31 @@ An extractor strategy must implement the following interface:
 
 ```ts
 interface Extractor {
-  props: object;
-  init(state: object): object;
-  update(message: object, state: object): object;
+  props: Object;
+  init(state: Object): messages: Message[];
+  update(message: Message, state: Object): Object<messages: Message[], state: Object, write: String>;
 }
 ```
+
+Where `Message` is defined as any JSON object compliant to the definitions in
+[neume-network/message-schema](https://github.com/neume-network/message-schema).
+
+A neume-network extraction message is layed out similarly to a react.js
+component in that foundamentally, it is a component implementing lifecycle
+methods.
+
+- A component has `props` as in "properties" that can be defined before
+  instantiation of the component.
+- The `init` function is called when the component is mounted into the core
+  process.
+- Upon completion of the `init` task, `update` is called until `update`'s
+  returned `messages` list is empty.
+
+Below is a visual overview of a neume-network extractor component's lifecycle.
+
+<p align="center">
+  <img src="/assets/extractor-lifecycle-component.png" />
+</p>
 
 ### transformer strategy interface definition
 
@@ -49,7 +69,7 @@ A transformer strategy must implement the following interface:
 
 ```ts
 interface Transformer {
-  transform(line: string): object;
+  transform(line: String): Object;
 }
 ```
 
