@@ -33,6 +33,7 @@ const validate = ajv.compile({
   oneOf: [extraction, transformation],
 });
 class LifeCycleHandler extends EventEmitter {}
+let lch;
 
 export async function lineReader(path, onLineHandler) {
   const rl = createInterface({
@@ -46,10 +47,25 @@ export async function lineReader(path, onLineHandler) {
 async function transform(worker, strategy) {
   const filePath = path.resolve(dataDir, strategy.name);
   const onLineHandler = (line) => {
-    const { write } = strategy.module.transform(line);
+    const { write, messages } = strategy.module.transform(line);
+    // TODO: Resolve callback properly
+    const fakeCB = () => {};
+    distribute(messages, worker, fakeCB);
     return write;
   };
   return await lineReader(filePath, onLineHandler);
+}
+
+export function distribute(messages, worker, resolve) {
+  const [internal, external] = partition(
+    messages,
+    ({ type }) => type === "extraction" || type === "transformation"
+  );
+  if (!internal.length && !external.length) {
+    return resolve();
+  }
+  internal.forEach((message) => lch.emit("message", message));
+  external.forEach((message) => worker.postMessage(message));
 }
 
 export async function extract(worker, extractor, state) {
@@ -61,30 +77,19 @@ export async function extract(worker, extractor, state) {
       if (message.error) {
         return reject(new Error(message.error));
       }
+      if (message.commissioner !== extractor.name) {
+        return;
+      }
 
       const stepN = extractor.module.update(message, state);
       const filePath = path.resolve(dataDir, extractor.name);
       await write(filePath, `${stepN.write}\n`);
       state = stepN.state;
 
-      const [internal, external] = partition(
-        stepN.messages,
-        ({ type }) => type === "extraction"
-      );
-      if (!internal.length && !external.length) {
-        return resolve();
-      }
-      external.forEach((message) => worker.postMessage(message));
+      distribute(stepN.messages, worker, resolve);
     });
 
-    const [internal, external] = partition(
-      step0.messages,
-      ({ type }) => type === "extraction"
-    );
-    if (!internal.length && !external.length) {
-      return resolve();
-    }
-    external.forEach((message) => worker.postMessage(message));
+    distribute(step0.messages, worker, resolve);
   });
 }
 
@@ -98,8 +103,15 @@ export async function route(message, worker, extractors, transformers) {
   if (message.type === "extraction") {
     const strategy = extractors.find(({ name }) => name === message.name);
     if (strategy && strategy.module) {
-      // TODO: Figure out how to test invoking this function
       await extract(worker, strategy, message.state);
+      lch.emit("message", {
+        type: "transformation",
+        version: "0.0.1",
+        name: strategy.name,
+        args: null,
+        results: null,
+        error: null,
+      });
     } else {
       throw new NotFoundError("Failed to find matching extraction strategy.");
     }
@@ -120,6 +132,8 @@ export async function route(message, worker, extractors, transformers) {
 }
 
 export async function launch(worker, router) {
+  const extractors = await loadStrategies(strategyDir, fileNames.extractor);
+  const transformers = await loadStrategies(strategyDir, fileNames.transformer);
   return async (message) => {
     const valid = validate(message);
     if (!valid) {
@@ -129,17 +143,12 @@ export async function launch(worker, router) {
       );
     }
 
-    const extractors = await loadStrategies(strategyDir, fileNames.extractor);
-    const transformers = await loadStrategies(
-      strategyDir,
-      fileNames.transformer
-    );
     return await router(message, worker, extractors, transformers);
   };
 }
 
 export async function init(worker) {
-  const lch = new LifeCycleHandler();
+  lch = new LifeCycleHandler();
   lch.on("message", await launch(worker, route));
   lch.emit("message", {
     type: "extraction",
@@ -149,12 +158,4 @@ export async function init(worker) {
     results: null,
     error: null,
   });
-  //lch.emit("message", {
-  //  type: "transformation",
-  //  version: "0.0.1",
-  //  name: "web3subgraph",
-  //  args: null,
-  //  results: null,
-  //  error: null,
-  //});
 }
