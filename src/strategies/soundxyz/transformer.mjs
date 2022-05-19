@@ -9,47 +9,51 @@ export function transform(line) {
     return null;
   }
   return {
-    version,
-    title: datum.name,
-    duration: "PT0M", // TODO: Duration needs to be inferred from the audio file
-    artist: {
+    messages: [],
+    state: {},
+    write: JSON.stringify({
       version,
-      name: datum.artist_name,
-    },
-    platform: {
-      version,
-      name: "Sound",
-      uri: "https://sound.xyz",
-    },
-    erc721: {
-      version,
-      // TODO
-      address: "0x0000000000000000000000000000000000000000",
-      tokenId: "0",
-      tokenURI: "https://example.com/metadata.json",
-      metadata: {
-        ...datum,
-      },
-    },
-    manifestations: [
-      {
+      title: datum.name,
+      duration: "PT0M", // TODO: Duration needs to be inferred from the audio file
+      artist: {
         version,
-        uri: datum.audio_url,
-        // TODO
-        mimetype: "audio/mp3",
+        name: datum.artist_name,
       },
-      {
+      platform: {
         version,
-        uri: datum.image,
-        // TODO
-        mimetype: "image/jpeg",
+        name: "Sound",
+        uri: "https://sound.xyz",
       },
-      {
+      erc721: {
         version,
-        uri: datum.animation_url,
         // TODO
-        mimetype: "image/gif",
+        address: "0x0000000000000000000000000000000000000000",
+        tokenId: "0",
+        tokenURI: "https://example.com/metadata.json",
+        metadata: {
+          ...datum,
+        },
       },
-    ],
+      manifestations: [
+        {
+          version,
+          uri: datum.audio_url,
+          // TODO
+          mimetype: "audio/mp3",
+        },
+        {
+          version,
+          uri: datum.image,
+          // TODO
+          mimetype: "image/jpeg",
+        },
+        {
+          version,
+          uri: datum.animation_url,
+          // TODO
+          mimetype: "image/gif",
+        },
+      ],
+    }),
   };
 }

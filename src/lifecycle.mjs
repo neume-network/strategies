@@ -46,9 +46,8 @@ export async function lineReader(path, onLineHandler) {
 async function transform(worker, strategy) {
   const filePath = path.resolve(dataDir, strategy.name);
   const onLineHandler = (line) => {
-    const result = strategy.module.transform(line);
-    log(JSON.stringify(result));
-    return result;
+    const { write } = strategy.module.transform(line);
+    return write;
   };
   return await lineReader(filePath, onLineHandler);
 }

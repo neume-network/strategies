@@ -32,8 +32,8 @@ const payload = {
 const sPayload = JSON.stringify(payload);
 
 test("soundxyz transformer", (t) => {
-  const result = transform(sPayload);
+  const { write } = transform(sPayload);
   const validate = ajv.compile(track);
-  const valid = validate(result);
+  const valid = validate(JSON.parse(write));
   t.true(valid);
 });

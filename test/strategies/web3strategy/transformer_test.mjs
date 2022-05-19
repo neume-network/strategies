@@ -8,7 +8,8 @@ const payload = [{ id: `${address}/0` }, { id: `${address}/1` }];
 const sPayload = JSON.stringify(payload);
 
 test("web3subgraph transformer", (t) => {
-  const result = transform(sPayload);
+  const { write } = transform(sPayload);
+  const result = JSON.parse(write);
   t.is(result.length, 2);
   t.is(result[0].address, address);
   t.is(result[1].address, address);
