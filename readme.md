@@ -1,9 +1,5 @@
 # neume-network-strategies
 
-<p align="center">
-  <img src="/assets/logo.webp" />
-</p>
-
 ## purpose
 
 The goal of this repository and the overall idea of separating
