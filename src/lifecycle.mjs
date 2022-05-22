@@ -120,6 +120,8 @@ export async function route(message, worker, extractors, transformers) {
 }
 
 export async function launch(worker, router) {
+  const extractors = await loadStrategies(strategyDir, fileNames.extractor);
+  const transformers = await loadStrategies(strategyDir, fileNames.transformer);
   return async (message) => {
     const valid = validate(message);
     if (!valid) {
@@ -128,12 +130,6 @@ export async function launch(worker, router) {
         "Found 1 or more validation error when checking lifecycle message."
       );
     }
-
-    const extractors = await loadStrategies(strategyDir, fileNames.extractor);
-    const transformers = await loadStrategies(
-      strategyDir,
-      fileNames.transformer
-    );
     return await router(message, worker, extractors, transformers);
   };
 }
