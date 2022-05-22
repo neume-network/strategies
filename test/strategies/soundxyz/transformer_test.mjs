@@ -3,7 +3,7 @@ import test from "ava";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
-import { track } from "@music-os/schema";
+import { track } from "@neume-network/schema";
 
 import { transform } from "../../../src/strategies/soundxyz/transformer.mjs";
 

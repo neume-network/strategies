@@ -9,7 +9,7 @@ import { env } from "process";
 
 import Ajv from "ajv";
 import partition from "lodash.partition";
-import { extraction, transformation } from "@music-os/message-schema";
+import { extraction, transformation } from "@neume-network/message-schema";
 
 import {
   NotImplementedError,
@@ -22,7 +22,7 @@ import logger from "./logger.mjs";
 const log = logger("lifecycle");
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const strategyDir = "./strategies";
-// TODO: https://github.com/music-os/music-os-core/issues/33
+// TODO: https://github.com/neume-network/core/issues/33
 const dataDir = path.resolve(__dirname, "../../..", env.DATA_DIR);
 const fileNames = {
   transformer: "transformer.mjs",

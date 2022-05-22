@@ -1,4 +1,4 @@
-# music-os-strategies
+# neume-network-strategies
 
 <p align="center">
   <img src="/assets/logo.webp" />
@@ -6,10 +6,11 @@
 
 ## purpose
 
-The goal of this repository and the overall idea of separating music-os-core's
-source from its strategies, is to allow any type of music platform to quickly
-define their on-chain schema - allowing them to re-use music-os-core to index
-and distribute their and other platform's music ecosystem.
+The goal of this repository and the overall idea of separating
+neume-network-core's source from its strategies, is to allow any type of music
+platform to quickly define their on-chain schema - allowing them to re-use
+neume-network-core to index and distribute their and other platform's music
+ecosystem.
 
 ## work-in-progress
 
@@ -19,7 +20,7 @@ WARNING: This repository is under active development and APIs aren't stable.
 
 ### high-level checklist for implementation
 
-- Any external request message passed to @music-os/extraction-worker must
+- Any external request message passed to @neume-network/extraction-worker must
   result in an idempotent response (aka. if the request is repeated the same
   result must be returned).
 - Extraction of information from external requests must not be coupled to e.g.
@@ -28,8 +29,8 @@ WARNING: This repository is under active development and APIs aren't stable.
 - Request patterns should be scoped through e.g. time or block periods.
 
 To implement a strategy with maximum efficiency, we recommend doing all
-on-chain and off-chain requests using music-os-core's [Extraction Worker
-API](https://github.com/music-os/music-os-core/tree/main/src/services/extractor#extractor-worker-api).
+on-chain and off-chain requests using the [extraction Worker
+API](https://github.com/neume-network/core/tree/main/src/services/extractor#extractor-worker-api).
 
 ### extractor strategy interface definition
 
@@ -73,5 +74,5 @@ interface Transformer {
 }
 ```
 
-Where `transform`'s return value `object` must comply with `@music-os/schema`'
-JSON schema.
+Where `transform`'s return value `object` must comply with
+`@neume-network/schema`' JSON schema.
