@@ -4,13 +4,8 @@ import { fileURLToPath } from "url";
 
 import test from "ava";
 
-import {
-  lineReader,
-  loadStrategies,
-  route,
-  launch,
-  extract,
-} from "../src/lifecycle.mjs";
+import { loadStrategies } from "../src/disc.mjs";
+import { lineReader, route, launch, extract } from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -168,26 +163,6 @@ test("if lifecycle launcher can handle routing message", async (t) => {
   await (
     await launch(worker, router)
   )(message);
-});
-
-test("interface compliance of transformer strategies", async (t) => {
-  const transformers = await loadStrategies("./strategies", "transformer.mjs");
-  t.truthy(transformers);
-  t.plan(transformers.length + 1);
-  for (const transformer of transformers) {
-    t.is(typeof transformer.module.transform, "function");
-  }
-});
-
-test("interface compliance of extractors strategies", async (t) => {
-  const extractors = await loadStrategies("./strategies", "extractor.mjs");
-  t.truthy(extractors);
-  t.plan(extractors.length * 3 + 1);
-  for (const extractor of extractors) {
-    t.is(typeof extractor.module.init, "function");
-    t.is(typeof extractor.module.update, "function");
-    t.is(typeof extractor.module.props, "object");
-  }
 });
 
 test("reading a file by line using the line reader", async (t) => {

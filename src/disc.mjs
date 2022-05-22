@@ -1,12 +1,21 @@
 // @format
-import { constants } from "fs";
+import { constants, statSync } from "fs";
 import { readdir, stat, appendFile, access } from "fs/promises";
-import { statSync } from "fs";
-import { resolve, basename } from "path";
+import { resolve, dirname, basename } from "path";
+import { fileURLToPath } from "url";
 
 import logger from "./logger.mjs";
 
 const log = logger("disc");
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const strategyDir = "./strategies";
+
+export async function loadStrategies(pathTip, fileName) {
+  const strategyDir = resolve(__dirname, pathTip);
+  const strategies = await getdirdirs(strategyDir);
+  return await loadAll(strategies, fileName);
+}
 
 export async function loadAll(paths, filename) {
   const names = paths.map((path) => basename(path));

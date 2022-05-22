@@ -6,9 +6,36 @@ import { fileURLToPath } from "url";
 
 import test from "ava";
 
-import { toJSON, toCSV, write, getdirdirs, loadAll } from "../src/disc.mjs";
+import {
+  loadStrategies,
+  toJSON,
+  toCSV,
+  write,
+  getdirdirs,
+  loadAll,
+} from "../src/disc.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+test("interface compliance of transformer strategies", async (t) => {
+  const transformers = await loadStrategies("./strategies", "transformer.mjs");
+  t.truthy(transformers);
+  t.plan(transformers.length + 1);
+  for (const transformer of transformers) {
+    t.is(typeof transformer.module.transform, "function");
+  }
+});
+
+test("interface compliance of extractors strategies", async (t) => {
+  const extractors = await loadStrategies("./strategies", "extractor.mjs");
+  t.truthy(extractors);
+  t.plan(extractors.length * 3 + 1);
+  for (const extractor of extractors) {
+    t.is(typeof extractor.module.init, "function");
+    t.is(typeof extractor.module.update, "function");
+    t.is(typeof extractor.module.props, "object");
+  }
+});
 
 test("test loading & validating extractors", async (t) => {
   const path = resolve(__dirname, "../src/strategies");

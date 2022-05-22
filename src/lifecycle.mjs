@@ -16,7 +16,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "./errors.mjs";
-import { getdirdirs, loadAll, write } from "./disc.mjs";
+import { loadStrategies, write } from "./disc.mjs";
 import logger from "./logger.mjs";
 
 const log = logger("lifecycle");
@@ -88,12 +88,6 @@ export async function extract(worker, extractor, state) {
   });
 }
 
-export async function loadStrategies(pathTip, fileName) {
-  const strategyDir = path.resolve(__dirname, pathTip);
-  const strategies = await getdirdirs(strategyDir);
-  return await loadAll(strategies, fileName);
-}
-
 export async function route(message, worker, extractors, transformers) {
   if (message.type === "extraction") {
     const strategy = extractors.find(({ name }) => name === message.name);
@@ -145,12 +139,4 @@ export async function init(worker) {
     results: null,
     error: null,
   });
-  //lch.emit("message", {
-  //  type: "transformation",
-  //  version: "0.0.1",
-  //  name: "web3subgraph",
-  //  args: null,
-  //  results: null,
-  //  error: null,
-  //});
 }
