@@ -2,25 +2,27 @@
 import { env } from "process";
 import { call, encodeCallSignature, decodeCallOutput, toHex } from "eth-fun";
 
+export const name = "soundxyz";
 export const props = {
   // TODO: Document autoStart property in readme.md
   autoStart: false,
   signatures: {
     tokenURI: "tokenURI(uint256)",
   },
-  node: {
+  contract: {
+    address: "0x01ab7d30525e4f3010af27a003180463a6c811a6",
+  },
+  options: {
     url: env.RPC_HTTP_HOST,
-    options: {
-      headers: {
-        Authorization: `Bearer ${env.RPC_API_KEY}`,
-      },
+    headers: {
+      Authorization: `Bearer ${env.RPC_API_KEY}`,
     },
   },
 };
 
 export function init(state) {
   const data = encodeCallSignature(
-    signatures.tokenURI,
+    props.signatures.tokenURI,
     ["uint256"],
     [state.tokenId]
   );
@@ -30,19 +32,20 @@ export function init(state) {
     messages: [
       {
         type: "json-rpc",
-        options,
+        commissioner: name,
+        options: props.options,
         version: "0.0.1",
         method: "eth_call",
         params: [
           {
             from,
-            to: address,
+            to: props.contract.address,
             data,
           },
           "latest",
         ],
         results: null,
-        errors: null,
+        error: null,
       },
     ],
     state,
@@ -51,6 +54,17 @@ export function init(state) {
 
 export function update(message, state) {
   return {
-    messages: [],
+    messages: [
+      {
+        type: "transformation",
+        version: "0.0.1",
+        name,
+        args: null,
+        results: null,
+        error: null,
+      },
+    ],
+    state: {},
+    write: message.results,
   };
 }

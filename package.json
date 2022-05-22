@@ -11,7 +11,14 @@
     "type": "git",
     "url": "git+https://github.com/neume-network/strategies.git"
   },
-  "keywords": ["data", "music", "web3", "decentralized", "tokens", "nfts"],
+  "keywords": [
+    "data",
+    "music",
+    "web3",
+    "decentralized",
+    "tokens",
+    "nfts"
+  ],
   "author": "Tim Daubenschütz <tim@daubenschuetz.de> (https://timdaub.github.io/)",
   "license": "GPL-3.0-only",
   "bugs": {
@@ -32,7 +39,7 @@
     "*.{js,css,md}": "prettier --write"
   },
   "dependencies": {
-    "@neume-network/message-schema": "0.1.0",
+    "@neume-network/message-schema": "0.2.0",
     "eth-fun": "0.6.0",
     "lodash.partition": "4.6.0"
   },

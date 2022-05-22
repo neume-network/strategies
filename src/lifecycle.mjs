@@ -9,7 +9,7 @@ import { env } from "process";
 
 import Ajv from "ajv";
 import partition from "lodash.partition";
-import { extraction, transformation } from "@neume-network/message-schema";
+import { lifecycleMessage } from "@neume-network/message-schema";
 
 import {
   NotImplementedError,
@@ -29,9 +29,7 @@ const fileNames = {
   extractor: "extractor.mjs",
 };
 const ajv = new Ajv();
-const validate = ajv.compile({
-  oneOf: [extraction, transformation],
-});
+const validate = ajv.compile(lifecycleMessage);
 class LifeCycleHandler extends EventEmitter {}
 
 export async function lineReader(path, onLineHandler) {
@@ -39,86 +37,38 @@ export async function lineReader(path, onLineHandler) {
     input: createReadStream(path),
     crlfDelay: Infinity,
   });
-  rl.on("line", onLineHandler);
-  return await once(rl, "close");
-}
-
-async function transform(worker, strategy) {
-  const filePath = path.resolve(dataDir, strategy.name);
-  const onLineHandler = (line) => {
-    const { write } = strategy.module.transform(line);
-    return write;
-  };
-  return await lineReader(filePath, onLineHandler);
-}
-
-export async function extract(worker, extractor, state) {
-  return new Promise((resolve, reject) => {
-    const step0 = extractor.module.init(state);
-    state = step0.state;
-
-    worker.on("message", async (message) => {
-      if (message.error) {
-        return reject(new Error(message.error));
-      }
-
-      const stepN = extractor.module.update(message, state);
-      const filePath = path.resolve(dataDir, extractor.name);
-      await write(filePath, `${stepN.write}\n`);
-      state = stepN.state;
-
-      const [internal, external] = partition(
-        stepN.messages,
-        ({ type }) => type === "extraction"
-      );
-      if (!internal.length && !external.length) {
-        return resolve();
-      }
-      external.forEach((message) => worker.postMessage(message));
-    });
-
-    const [internal, external] = partition(
-      step0.messages,
-      ({ type }) => type === "extraction"
-    );
-    if (!internal.length && !external.length) {
-      return resolve();
+  let writeBuff = "";
+  let msgBuff = [];
+  rl.on("line", (line) => {
+    const { write, messages } = onLineHandler(line);
+    if (write) {
+      writeBuff += `${write}\n`;
     }
-    external.forEach((message) => worker.postMessage(message));
+    msgBuff = [...msgBuff, ...messages];
   });
+  await once(rl, "close");
+  return {
+    messages: msgBuff,
+    write: writeBuff,
+  };
 }
 
-export async function route(message, worker, extractors, transformers) {
-  if (message.type === "extraction") {
-    const strategy = extractors.find(({ name }) => name === message.name);
-    if (strategy && strategy.module) {
-      // TODO: Figure out how to test invoking this function
-      await extract(worker, strategy, message.state);
-    } else {
-      throw new NotFoundError("Failed to find matching extraction strategy.");
-    }
-  } else if (message.type === "transformation") {
-    const strategy = transformers.find(({ name }) => name === message.name);
-    if (strategy && strategy.module) {
-      await transform(worker, strategy);
-    } else {
-      throw new NotFoundError(
-        "Failed to find matching transformation strategy."
-      );
-    }
-  } else {
-    throw new NotImplementedError(
-      `Failed to find strategy type for corresponding type submission: "${message.type}"`
-    );
-  }
-}
-
-export async function launch(worker, router) {
+export async function setupFinder() {
   const extractors = await loadStrategies(strategyDir, fileNames.extractor);
   const transformers = await loadStrategies(strategyDir, fileNames.transformer);
-  return async (message) => {
-    check(message);
-    return await router(message, worker, extractors, transformers);
+  return (type, name) => {
+    let strategy;
+    if (type === "extraction") {
+      strategy = extractors.find((strategy) => strategy.name === name);
+    } else if (type === "transformation") {
+      strategy = transformers.find((strategy) => strategy.name === name);
+    }
+
+    if (strategy && strategy.module) {
+      return strategy;
+    } else {
+      throw new NotFoundError("Failed to find matching strategy.");
+    }
   };
 }
 
@@ -132,9 +82,71 @@ export function check(message) {
   }
 }
 
+export function filterLifeCycle(messages) {
+  return messages.type === "extraction" || messages.type === "transformation";
+}
+
+export function generatePath(name, type) {
+  return path.resolve(dataDir, `${name}-${type}`);
+}
+
+async function transform(handler, name, type) {
+  const filePath = generatePath(name, type);
+  return await lineReader(filePath, handler);
+}
+
+export async function run(strategy, type, fun, params) {
+  let result;
+  if (type === "extraction") {
+    result = await strategy.module[fun](params);
+  } else if (type === "transformation") {
+    result = await transform(
+      strategy.module["transform"],
+      strategy.name,
+      "extraction"
+    );
+  }
+
+  const filePath = generatePath(strategy.name, type);
+  if (result && result.write) {
+    await write(filePath, `${result.write}\n`);
+  }
+  const [lifecycle, worker] = partition(result.messages, filterLifeCycle);
+  return {
+    lifecycle,
+    worker,
+  };
+}
+
 export async function init(worker) {
   const lch = new LifeCycleHandler();
-  lch.on("message", await launch(worker, route));
+  const finder = await setupFinder();
+
+  worker.on("message", async (message) => {
+    if (message.error) {
+      throw new Error(message.error);
+    }
+
+    const lifeCycleType = "extraction";
+    const strategy = finder(lifeCycleType, message.commissioner);
+    const messages = await run(strategy, lifeCycleType, "update", message);
+    messages.worker.forEach((message) => worker.postMessage(message));
+    messages.lifecycle.forEach((message) => lch.emit("message", message));
+  });
+
+  lch.on("message", async (message) => {
+    check(message);
+    const lifeCycleType = message.type;
+    let params;
+    if (lifeCycleType === "extraction") {
+      params = message.state;
+    }
+    const strategy = finder(lifeCycleType, message.name);
+    const messages = await run(strategy, lifeCycleType, "init", params);
+    messages.worker.forEach((message) => worker.postMessage(message));
+    messages.lifecycle.forEach((message) => lch.emit("message", message));
+  });
+
   lch.emit("message", {
     type: "extraction",
     version: "0.0.1",
@@ -143,4 +155,12 @@ export async function init(worker) {
     results: null,
     error: null,
   });
+  //lch.emit("message", {
+  //  type: "transformation",
+  //  version: "0.0.1",
+  //  name: "web3subgraph",
+  //  args: null,
+  //  results: null,
+  //  error: null,
+  //});
 }

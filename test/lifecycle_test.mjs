@@ -5,13 +5,7 @@ import { fileURLToPath } from "url";
 import test from "ava";
 
 import { loadStrategies } from "../src/disc.mjs";
-import {
-  check,
-  lineReader,
-  route,
-  launch,
-  extract,
-} from "../src/lifecycle.mjs";
+import { check, lineReader, setupFinder, extract } from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -19,6 +13,19 @@ import {
 } from "../src/errors.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+test("test if checking valid lifecycle message passes check function", (t) => {
+  const invalidMessage = {
+    type: "extraction",
+    version: "0.0.1",
+    name: "web3subgraph",
+    state: null,
+    results: null,
+    error: null,
+  };
+  check(invalidMessage);
+  t.pass();
+});
 
 test("checking if message throws", (t) => {
   const invalidMessage = { hello: "world" };
@@ -118,62 +125,24 @@ test("running an iterative extractor lifecycle that can end", async (t) => {
   t.pass();
 });
 
-test("if launcher throws errors on invalid type submission", async (t) => {
-  await t.throwsAsync(async () => await route({ type: "non-existent" }), {
-    instanceOf: NotImplementedError,
+test("if launcher throws errors on invalid strategy type", async (t) => {
+  const finder = await setupFinder();
+  t.throws(() => finder({ type: "non-existent" }), {
+    instanceOf: NotFoundError,
   });
 });
 
 test("if launcher throws errors on invalid strategy name submission", async (t) => {
   const message0 = { type: "extraction", name: "non-existent" };
   const message1 = { type: "extraction", name: "non-existent" };
-  const worker = "worker";
-  const extractors = [{ module: null, name: "strategyx" }];
-  const transformers = [{ module: null, name: "strategyy" }];
-  await t.throwsAsync(async () => await route(message0, worker, extractors), {
+
+  const finder = await setupFinder();
+  t.throws(() => finder(message0), {
     instanceOf: NotFoundError,
   });
-  await t.throwsAsync(
-    async () => await route(message1, worker, extractors, transformers),
-    {
-      instanceOf: NotFoundError,
-    }
-  );
-});
-
-test("if lifecycle launcher throws on incorrect message", async (t) => {
-  const worker = "worker";
-  const message = {
-    type: "extraction",
-  };
-  const router = async () => t.fail();
-  await t.throwsAsync(async () => (await launch(worker, router))(message), {
-    instanceOf: ValidationError,
+  t.throws(() => finder(message1), {
+    instanceOf: NotFoundError,
   });
-});
-
-test("if lifecycle launcher can handle routing message", async (t) => {
-  const worker = "worker";
-  const message = {
-    type: "extraction",
-    version: "0.0.1",
-    name: "web3subgraph",
-    state: null,
-    results: null,
-    error: null,
-  };
-  t.plan(5);
-  const router = async (...args) => {
-    t.truthy(args);
-    const [routerMessage, routerWorker, extractors, transformers] = args;
-    t.deepEqual(routerMessage, message);
-    t.is(routerWorker, worker);
-    t.truthy(extractors);
-    t.truthy(transformers);
-  };
-  await (
-    await launch(worker, router)
-  )(message);
 });
 
 test("reading a file by line using the line reader", async (t) => {
