@@ -8,6 +8,13 @@ platform to quickly define their on-chain schema - allowing them to re-use
 neume-network-core to index and distribute their and other platform's music
 ecosystem.
 
+## installation and contributing
+
+Unless you want to run this repository's unit tests, for now, this repository
+can't run by itself. Instead, we recommend you run it as a submodule of
+neume-network/core. Please follow [its installation
+instructions](https://github.com/neume-network/core#installation).
+
 ## work-in-progress
 
 WARNING: This repository is under active development and APIs aren't stable.
