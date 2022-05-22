@@ -117,15 +117,19 @@ export async function launch(worker, router) {
   const extractors = await loadStrategies(strategyDir, fileNames.extractor);
   const transformers = await loadStrategies(strategyDir, fileNames.transformer);
   return async (message) => {
-    const valid = validate(message);
-    if (!valid) {
-      log(validate.errors);
-      throw new ValidationError(
-        "Found 1 or more validation error when checking lifecycle message."
-      );
-    }
+    check(message);
     return await router(message, worker, extractors, transformers);
   };
+}
+
+export function check(message) {
+  const valid = validate(message);
+  if (!valid) {
+    log(validate.errors);
+    throw new ValidationError(
+      "Found 1 or more validation error when checking lifecycle message."
+    );
+  }
 }
 
 export async function init(worker) {

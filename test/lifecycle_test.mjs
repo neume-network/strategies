@@ -5,7 +5,13 @@ import { fileURLToPath } from "url";
 import test from "ava";
 
 import { loadStrategies } from "../src/disc.mjs";
-import { lineReader, route, launch, extract } from "../src/lifecycle.mjs";
+import {
+  check,
+  lineReader,
+  route,
+  launch,
+  extract,
+} from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -13,6 +19,11 @@ import {
 } from "../src/errors.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+test("checking if message throws", (t) => {
+  const invalidMessage = { hello: "world" };
+  t.throws(() => check(invalidMessage));
+});
 
 test("running a lifecycle that throws", async (t) => {
   const [strategy] = (
