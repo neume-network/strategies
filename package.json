@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/neume-network/strategies#readme",
   "devDependencies": {
-    "@neume-network/schema": "0.1.0",
+    "@neume-network/schema": "0.2.0",
     "ajv": "8.11.0",
     "ajv-formats": "2.1.1",
     "ava": "4.2.0",
@@ -32,7 +32,7 @@
     "*.{js,css,md}": "prettier --write"
   },
   "dependencies": {
-    "@neume-network/message-schema": "0.0.2",
+    "@neume-network/message-schema": "0.1.0",
     "eth-fun": "0.6.0",
     "lodash.partition": "4.6.0"
   },
