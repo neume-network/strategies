@@ -20,11 +20,11 @@ export const props = {
   },
 };
 
-export function init(state) {
+export function init(tokenId) {
   const data = encodeCallSignature(
     props.signatures.tokenURI,
     ["uint256"],
-    [state.tokenId]
+    [tokenId]
   );
 
   const from = null;
@@ -48,11 +48,10 @@ export function init(state) {
         error: null,
       },
     ],
-    state,
   };
 }
 
-export function update(message, state) {
+export function update(message) {
   return {
     messages: [
       {
@@ -64,7 +63,6 @@ export function update(message, state) {
         error: null,
       },
     ],
-    state: {},
     write: message.results,
   };
 }

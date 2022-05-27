@@ -19,9 +19,7 @@ test("test if checking valid lifecycle message passes check function", (t) => {
     type: "extraction",
     version: "0.0.1",
     name: "web3subgraph",
-    state: null,
-    results: null,
-    error: null,
+    args: null,
   };
   check(invalidMessage);
   t.pass();

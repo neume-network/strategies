@@ -98,7 +98,7 @@ async function transform(handler, name, type) {
 export async function run(strategy, type, fun, params) {
   let result;
   if (type === "extraction") {
-    result = await strategy.module[fun](params);
+    result = await strategy.module[fun](...params);
   } else if (type === "transformation") {
     result = await transform(
       strategy.module["transform"],
@@ -129,7 +129,7 @@ export async function init(worker) {
 
     const lifeCycleType = "extraction";
     const strategy = finder(lifeCycleType, message.commissioner);
-    const messages = await run(strategy, lifeCycleType, "update", message);
+    const messages = await run(strategy, lifeCycleType, "update", [message]);
     messages.worker.forEach((message) => worker.postMessage(message));
     messages.lifecycle.forEach((message) => lch.emit("message", message));
   });
@@ -137,30 +137,22 @@ export async function init(worker) {
   lch.on("message", async (message) => {
     check(message);
     const lifeCycleType = message.type;
-    let params;
-    if (lifeCycleType === "extraction") {
-      params = message.state;
-    }
     const strategy = finder(lifeCycleType, message.name);
-    const messages = await run(strategy, lifeCycleType, "init", params);
+    const messages = await run(strategy, lifeCycleType, "init", message.args);
     messages.worker.forEach((message) => worker.postMessage(message));
-    messages.lifecycle.forEach((message) => lch.emit("message", message));
+    messages.lifecycle.forEach((message) => lch.emit("message", [message]));
   });
 
   lch.emit("message", {
     type: "extraction",
     version: "0.0.1",
     name: "web3subgraph",
-    state: null,
-    results: null,
-    error: null,
+    args: null,
   });
   //lch.emit("message", {
   //  type: "transformation",
   //  version: "0.0.1",
   //  name: "web3subgraph",
   //  args: null,
-  //  results: null,
-  //  error: null,
   //});
 }

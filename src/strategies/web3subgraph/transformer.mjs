@@ -9,9 +9,7 @@ function generate(address, tokenId) {
       type: "extraction",
       version: "0.0.1",
       name: "soundxyz",
-      state: { tokenId },
-      results: null,
-      error: null,
+      args: [tokenId],
     };
   }
 }
@@ -23,14 +21,12 @@ export function transform(line) {
   } catch (err) {
     return {
       messages: [],
-      state: {},
       write: null,
     };
   }
   if (!data) {
     return {
       messages: [],
-      state: {},
       write: null,
     };
   }
@@ -46,7 +42,6 @@ export function transform(line) {
     .filter((message) => !!message);
   return {
     messages,
-    state: {},
     write: JSON.stringify(nfts),
   };
 }

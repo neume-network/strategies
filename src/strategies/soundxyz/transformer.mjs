@@ -10,13 +10,11 @@ export function transform(line) {
     console.log(err);
     return {
       messages: [],
-      state: {},
       write: null,
     };
   }
   return {
     messages: [],
-    state: {},
     write: tokenURI,
   };
 }

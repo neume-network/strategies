@@ -10,7 +10,6 @@ export function transform(line) {
   }
   return {
     messages: [],
-    state: {},
     write: JSON.stringify({
       version,
       title: datum.body.title,

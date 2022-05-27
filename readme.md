@@ -42,8 +42,8 @@ An extractor strategy must implement the following interface:
 ```ts
 interface Extractor {
   props: Object;
-  init(state: Object): messages: Message[];
-  update(message: Message, state: Object): Object<messages: Message[], state: Object, write: String>;
+  init(args...): messages: Message[];
+  update(message: Message): Object<messages: Message[], write: String>;
 }
 ```
 

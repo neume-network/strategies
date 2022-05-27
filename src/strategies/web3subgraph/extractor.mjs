@@ -30,15 +30,14 @@ export const props = {
   lastId: "",
 };
 
-export function init(state) {
+export function init() {
   return {
     messages: [generate(props.first, props.lastId)],
-    state,
     write: null,
   };
 }
 
-export function update(message, state) {
+export function update(message) {
   const { nfts } = message.results.data;
 
   let messages = [];
@@ -54,14 +53,11 @@ export function update(message, state) {
         version: "0.0.1",
         name,
         args: null,
-        results: null,
-        error: null,
       },
     ];
   }
   return {
     messages,
-    state,
     write,
   };
 }
