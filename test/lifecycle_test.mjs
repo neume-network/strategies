@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import test from "ava";
 
 import { loadStrategies } from "../src/disc.mjs";
-import { check, lineReader, setupFinder, extract } from "../src/lifecycle.mjs";
+import { check, lineReader, setupFinder } from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -30,99 +30,6 @@ test("test if checking valid lifecycle message passes check function", (t) => {
 test("checking if message throws", (t) => {
   const invalidMessage = { hello: "world" };
   t.throws(() => check(invalidMessage));
-});
-
-test("running a lifecycle that throws", async (t) => {
-  const [strategy] = (
-    await loadStrategies("./strategies", "extractor.mjs")
-  ).filter((strategy) => strategy.name === "web3subgraph");
-  let callback;
-  const mockWorker = {
-    on: async (eventName, cb) => {
-      callback = cb;
-    },
-    postMessage: (message) => {
-      message = {
-        ...message,
-        error: new Error("STOP THE PROCESS!"),
-      };
-      return callback(message);
-    },
-  };
-  const state = {};
-
-  await t.throwsAsync(async () => await extract(mockWorker, strategy, state), {
-    instanceOf: Error,
-  });
-});
-
-test("running a non-iterative extractor lifecycle that can end", async (t) => {
-  const [strategy] = (
-    await loadStrategies("./strategies", "extractor.mjs")
-  ).filter((strategy) => strategy.name === "web3subgraph");
-  let callback;
-  const mockWorker = {
-    on: async (eventName, cb) => {
-      callback = cb;
-    },
-    postMessage: (message) => {
-      message = {
-        ...message,
-        results: {
-          data: {
-            nfts: [],
-          },
-        },
-      };
-      return callback(message);
-    },
-  };
-  const state = {};
-
-  await extract(mockWorker, strategy, state);
-  t.truthy(callback);
-  t.pass();
-});
-
-test("running an iterative extractor lifecycle that can end", async (t) => {
-  const [strategy] = (
-    await loadStrategies("./strategies", "extractor.mjs")
-  ).filter((strategy) => strategy.name === "web3subgraph");
-  let callback;
-  let end = false;
-  const mockWorker = {
-    on: async (eventName, cb) => {
-      callback = cb;
-    },
-    postMessage: (message) => {
-      if (end) {
-        message = {
-          ...message,
-          results: {
-            data: {
-              nfts: [],
-            },
-          },
-        };
-      } else {
-        message = {
-          ...message,
-          results: {
-            data: {
-              nfts: [{ id: "0xabc/0" }],
-            },
-          },
-        };
-      }
-      end = true;
-      return callback(message);
-    },
-  };
-  const state = {};
-
-  await extract(mockWorker, strategy, state);
-  t.truthy(callback);
-  t.pass();
 });
 
 test("if launcher throws errors on invalid strategy type", async (t) => {
@@ -153,6 +60,7 @@ test("reading a file by line using the line reader", async (t) => {
     if (count === 0) t.is(line, "line0");
     if (count === 1) t.is(line, "line1");
     count++;
+    return { write: "hello world", messages: [] };
   };
   await lineReader(path, onLineHandler);
   t.is(count, 2);
