@@ -140,14 +140,14 @@ export async function init(worker) {
     const strategy = finder(lifeCycleType, message.name);
     const messages = await run(strategy, lifeCycleType, "init", message.args);
     messages.worker.forEach((message) => worker.postMessage(message));
-    messages.lifecycle.forEach((message) => lch.emit("message", [message]));
+    messages.lifecycle.forEach((message) => lch.emit("message", message));
   });
 
   lch.emit("message", {
     type: "extraction",
     version: "0.0.1",
     name: "web3subgraph",
-    args: null,
+    args: [null],
   });
   //lch.emit("message", {
   //  type: "transformation",

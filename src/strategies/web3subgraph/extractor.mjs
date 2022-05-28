@@ -15,6 +15,11 @@ function generate(first, lastId) {
             nfts(first: ${first}, where: { id_gt: $lastId }) {
               id
             }
+            _meta {
+              block {
+                number
+              }
+            }
           }`,
         variables: { lastId },
       }),
@@ -45,7 +50,7 @@ export function update(message) {
   if (nfts.length) {
     const lastId = nfts[nfts.length - 1].id;
     messages = [generate(props.first, lastId)];
-    write = JSON.stringify(nfts);
+    write = JSON.stringify(message.results.data);
   } else {
     messages = [
       {

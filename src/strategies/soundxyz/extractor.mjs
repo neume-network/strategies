@@ -20,7 +20,7 @@ export const props = {
   },
 };
 
-export function init(tokenId) {
+export function init(tokenId, blockNumber) {
   const data = encodeCallSignature(
     props.signatures.tokenURI,
     ["uint256"],
@@ -42,7 +42,7 @@ export function init(tokenId) {
             to: props.contract.address,
             data,
           },
-          "latest",
+          blockNumber,
         ],
         results: null,
         error: null,
