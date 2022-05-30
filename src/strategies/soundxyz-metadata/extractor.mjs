@@ -2,6 +2,7 @@
 import { env } from "process";
 import { encodeCallSignature, decodeCallOutput } from "eth-fun";
 
+const version = "0.0.1";
 export const name = "soundxyz-metadata";
 export const props = {
   signatures: {
@@ -33,7 +34,7 @@ export function init(tokenId) {
         type: "json-rpc",
         commissioner: name,
         options: props.options,
-        version: "0.0.1",
+        version,
         method: "eth_call",
         params: [
           {
@@ -51,28 +52,26 @@ export function init(tokenId) {
 }
 
 export function update(message) {
-  // because "editions" returns a struct with 9 fields
-  if (message.results.length === 578) {
-    const editionMetadata = decodeCallOutput(
-      [
-        "address",
-        "uint256",
-        "uint32",
-        "uint32",
-        "uint32",
-        "uint32",
-        "uint32",
-        "uint32",
-        "address",
-      ],
-      message.results
-    );
+  // The editions call returns 9 fields each of 32 bytes. Hence, the result contains 32*2*9 characters. Additional two characters for 0x prefix.
+  const LENGTH_OF_EDITIONS_RESPONSE = 578;
+  // The tokenToEdition call returns 1 field each of 32 bytes. Hence, the result contains 32*1*1 characters. Additional two characters for 0x prefix.
+  const LENGTH_OF_TOKEN_TO_EDITION_RESPONSE = 66;
 
+  if (message.results.length === LENGTH_OF_EDITIONS_RESPONSE) {
     return {
-      messages: [],
-      write: JSON.stringify(editionMetadata),
+      messages: [
+        {
+          type: "transformation",
+          version,
+          name,
+          args: null,
+          results: null,
+          error: null,
+        },
+      ],
+      write: message.results,
     };
-  } else if (message.results.length === 66) {
+  } else if (message.results.length === LENGTH_OF_TOKEN_TO_EDITION_RESPONSE) {
     const edition = parseInt(decodeCallOutput(["uint256"], message.results));
 
     const data = encodeCallSignature(
@@ -88,7 +87,7 @@ export function update(message) {
           type: "json-rpc",
           commissioner: name,
           options: props.options,
-          version: "0.0.1",
+          version,
           method: "eth_call",
           params: [
             {
