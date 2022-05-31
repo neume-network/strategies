@@ -14,6 +14,7 @@ function generate(first, lastId) {
           query manyNFTs($lastId: String) {
             nfts(first: ${first}, where: { id_gt: $lastId }) {
               id
+              createdAtBlockNumber
             }
           }`,
         variables: { lastId },
