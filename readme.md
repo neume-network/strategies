@@ -42,7 +42,7 @@ An extractor strategy must implement the following interface:
 ```ts
 interface Extractor {
   props: Object;
-  init(args...): messages: Message[];
+  init(args...): Object<messages:  Message[], write: String>;
   update(message: Message): Object<messages: Message[], write: String>;
 }
 ```
@@ -73,9 +73,11 @@ A transformer strategy must implement the following interface:
 
 ```ts
 interface Transformer {
-  transform(line: String): Object;
+  onLine(line: String): Object<messages:  Message[], write: String>;
+  onError(error: Error): any;
+  onClose(): Object<messages:  Message[], write: String>;
 }
 ```
 
-Where `transform`'s return value `object` must comply with
-`@neume-network/schema`' JSON schema.
+Where `Message` is defined as any JSON object compliant to the definitions in
+[neume-network/message-schema](https://github.com/neume-network/message-schema).

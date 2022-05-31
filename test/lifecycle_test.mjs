@@ -54,13 +54,17 @@ test("reading a file by line using the line reader", async (t) => {
   const path = resolve(__dirname, "./fixtures/file0.data");
   let count = 0;
   t.plan(3);
-  const onLineHandler = (line) => {
+  const lineHandlerMock = (line) => {
     if (count === 0) t.is(line, "line0");
     if (count === 1) t.is(line, "line1");
     count++;
     return { write: "hello world", messages: [] };
   };
-  await lineReader(path, onLineHandler);
+  const strategies = (
+    await loadStrategies("./strategies", "transformer.mjs")
+  ).filter((strategy) => strategy && strategy.name === "soundxyz");
+  const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
+  await lineReader(path, strategy);
   t.is(count, 2);
 });
 
@@ -69,8 +73,7 @@ test("applying transformation strategies to a file", async (t) => {
   const strategies = (
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter((strategy) => strategy && strategy.name === "soundxyz");
-  const onLineHandler = (line) => strategies[0].module.transform(line);
-  await lineReader(dataPath, onLineHandler);
+  await lineReader(dataPath, strategies[0].module);
   t.pass();
 });
 

@@ -32,25 +32,36 @@ const ajv = new Ajv();
 const validate = ajv.compile(lifecycleMessage);
 class LifeCycleHandler extends EventEmitter {}
 
-export async function lineReader(path, onLineHandler) {
+function fill(buffer, write, messages) {
+  if (write) {
+    buffer.write += `${write}\n`;
+  }
+  buffer.messages = [...buffer.messages, ...messages];
+
+  return buffer;
+}
+
+export async function lineReader(path, strategy) {
   const rl = createInterface({
     input: createReadStream(path),
     crlfDelay: Infinity,
   });
-  let writeBuff = "";
-  let msgBuff = [];
+
+  let buffer = { write: "", messages: [] };
   rl.on("line", (line) => {
-    const { write, messages } = onLineHandler(line);
-    if (write) {
-      writeBuff += `${write}\n`;
-    }
-    msgBuff = [...msgBuff, ...messages];
+    const { write, messages } = strategy.onLine(line);
+    buffer = fill(buffer, write, messages);
   });
+  // TODO: Figure out how `onError` shall be handled.
+  rl.on("error", (error) => {
+    const { write, messages } = strategy.onError(error);
+    buffer = fill(buffer, write, messages);
+  });
+
   await once(rl, "close");
-  return {
-    messages: msgBuff,
-    write: writeBuff,
-  };
+  const { write, messages } = strategy.onClose();
+  buffer = fill(buffer, write, messages);
+  return buffer;
 }
 
 export async function setupFinder() {
@@ -75,6 +86,7 @@ export async function setupFinder() {
 export function check(message) {
   const valid = validate(message);
   if (!valid) {
+    log(JSON.stringify(message));
     log(validate.errors);
     throw new ValidationError(
       "Found 1 or more validation error when checking lifecycle message."
@@ -90,9 +102,9 @@ export function generatePath(name, type) {
   return path.resolve(dataDir, `${name}-${type}`);
 }
 
-async function transform(handler, name, type) {
+async function transform(strategy, name, type) {
   const filePath = generatePath(name, type);
-  return await lineReader(filePath, handler);
+  return await lineReader(filePath, strategy);
 }
 
 export async function run(strategy, type, fun, params) {
@@ -104,16 +116,22 @@ export async function run(strategy, type, fun, params) {
       result = await strategy.module[fun]();
     }
   } else if (type === "transformation") {
-    result = await transform(
-      strategy.module["transform"],
-      strategy.name,
-      "extraction"
-    );
+    result = await transform(strategy.module, strategy.name, "extraction");
   }
 
   const filePath = generatePath(strategy.name, type);
-  if (result && result.write) {
-    await write(filePath, `${result.write}\n`);
+  if (result) {
+    if (result.write) {
+      await write(filePath, `${result.write}\n`);
+    }
+  } else {
+    throw new Error(
+      `Strategy "${
+        strategy.name
+      }" and call "${fun}" didn't return a valid result: "${JSON.stringify(
+        result
+      )}"`
+    );
   }
   const [lifecycle, worker] = partition(result.messages, filterLifeCycle);
   return {

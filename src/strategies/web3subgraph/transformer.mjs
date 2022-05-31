@@ -1,53 +1,64 @@
 // @format
-const version = "0.1.0";
+import { env } from "process";
+import { resolve } from "path";
 
 import { toHex } from "eth-fun";
+
 import { toJSON } from "../../disc.mjs";
+import logger from "../../logger.mjs";
 
-function generate(address, tokenId, blockNumber) {
-  return {
-    type: "extraction",
-    version: "0.0.1",
-    name: "soundxyz",
-    args: [tokenId, toHex(parseInt(blockNumber))],
-  };
-}
+const name = "web3subgraph";
+const log = logger(name);
+const version = "0.1.0";
 
-export function transform(line) {
-  let data;
-  try {
-    data = JSON.parse(line);
-  } catch (err) {
-    return {
-      messages: [],
-      write: null,
-    };
-  }
+export function onLine(line) {
+  // NOTE: Parse isn't enclosed in a try catch loop as we want to catch the
+  // error when we're envoking `function onLine`.
+  const data = JSON.parse(line);
   if (!data) {
-    return {
-      messages: [],
-      write: null,
-    };
+    throw new Error(`No data passed to "onLine" handler`);
   }
   const expr = new RegExp(
     "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
   );
-  const nfts = toJSON(
+  let nfts = toJSON(
     data.map((entry) => entry.id),
     expr
   );
-
-  let messages = [];
-  for (const [i, nft] of nfts.entries()) {
-    if (nft.address === "0x01ab7d30525e4f3010af27a003180463a6c811a6") {
-      messages.push(
-        generate(nft.address, nft.tokenId, data[i].createdAtBlockNumber)
-      );
-    }
+  nfts = nfts.map((nft, i) => {
     nft.createdAtBlockNumber = data[i].createdAtBlockNumber;
-  }
+    return nft;
+  });
+
   return {
-    messages,
+    messages: [],
     write: JSON.stringify(nfts),
+  };
+}
+
+export function onError(error) {
+  // TODO: Figure out how to properly handle errors in transformers
+  log(error.toString());
+  throw error;
+}
+
+export function onClose() {
+  const fileName = "web3subgraph-transformation";
+  return {
+    messages: [
+      {
+        type: "extraction",
+        version,
+        name: "soundxyz",
+        args: [resolve(env.DATA_DIR, fileName)],
+      },
+      {
+        type: "extraction",
+        version,
+        name: "soundxyz-metadata",
+        args: [resolve(env.DATA_DIR, fileName)],
+      },
+    ],
+    write: null,
   };
 }

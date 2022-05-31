@@ -20,9 +20,23 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 test("interface compliance of transformer strategies", async (t) => {
   const transformers = await loadStrategies("./strategies", "transformer.mjs");
   t.truthy(transformers);
-  t.plan(transformers.length + 1);
+  t.plan(transformers.length * 3 + 1);
   for (const transformer of transformers) {
-    t.is(typeof transformer.module.transform, "function");
+    t.is(
+      typeof transformer.module.onLine,
+      "function",
+      `Error at ${transformer.name} onLine`
+    );
+    t.is(
+      typeof transformer.module.onError,
+      "function",
+      `Error at ${transformer.name} onError`
+    );
+    t.is(
+      typeof transformer.module.onClose,
+      "function",
+      `Error at ${transformer.name} onClose`
+    );
   }
 });
 

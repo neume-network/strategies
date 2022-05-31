@@ -1,12 +1,32 @@
 // @format
+import logger from "../../logger.mjs";
+
+const name = "catalog";
+const log = logger(name);
 const version = "0.1.0";
 
-export function transform(line) {
+export function onClose() {
+  log("closed");
+  return {
+    write: null,
+    messages: [],
+  };
+}
+
+export function onError(error) {
+  log(error.toString());
+  throw error;
+}
+
+export function onLine(line) {
   let datum;
   try {
     datum = JSON.parse(line);
   } catch (err) {
-    return null;
+    return {
+      write: null,
+      messages: [],
+    };
   }
   return {
     messages: [],

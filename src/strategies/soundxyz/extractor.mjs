@@ -1,7 +1,11 @@
 // @format
 import { env } from "process";
-import { call, encodeCallSignature, decodeCallOutput, toHex } from "eth-fun";
+import { createInterface } from "readline";
+import { createReadStream } from "fs";
 
+import { toHex, encodeCallSignature } from "eth-fun";
+
+export const version = "0.0.1";
 export const name = "soundxyz";
 export const props = {
   // TODO: Document autoStart property in readme.md
@@ -20,7 +24,35 @@ export const props = {
   },
 };
 
-export function init(tokenId, blockNumber) {
+export async function init(filePath) {
+  const rl = createInterface({
+    input: createReadStream(filePath),
+    crlfDelay: Infinity,
+  });
+
+  let messages = [];
+  for await (const line of rl) {
+    // NOTE: We're ignoring empty lines
+    if (line === "") continue;
+    const nfts = JSON.parse(line);
+
+    messages = [
+      ...messages,
+      ...nfts
+        .filter(({ address }) => address === props.contract.address)
+        .map(({ tokenId, createdAtBlockNumber }) =>
+          makeRequest(tokenId, createdAtBlockNumber)
+        ),
+    ];
+  }
+  messages[messages.length - 1].last = true;
+  return {
+    write: null,
+    messages,
+  };
+}
+
+export function makeRequest(tokenId, blockNumber) {
   const data = encodeCallSignature(
     props.signatures.tokenURI,
     ["uint256"],
@@ -29,40 +61,41 @@ export function init(tokenId, blockNumber) {
 
   const from = null;
   return {
-    messages: [
+    type: "json-rpc",
+    commissioner: name,
+    options: props.options,
+    version,
+    method: "eth_call",
+    params: [
       {
-        type: "json-rpc",
-        commissioner: name,
-        options: props.options,
-        version: "0.0.1",
-        method: "eth_call",
-        params: [
-          {
-            from,
-            to: props.contract.address,
-            data,
-          },
-          blockNumber,
-        ],
-        results: null,
-        error: null,
+        from,
+        to: props.contract.address,
+        data,
       },
+      // TODO: https://github.com/neume-network/strategies/issues/68
+      //toHex(blockNumber),
+      "latest",
     ],
+    results: null,
+    error: null,
   };
 }
 
 export function update(message) {
-  return {
-    messages: [
+  let messages = [];
+  if (message.last) {
+    messages = [
       {
         type: "transformation",
-        version: "0.0.1",
+        version,
         name,
         args: null,
-        results: null,
-        error: null,
       },
-    ],
+    ];
+  }
+
+  return {
+    messages,
     write: message.results,
   };
 }

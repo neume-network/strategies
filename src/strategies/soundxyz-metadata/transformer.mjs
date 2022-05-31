@@ -1,7 +1,26 @@
 // @format
 import { decodeCallOutput } from "eth-fun";
 
-export function transform(line) {
+import logger from "../../logger.mjs";
+
+const name = "soundxyz-metadata";
+const log = logger(name);
+const version = "0.1.0";
+
+export function onClose() {
+  log("closed");
+  return {
+    write: null,
+    messages: [],
+  };
+}
+
+export function onError(error) {
+  log(error.toString());
+  throw error;
+}
+
+export function onLine(line) {
   let editionMetadataObject = {};
   let editionMetadataArray = [];
 

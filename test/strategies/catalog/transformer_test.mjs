@@ -5,7 +5,7 @@ import addFormats from "ajv-formats";
 
 import { track } from "@neume-network/schema";
 
-import { transform } from "../../../src/strategies/catalog/transformer.mjs";
+import { onLine } from "../../../src/strategies/catalog/transformer.mjs";
 
 const ajv = new Ajv();
 addFormats(ajv);
@@ -41,7 +41,7 @@ const payload = {
 const sPayload = JSON.stringify(payload);
 
 test("catalog transformer", (t) => {
-  const { write } = transform(sPayload);
+  const { write } = onLine(sPayload);
   const validate = ajv.compile(track);
   const valid = validate(JSON.parse(write));
   t.true(valid);

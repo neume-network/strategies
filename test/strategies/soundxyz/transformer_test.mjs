@@ -1,11 +1,11 @@
 //@format
 import test from "ava";
-import { transform } from "../../../src/strategies/soundxyz/transformer.mjs";
+import { onLine } from "../../../src/strategies/soundxyz/transformer.mjs";
 
 const payload =
   "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002668747470733a2f2f736f756e642e78797a2f6170692f6d657461646174612f36362f312f31350000000000000000000000000000000000000000000000000000";
 
 test("soundxyz transformer", (t) => {
-  const { write } = transform(payload);
+  const { write } = onLine(payload);
   t.is(write, "https://sound.xyz/api/metadata/66/1/15");
 });
