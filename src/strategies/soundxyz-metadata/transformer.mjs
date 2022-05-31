@@ -3,9 +3,10 @@ import { decodeCallOutput } from "eth-fun";
 
 export function transform(line) {
   let editionMetadataObject = {};
+  let editionMetadataArray = [];
 
   try {
-    const editionMetadataArray = decodeCallOutput(
+    editionMetadataArray = decodeCallOutput(
       [
         "address",
         "uint256",
@@ -19,8 +20,15 @@ export function transform(line) {
       ],
       line
     );
+  } catch (err) {
+    return {
+      messages: [],
+      write: null,
+    };
+  }
 
-    // map editionMetaDataArray to editionMetadataObject
+  // map editionMetaDataArray to editionMetadataObject
+  try {
     editionMetadataObject.fundingRecipient = editionMetadataArray[0];
     editionMetadataObject.price = editionMetadataArray[1];
     editionMetadataObject.numSold = editionMetadataArray[2];
@@ -31,7 +39,6 @@ export function transform(line) {
     editionMetadataObject.presaleQuantity = editionMetadataArray[7];
     editionMetadataObject.signerAddress = editionMetadataArray[8];
   } catch (err) {
-    console.log(err);
     return {
       messages: [],
       write: null,
