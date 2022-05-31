@@ -14,11 +14,7 @@ function generate(first, lastId) {
           query manyNFTs($lastId: String) {
             nfts(first: ${first}, where: { id_gt: $lastId }) {
               id
-            }
-            _meta {
-              block {
-                number
-              }
+              createdAtBlockNumber
             }
           }`,
         variables: { lastId },
@@ -50,7 +46,7 @@ export function update(message) {
   if (nfts.length) {
     const lastId = nfts[nfts.length - 1].id;
     messages = [generate(props.first, lastId)];
-    write = JSON.stringify(message.results.data);
+    write = JSON.stringify(nfts);
   } else {
     messages = [
       {

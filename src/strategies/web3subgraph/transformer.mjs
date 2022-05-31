@@ -1,6 +1,7 @@
 // @format
 const version = "0.1.0";
 
+import { toHex } from "eth-fun";
 import { toJSON } from "../../disc.mjs";
 
 function generate(address, tokenId, blockNumber) {
@@ -9,7 +10,7 @@ function generate(address, tokenId, blockNumber) {
       type: "extraction",
       version: "0.0.1",
       name: "soundxyz",
-      args: [tokenId, `0x${blockNumber.toString(16)}`],
+      args: [tokenId, toHex(parseInt(blockNumber))],
     };
   }
 }
@@ -34,12 +35,12 @@ export function transform(line) {
     "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
   );
   const nfts = toJSON(
-    data.nfts.map((entry) => entry.id),
+    data.map((entry) => entry.id),
     expr
   );
   const messages = nfts
-    .map(({ address, tokenId }) =>
-      generate(address, tokenId, data._meta.block.number)
+    .map(({ address, tokenId }, i) =>
+      generate(address, tokenId, data[i].createdAtBlockNumber)
     )
     .filter((message) => !!message);
   return {
