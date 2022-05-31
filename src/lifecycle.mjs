@@ -98,7 +98,11 @@ async function transform(handler, name, type) {
 export async function run(strategy, type, fun, params) {
   let result;
   if (type === "extraction") {
-    result = await strategy.module[fun](...params);
+    if (params) {
+      result = await strategy.module[fun](...params);
+    } else {
+      result = await strategy.module[fun]();
+    }
   } else if (type === "transformation") {
     result = await transform(
       strategy.module["transform"],
