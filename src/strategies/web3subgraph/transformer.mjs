@@ -5,14 +5,12 @@ import { toHex } from "eth-fun";
 import { toJSON } from "../../disc.mjs";
 
 function generate(address, tokenId, blockNumber) {
-  if (address === "0x01ab7d30525e4f3010af27a003180463a6c811a6") {
-    return {
-      type: "extraction",
-      version: "0.0.1",
-      name: "soundxyz",
-      args: [tokenId, toHex(parseInt(blockNumber))],
-    };
-  }
+  return {
+    type: "extraction",
+    version: "0.0.1",
+    name: "soundxyz",
+    args: [tokenId, toHex(parseInt(blockNumber))],
+  };
 }
 
 export function transform(line) {
@@ -38,11 +36,16 @@ export function transform(line) {
     data.map((entry) => entry.id),
     expr
   );
-  const messages = nfts
-    .map(({ address, tokenId }, i) =>
-      generate(address, tokenId, data[i].createdAtBlockNumber)
-    )
-    .filter((message) => !!message);
+
+  let messages = [];
+  for (const [i, nft] of nfts.entries()) {
+    if (nft.address === "0x01ab7d30525e4f3010af27a003180463a6c811a6") {
+      messages.push(
+        generate(nft.address, nft.tokenId, data[i].createdAtBlockNumber)
+      );
+    }
+    nft.createdAtBlockNumber = data[i].createdAtBlockNumber;
+  }
   return {
     messages,
     write: JSON.stringify(nfts),
