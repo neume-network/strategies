@@ -55,6 +55,12 @@ export function onClose() {
       {
         type: "extraction",
         version,
+        name: "catalog",
+        args: [resolve(env.DATA_DIR, fileName)],
+      },
+      {
+        type: "extraction",
+        version,
         name: "soundxyz-metadata",
         args: [resolve(env.DATA_DIR, fileName)],
       },
