@@ -28,15 +28,40 @@ export function onLine(line) {
       messages: [],
     };
   }
+
+  let title, duration, artist, description, artwork;
+  if (datum.body) {
+    title = datum.body.title;
+    if (datum.body.duration) {
+      duration = `PT${Math.floor(datum.body.duration / 60)}M${(
+        datum.body.duration % 60
+      ).toFixed(0)}S`;
+    } else {
+      // TODO
+      duration = "";
+    }
+    if (datum.body.artist) {
+      artist = datum.body.artist;
+    }
+    if (datum.body.notes) {
+      description = datum.body.notes;
+    }
+    if (datum.body.artwork) {
+      artwork = datum.body.artwork;
+    }
+  } else if (datum.name) {
+    title = datum.name;
+  }
+
   return {
     messages: [],
     write: JSON.stringify({
       version,
-      title: datum.body.title,
-      duration: "PT0M", // TODO: From catalog duration go to ISO8601 duration
+      title,
+      duration,
       artist: {
         version,
-        name: datum.body.artist,
+        name: artist,
       },
       platform: {
         version,
@@ -46,27 +71,27 @@ export function onLine(line) {
       erc721: {
         version,
         // TODO
-        address: "0x0000000000000000000000000000000000000000",
-        tokenId: "0",
-        tokenURI: "https://example.com/metadata.json",
+        //address: nft[1],
+        //tokenId: nft[2],
+        //tokenURI: "https://example.com/metadata.json",
         metadata: {
           ...datum,
-          name: datum.body.title,
-          description: datum.body.notes,
-          image: datum.body.artwork.info.uri,
+          name: title,
+          description,
+          //image: artwork.info.uri,
         },
       },
       manifestations: [
         {
           version,
           // TODO: Zora's file URL can be retrieved when calling tokenURI
-          uri: "https://example.com/file",
-          mimetype: datum.body.mimeType,
+          //uri: "https://example.com/file",
+          //mimetype: datum.body.mimeType,
         },
         {
           version,
-          uri: datum.body.artwork.info.uri,
-          mimetype: datum.body.artwork.info.mimeType,
+          //uri: artwork.info.uri,
+          //mimetype: artwork.info.mimeType,
         },
       ],
     }),
