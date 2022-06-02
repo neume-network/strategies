@@ -43,7 +43,7 @@ export function onError(error) {
 }
 
 export function onClose() {
-  const fileName = "web3subgraph-transformation";
+  const fileName = `${name}-transformation`;
   return {
     messages: [
       {
