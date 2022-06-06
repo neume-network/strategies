@@ -31,7 +31,6 @@ const fileNames = {
 const ajv = new Ajv();
 const validate = ajv.compile(lifecycleMessage);
 class LifeCycleHandler extends EventEmitter {}
-console.log("write");
 
 function fill(buffer, write, messages) {
   if (write) {
