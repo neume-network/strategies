@@ -31,10 +31,10 @@ const fileNames = {
 const ajv = new Ajv();
 const validate = ajv.compile(lifecycleMessage);
 class LifeCycleHandler extends EventEmitter {}
-console.log('write')
+console.log("write");
 
 function fill(buffer, write, messages) {
-  if ( write ) {
+  if (write) {
     buffer.write += `${write}\n`;
   }
   buffer.messages = [...buffer.messages, ...messages];

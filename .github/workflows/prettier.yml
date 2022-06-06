@@ -29,4 +29,4 @@ jobs:
       - name: Prettier
         run: npx prettier --check **/*.mjs
       - name: ESLint
-        run: npx eslint
+        run: npx eslint . --ext mjs
