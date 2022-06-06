@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  prettier:
+  format_and_lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +27,6 @@ jobs:
           cache: "npm"
       - run: npm ci
       - name: Prettier
-        run: npx prettier --check
+        run: npx prettier --check **/*.mjs
       - name: ESLint
         run: npx eslint
