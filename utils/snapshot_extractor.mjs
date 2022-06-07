@@ -1,5 +1,4 @@
 // @format
-import "dotenv/config";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { once } from "events";
@@ -7,10 +6,7 @@ import { Worker } from "worker_threads";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default async function snapshotExtractor2(
-  extractor,
-  { inputs, expect }
-) {
+export default async function snapshotExtractor(extractor, { inputs, expect }) {
   const map = new Map();
   expect.write.forEach((line) => map.set(line, false));
 
@@ -38,6 +34,7 @@ export default async function snapshotExtractor2(
   worker.on("message", (message) => {
     if (message.error) {
       worker.emit("exit");
+      console.error(message);
       throw new Error(message.error);
     }
 
