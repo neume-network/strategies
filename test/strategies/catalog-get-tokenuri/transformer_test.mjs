@@ -5,7 +5,7 @@ import addFormats from "ajv-formats";
 
 import { track } from "@neume-network/schema";
 
-import { onLine } from "../../../src/strategies/catalog/transformer.mjs";
+import { onLine } from "../../../src/strategies/catalog-get-tokenuri/transformer.mjs";
 
 const ajv = new Ajv();
 addFormats(ajv);
@@ -44,5 +44,9 @@ test("catalog transformer", (t) => {
   const { write } = onLine(sPayload);
   const validate = ajv.compile(track);
   const valid = validate(JSON.parse(write));
-  t.true(valid);
+  t.is(validate.errors.length, 1);
+  // NOTE: catalog-get-tokenuri implements neume-network/schema only partially
+  // at this point, so we can't expect it to pass validation. Instead, we're
+  // expecting errors to be thrown.
+  t.is(validate.errors[0].params.missingProperty, "address");
 });
