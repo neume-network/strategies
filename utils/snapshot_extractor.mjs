@@ -6,10 +6,7 @@ import { Worker } from "worker_threads";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default async function snapshotExtractor(extractor, { inputs, expect }) {
-  const map = new Map();
-  expect.write.forEach((line) => map.set(line, false));
-
+export default async function snapshotExtractor(extractor, { inputs }) {
   const worker = new Worker(resolve(__dirname, "./worker_start.mjs"), {
     workerData: {
       concurrency: 20,
@@ -22,13 +19,9 @@ export default async function snapshotExtractor(extractor, { inputs, expect }) {
     worker.postMessage(message);
   };
 
-  // Uncomment this to see what is being written
-  const DEBUG = false;
   let writeResult = "";
   const write = (string) => {
-    if (DEBUG && string) {
-      writeResult += string + "\n";
-    }
+    writeResult += string + "\n";
   };
 
   worker.on("message", (message) => {
@@ -40,7 +33,6 @@ export default async function snapshotExtractor(extractor, { inputs, expect }) {
 
     const ret = extractor.update(message);
     write(ret.write);
-    if (map.has(ret.write)) map.set(ret.write, true);
 
     ret.messages
       .filter(({ type }) => type !== "extraction" && type !== "transformation")
@@ -55,8 +47,7 @@ export default async function snapshotExtractor(extractor, { inputs, expect }) {
   });
 
   const ret = await extractor.init(...inputs);
-  write(ret.write);
-  if (map.has(ret.write)) map.set(ret.write, true);
+  if (ret.write) write(ret.write);
 
   ret.messages
     .filter(({ type }) => type !== "extraction" && type !== "transformation")
@@ -66,15 +57,5 @@ export default async function snapshotExtractor(extractor, { inputs, expect }) {
 
   await once(worker, "exit");
 
-  DEBUG && console.log("writeResult\n", writeResult);
-
-  let areAllLinesWritten = true;
-  for (const [line, isLineWritten] of map) {
-    if (!isLineWritten) {
-      areAllLinesWritten = false;
-      break;
-    }
-  }
-
-  return areAllLinesWritten;
+  return writeResult;
 }

@@ -12,5 +12,6 @@ test("web3subgraph extractor", async (t) => {
     fs.readFileSync(resolve(__dirname, "./extractor_snapshot.json"))
   );
 
-  t.true(await snapshotExtractor(web3Extractor, snapshot));
+  const result = await snapshotExtractor(web3Extractor, snapshot);
+  t.true(result.includes(snapshot.expect.write));
 });
