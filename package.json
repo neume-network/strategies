@@ -5,20 +5,15 @@
   "main": "./src/index.mjs",
   "scripts": {
     "test": "ava --verbose",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prettier": "prettier --write",
+    "eslint": "eslint . --ext mjs --fix"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neume-network/strategies.git"
   },
-  "keywords": [
-    "data",
-    "music",
-    "web3",
-    "decentralized",
-    "tokens",
-    "nfts"
-  ],
+  "keywords": ["data", "music", "web3", "decentralized", "tokens", "nfts"],
   "author": "Tim Daubenschütz <tim@daubenschuetz.de> (https://timdaub.github.io/)",
   "license": "GPL-3.0-only",
   "bugs": {
@@ -26,6 +21,7 @@
   },
   "homepage": "https://github.com/neume-network/strategies#readme",
   "devDependencies": {
+    "@neume-network/extraction-worker": "0.2.0",
     "@neume-network/schema": "0.2.0",
     "ajv": "8.11.0",
     "ajv-formats": "2.1.1",
@@ -38,10 +34,7 @@
     "prettier": "2.6.2"
   },
   "lint-staged": {
-    "*.{mjs,js,css,md}": [
-      "prettier --write",
-      "eslint . --ext mjs --fix"
-    ]
+    "*.{mjs,js,css,md}": ["npm run prettier", "npm run eslint"]
   },
   "dependencies": {
     "@neume-network/message-schema": "0.3.0",
@@ -49,9 +42,12 @@
     "lodash.partition": "4.6.0"
   },
   "ava": {
+    "timeout": "30s",
     "environmentVariables": {
       "DEBUG": "neume-network-strategies:*",
-      "DATA_DIR": "data"
+      "DATA_DIR": "data",
+      "RPC_HTTP_HOST": "https://cloudflare-eth.com",
+      "RPC_API_KEY": "ABC"
     }
   }
 }
