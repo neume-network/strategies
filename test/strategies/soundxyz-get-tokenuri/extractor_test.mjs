@@ -7,7 +7,7 @@ import snapshotExtractor from "../../../utils/snapshot_extractor.mjs";
 
 import * as soundxyz from "../../../src/strategies/soundxyz-get-tokenuri/extractor.mjs";
 
-test("soundxyz extractor", async (t) => {
+test("soundxyz-get-tokenuri extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(
