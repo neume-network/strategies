@@ -1,11 +1,29 @@
 //@format
+import fs from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
 import test from "ava";
+
 import { onLine } from "../../../src/strategies/soundxyz/transformer.mjs";
 
-const payload =
-  "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002668747470733a2f2f736f756e642e78797a2f6170692f6d657461646174612f36362f312f31350000000000000000000000000000000000000000000000000000";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const snapshot = JSON.parse(
+  fs.readFileSync(resolve(__dirname, "./extractor_snapshot.json"))
+);
 
 test("soundxyz transformer", (t) => {
-  const { write } = onLine(payload);
-  t.is(write, "https://sound.xyz/api/metadata/66/1/15");
+  const { write } = onLine(snapshot.expect.write);
+  const expected = {
+    metadata: {
+      block: {
+        number: "14323199",
+      },
+      contract: { address: "0x01ab7d30525e4f3010af27a003180463a6c811a6" },
+      tokenId: "1",
+    },
+    tokenURI: "https://sound.xyz/api/metadata/66/1/1",
+  };
+  t.is(write, JSON.stringify(expected));
 });

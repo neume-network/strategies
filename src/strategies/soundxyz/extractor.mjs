@@ -77,6 +77,15 @@ export function makeRequest(tokenId, blockNumber) {
       },
       toHex(parseInt(blockNumber)),
     ],
+    metadata: {
+      block: {
+        number: blockNumber,
+      },
+      contract: {
+        address: props.contract.address,
+      },
+      tokenId,
+    },
     results: null,
     error: null,
   };
@@ -97,6 +106,9 @@ export function update(message) {
 
   return {
     messages,
-    write: message.results,
+    write: JSON.stringify({
+      metadata: message.metadata,
+      results: message.results,
+    }),
   };
 }
