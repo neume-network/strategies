@@ -5,20 +5,15 @@
   "main": "./src/index.mjs",
   "scripts": {
     "test": "ava --verbose",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prettier": "prettier --write",
+    "eslint": "eslint . --ext mjs --fix"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neume-network/strategies.git"
   },
-  "keywords": [
-    "data",
-    "music",
-    "web3",
-    "decentralized",
-    "tokens",
-    "nfts"
-  ],
+  "keywords": ["data", "music", "web3", "decentralized", "tokens", "nfts"],
   "author": "Tim Daubenschütz <tim@daubenschuetz.de> (https://timdaub.github.io/)",
   "license": "GPL-3.0-only",
   "bugs": {
@@ -39,10 +34,7 @@
     "prettier": "2.6.2"
   },
   "lint-staged": {
-    "*.{mjs,js,css,md}": [
-      "prettier --write",
-      "eslint . --ext mjs --fix"
-    ]
+    "*.{mjs,js,css,md}": ["npm run prettier", "npm run eslint"]
   },
   "dependencies": {
     "@neume-network/message-schema": "0.3.0",
