@@ -42,12 +42,6 @@
     "lodash.partition": "4.6.0"
   },
   "ava": {
-    "timeout": "30s",
-    "environmentVariables": {
-      "DEBUG": "neume-network-strategies:*",
-      "DATA_DIR": "data",
-      "RPC_HTTP_HOST": "https://cloudflare-eth.com",
-      "RPC_API_KEY": "ABC"
-    }
+    "timeout": "30s"
   }
 }
