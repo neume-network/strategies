@@ -72,9 +72,7 @@ export function makeRequest(tokenId, blockNumber) {
         to: props.contract.address,
         data,
       },
-      // TODO: https://github.com/neume-network/strategies/issues/68
-      //toHex(blockNumber),
-      "latest",
+      toHex(parseInt(blockNumber)),
     ],
     results: null,
     error: null,
