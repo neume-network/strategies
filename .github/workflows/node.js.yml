@@ -32,5 +32,5 @@ jobs:
         env:
           DEBUG: "neume-network-strategies:*"
           DATA_DIR: data
-          RPC_HTTP_HOST: https://node.rugpullindex.com
+          RPC_HTTP_HOST: ${{ secrets.RPC_HTTP_HOST }}
           RPC_API_KEY": ${{ secrets.RPC_API_KEY }}
