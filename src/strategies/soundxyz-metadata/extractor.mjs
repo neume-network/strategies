@@ -17,11 +17,14 @@ export const props = {
   },
   options: {
     url: env.RPC_HTTP_HOST,
-    headers: {
-      Authorization: `Bearer ${env.RPC_API_KEY}`,
-    },
   },
 };
+
+if (env.RPC_API_KEY) {
+  props.options.headers = {
+    Authorization: `Bearer ${env.RPC_API_KEY}`,
+  };
+}
 
 export async function init(filePath) {
   const rl = createInterface({
