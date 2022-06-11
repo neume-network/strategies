@@ -6,7 +6,7 @@ const version = "0.1.0";
 const nextStrategyName = "soundxyz-get-tokenuri";
 
 const { onClose, onError, onLine } = decodeSolidityHexStringFactory({
-  name,
+  strategyName: name,
   version,
   nextStrategyName,
 });

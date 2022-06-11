@@ -7,12 +7,12 @@ import { decodeCallOutput } from "eth-fun";
 import logger from "../../logger.mjs";
 
 export const decodeSolidityHexStringFactory = (props) => {
-  const { name, version, nextStrategyName } = props;
+  const { strategyName, version, nextStrategyName } = props;
 
-  const log = logger(name);
+  const log = logger(strategyName);
 
   function onClose() {
-    const fileName = `${name}-transformation`;
+    const fileName = `${strategyName}-transformation`;
     return {
       write: null,
       messages: [
