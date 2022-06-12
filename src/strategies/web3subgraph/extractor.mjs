@@ -28,12 +28,11 @@ function generate(first, lastId) {
 export const props = {
   autoStart: true,
   first: 1000,
-  lastId: "",
 };
 
-export function init() {
+export function init(lastId = "") {
   return {
-    messages: [generate(props.first, props.lastId)],
+    messages: [generate(props.first, lastId)],
     write: null,
   };
 }
