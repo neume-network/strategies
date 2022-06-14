@@ -169,7 +169,7 @@ export async function init(worker) {
     type: "extraction",
     version: "0.0.1",
     name: "web3subgraph",
-    args: [null],
+    args: [],
   });
   //lch.emit("message", {
   //  type: "transformation",
