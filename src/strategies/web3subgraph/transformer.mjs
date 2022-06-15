@@ -55,7 +55,7 @@ export function onClose() {
       {
         type: "extraction",
         version,
-        name: "catalog",
+        name: "zora-call-tokenmetadatauri",
         args: [resolve(env.DATA_DIR, fileName)],
       },
       {

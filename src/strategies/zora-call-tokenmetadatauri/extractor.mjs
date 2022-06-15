@@ -6,7 +6,7 @@ import { createReadStream } from "fs";
 import { toHex, encodeCallSignature } from "eth-fun";
 
 export const version = "0.0.1";
-export const name = "catalog";
+export const name = "zora-call-tokenmetadatauri";
 export const props = {
   // TODO: Document autoStart property in readme.md
   autoStart: false,
