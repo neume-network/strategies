@@ -6,10 +6,10 @@ import { createReadStream } from "fs";
 import { toHex, encodeCallSignature } from "eth-fun";
 
 export const version = "0.0.1";
-export const name = "zora-call-tokenmetadatauri";
+export const name = "zora-call-tokenuri";
 export const props = {
   signatures: {
-    tokenMetadataURI: "tokenMetadataURI(uint256)",
+    tokenURI: "tokenURI(uint256)",
   },
   contract: {
     address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
@@ -55,7 +55,7 @@ export async function init(filePath) {
 
 export function makeRequest(tokenId, blockNumber) {
   const data = encodeCallSignature(
-    props.signatures.tokenMetadataURI,
+    props.signatures.tokenURI,
     ["uint256"],
     [tokenId]
   );
