@@ -2,9 +2,10 @@
 import fs from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import test from "ava";
-import snapshotExtractor from "../../../utils/snapshot_extractor.mjs";
 
+import test from "ava";
+
+import snapshotExtractor from "../../../utils/snapshot_extractor.mjs";
 import * as soundxyz from "../../../src/strategies/soundxyz/extractor.mjs";
 
 test("soundxyz extractor", async (t) => {

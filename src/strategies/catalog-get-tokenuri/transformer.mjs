@@ -19,15 +19,17 @@ export function onError(error) {
 }
 
 export function onLine(line) {
-  let datum;
+  let data;
   try {
-    datum = JSON.parse(line);
+    data = JSON.parse(line);
   } catch (err) {
     return {
       write: null,
       messages: [],
     };
   }
+  const metadata = data.metadata;
+  const datum = data.results;
 
   let title, duration, artist, description, artwork;
   if (datum.body) {
@@ -73,7 +75,7 @@ export function onLine(line) {
         // TODO
         //address: nft[1],
         //tokenId: nft[2],
-        //tokenURI: "https://example.com/metadata.json",
+        tokenURI: metadata.tokenURI,
         metadata: {
           ...datum,
           name: title,

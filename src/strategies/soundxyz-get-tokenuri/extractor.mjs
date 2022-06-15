@@ -58,6 +58,11 @@ export function update(message) {
 
   return {
     messages,
-    write: JSON.stringify(message.results),
+    write: JSON.stringify({
+      metadata: {
+        tokenURI: message.options.url,
+      },
+      results: message.results,
+    }),
   };
 }

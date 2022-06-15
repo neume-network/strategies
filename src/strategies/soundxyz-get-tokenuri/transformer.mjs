@@ -21,7 +21,8 @@ export function onError(error) {
 }
 
 export function onLine(line) {
-  const datum = JSON.parse(line);
+  const obj = JSON.parse(line);
+  const datum = obj.results;
   return {
     messages: [],
     write: JSON.stringify({
@@ -43,7 +44,7 @@ export function onLine(line) {
         // TODO
         //address: nft[1],
         //tokenId: nft[2],
-        //tokenURI: "https://example.com/metadata.json",
+        tokenURI: obj.metadata.tokenURI,
         metadata: {
           ...datum,
         },
