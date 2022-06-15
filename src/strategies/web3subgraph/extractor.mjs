@@ -26,7 +26,6 @@ function generate(first, lastId) {
 }
 
 export const props = {
-  autoStart: true,
   first: 1000,
 };
 

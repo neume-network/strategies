@@ -8,8 +8,6 @@ import { toHex, encodeCallSignature } from "eth-fun";
 export const version = "0.0.1";
 export const name = "soundxyz";
 export const props = {
-  // TODO: Document autoStart property in readme.md
-  autoStart: false,
   signatures: {
     tokenURI: "tokenURI(uint256)",
   },

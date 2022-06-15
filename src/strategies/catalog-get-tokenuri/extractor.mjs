@@ -5,10 +5,7 @@ import { createReadStream } from "fs";
 
 export const version = "0.0.1";
 export const name = "catalog-get-tokenuri";
-export const props = {
-  // TODO: Document autoStart property in readme.md
-  autoStart: false,
-};
+export const props = {};
 
 export async function init(filePath) {
   const rl = createInterface({
