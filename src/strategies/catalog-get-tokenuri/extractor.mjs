@@ -5,7 +5,13 @@ import { createReadStream } from "fs";
 
 export const version = "0.0.1";
 export const name = "catalog-get-tokenuri";
-export const props = {};
+export const props = { options: {} };
+
+if (env.IPFS_HTTPS_GATEWAY_KEY) {
+  props.options.headers = {
+    Authorization: `Bearer ${env.IPFS_HTTPS_GATEWAY_KEY}`,
+  };
+}
 
 export async function init(filePath) {
   const rl = createInterface({
@@ -14,9 +20,19 @@ export async function init(filePath) {
   });
 
   let messages = [];
-  for await (let tokenURI of rl) {
+  for await (let line of rl) {
     // NOTE: We're ignoring empty lines
-    if (tokenURI === "") continue;
+    if (line === "") continue;
+
+    const data = JSON.parse(line);
+    const { metadata } = data;
+    let tokenURI = data.tokenURI;
+
+    if (tokenURI.includes("https://")) {
+      const parts = tokenURI.split("/");
+      const hash = parts.pop();
+      tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
+    }
 
     const IPFSIANAScheme = "ipfs://";
     if (tokenURI.includes(IPFSIANAScheme)) {
@@ -39,6 +55,7 @@ export function makeRequest(tokenURI) {
     options: {
       url: tokenURI,
       method: "GET",
+      headers: props.options.headers,
     },
     results: null,
     error: null,
