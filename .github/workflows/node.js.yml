@@ -35,3 +35,4 @@ jobs:
           RPC_HTTP_HOST: ${{ secrets.RPC_HTTP_HOST }}
           RPC_API_KEY": ${{ secrets.RPC_API_KEY }}
           IPFS_HTTPS_GATEWAY: https://cloudflare-ipfs.com/ipfs/
+          EXTRACTION_WORKER_CONCURRENCY: 20
