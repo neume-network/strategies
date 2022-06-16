@@ -1,9 +1,9 @@
 // @format
 import logger from "../../logger.mjs";
 
-const name = "catalog";
+export const name = "catalog";
 const log = logger(name);
-const version = "0.1.0";
+export const version = "0.1.0";
 
 export function onClose() {
   log("closed");

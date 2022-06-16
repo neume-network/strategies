@@ -1,8 +1,8 @@
 // @format
 import { decodeSolidityHexStringFactory } from "../../strategy-factories/decode-solidity-hex-string-factory/transformer.mjs";
 
-const name = "zora-call-tokenuri";
-const version = "0.1.0";
+export const name = "zora-call-tokenuri";
+export const version = "0.1.0";
 const nextStrategyName = "catalog-get-tokenuri";
 const resultKey = "tokenURI";
 
