@@ -107,7 +107,10 @@ export function update(message) {
           error: null,
         },
       ],
-      write: message.results,
+      write: JSON.stringify({
+        metadata: message.metadata,
+        results: message.results,
+      }),
     };
   } else if (message.results.length === LENGTH_OF_TOKEN_TO_EDITION_RESPONSE) {
     const edition = parseInt(decodeCallOutput(["uint256"], message.results));
