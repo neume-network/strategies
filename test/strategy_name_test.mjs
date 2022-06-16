@@ -2,8 +2,10 @@
 import test from "ava";
 import { readdir } from "fs/promises";
 
+const STRAGIES_PATH = "../src/strategies/";
+
 test("if strategy name is the same as directory name", async (t) => {
-  const source = new URL("../src/strategies", import.meta.url);
+  const source = new URL(STRAGIES_PATH, import.meta.url);
 
   const directories = (await readdir(source, { withFileTypes: true })).filter(
     (dirent) => dirent.isDirectory()
