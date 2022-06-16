@@ -1,8 +1,17 @@
 //@format
 import test from "ava";
-import { readdir } from "fs/promises";
+import { access, readdir } from "fs/promises";
 
-const STRAGIES_PATH = "../src/strategies/";
+const STRAGIES_PATH = "../src/strategies";
+
+const checkIfFileExists = async (filePath) => {
+  try {
+    await access(filePath);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 test("if strategy name is the same as directory name", async (t) => {
   const source = new URL(STRAGIES_PATH, import.meta.url);
@@ -14,17 +23,21 @@ test("if strategy name is the same as directory name", async (t) => {
   await Promise.all(
     directories.map(async (dir) => {
       const name = dir.name;
-      const extractorSource = new URL(
-        `../src/strategies/${name}/extractor.mjs`,
-        import.meta.url
-      );
-      const transformerSource = new URL(
-        `../src/strategies/${name}/transformer.mjs`,
-        import.meta.url
+      const sources = await Promise.all(
+        [
+          new URL(`${STRAGIES_PATH}/${name}/extractor.mjs`, import.meta.url),
+          new URL(`${STRAGIES_PATH}/${name}/transformer.mjs`, import.meta.url),
+        ].map(async (url) => {
+          if (await checkIfFileExists(url)) {
+            return url;
+          }
+        })
       );
 
+      const filteredSources = sources.filter((s) => s);
+
       await Promise.all(
-        [extractorSource, transformerSource].map(async (source) => {
+        filteredSources.map(async (source) => {
           const strategy = await import(source);
           // For better debugging abilities
           if (!strategy.name) {
