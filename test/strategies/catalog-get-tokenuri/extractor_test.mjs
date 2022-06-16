@@ -17,5 +17,6 @@ test("catalog-get-tokenuri extractor", async (t) => {
   snapshot.inputs[0] = resolve(__dirname, snapshot.inputs[0]);
 
   const result = await snapshotExtractor(extractor, snapshot);
-  t.is(result, snapshot.expect.write);
+  t.true(result.includes(snapshot.expect.write.lines[0]));
+  t.true(result.includes(snapshot.expect.write.lines[1]));
 });
