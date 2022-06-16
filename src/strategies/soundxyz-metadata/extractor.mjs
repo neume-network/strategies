@@ -3,7 +3,7 @@ import { env } from "process";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
 
-import { encodeCallSignature, decodeCallOutput } from "eth-fun";
+import { toHex, encodeCallSignature, decodeCallOutput } from "eth-fun";
 
 const version = "0.0.1";
 export const name = "soundxyz-metadata";
@@ -73,10 +73,17 @@ export function makeRequest(tokenId, blockNumber) {
         to: props.contract.address,
         data,
       },
-      //TODO: https://github.com/neume-network/strategies/issues/68
-      //blockNumber,
-      "latest",
+      toHex(parseInt(blockNumber)),
     ],
+    metadata: {
+      block: {
+        number: blockNumber,
+      },
+      contract: {
+        address: props.contract.address,
+      },
+      tokenId,
+    },
     results: null,
     error: null,
   };
@@ -126,9 +133,17 @@ export function update(message) {
               to: props.contract.address,
               data,
             },
-            //TODO: https://github.com/neume-network/strategies/issues/68
-            "latest",
+            toHex(parseInt(message.metadata.block.number)),
           ],
+          metadata: {
+            block: {
+              number: message.metadata.block.number,
+            },
+            contract: {
+              address: props.contract.address,
+            },
+            tokenId: message.metadata.tokenId,
+          },
           results: null,
           error: null,
         },

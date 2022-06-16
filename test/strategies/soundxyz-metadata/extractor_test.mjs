@@ -6,9 +6,9 @@ import { fileURLToPath } from "url";
 import test from "ava";
 
 import snapshotExtractor from "../../../utils/snapshot_extractor.mjs";
-import * as soundxyz from "../../../src/strategies/soundxyz/extractor.mjs";
+import * as extractor from "../../../src/strategies/soundxyz-metadata/extractor.mjs";
 
-test("soundxyz extractor", async (t) => {
+test("soundxyz-metadata extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(
@@ -17,6 +17,6 @@ test("soundxyz extractor", async (t) => {
 
   snapshot.inputs[0] = resolve(__dirname, snapshot.inputs[0]);
 
-  const result = await snapshotExtractor(soundxyz, snapshot);
+  const result = await snapshotExtractor(extractor, snapshot);
   t.is(result, snapshot.expect.write);
 });

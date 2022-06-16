@@ -32,7 +32,7 @@ export default async function snapshotExtractor(extractor, { inputs }) {
     }
 
     const ret = extractor.update(message);
-    write(ret.write);
+    if (ret.write) write(ret.write);
 
     ret.messages
       .filter(({ type }) => type !== "extraction" && type !== "transformation")
