@@ -14,10 +14,14 @@ export async function init(filePath) {
   });
 
   let messages = [];
-  for await (const tokenURI of rl) {
+  for await (let tokenURI of rl) {
     // NOTE: We're ignoring empty lines
-    // TODO: Later we want to allow quering ipfs:// uris too
-    if (tokenURI === "" || tokenURI.includes("ipfs://")) continue;
+    if (tokenURI === "") continue;
+
+    const IPFSIANAScheme = "ipfs://";
+    if (tokenURI.includes(IPFSIANAScheme)) {
+      tokenURI = tokenURI.replace(IPFSIANAScheme, env.IPFS_HTTPS_GATEWAY);
+    }
     messages.push(makeRequest(tokenURI));
   }
   messages[messages.length - 1].last = true;
