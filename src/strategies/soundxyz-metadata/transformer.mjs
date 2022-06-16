@@ -21,6 +21,7 @@ export function onError(error) {
 }
 
 export function onLine(line) {
+  const { results, metadata } = JSON.parse(line);
   let editionMetadataObject = {};
   let editionMetadataArray = [];
 
@@ -37,7 +38,7 @@ export function onLine(line) {
         "uint32",
         "address",
       ],
-      line
+      results
     );
   } catch (err) {
     return {
@@ -65,6 +66,9 @@ export function onLine(line) {
   }
   return {
     messages: [],
-    write: JSON.stringify(editionMetadataObject),
+    write: JSON.stringify({
+      results: editionMetadataObject,
+      metadata: metadata,
+    }),
   };
 }
