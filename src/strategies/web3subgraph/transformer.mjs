@@ -7,9 +7,9 @@ import { toHex } from "eth-fun";
 import { toJSON } from "../../disc.mjs";
 import logger from "../../logger.mjs";
 
-const name = "web3subgraph";
+export const name = "web3subgraph";
 const log = logger(name);
-const version = "0.1.0";
+export const version = "0.1.0";
 
 export function onLine(line) {
   // NOTE: Parse isn't enclosed in a try catch loop as we want to catch the

@@ -3,9 +3,9 @@ import { decodeCallOutput } from "eth-fun";
 
 import logger from "../../logger.mjs";
 
-const name = "soundxyz-metadata";
+export const name = "soundxyz-metadata";
 const log = logger(name);
-const version = "0.1.0";
+export const version = "0.1.0";
 
 export function onClose() {
   log("closed");
