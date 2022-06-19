@@ -4,7 +4,7 @@ import { createInterface } from "readline";
 import { createReadStream } from "fs";
 
 export const version = "0.0.1";
-export const name = "catalog-get-tokenuri";
+export const name = "zora-get-tokenuri";
 export const props = { options: {} };
 
 if (env.IPFS_HTTPS_GATEWAY_KEY) {

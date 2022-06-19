@@ -5,9 +5,9 @@ import { fileURLToPath } from "url";
 import test from "ava";
 import snapshotExtractor from "../../../utils/snapshot_extractor.mjs";
 
-import * as extractor from "../../../src/strategies/catalog-get-tokenuri/extractor.mjs";
+import * as extractor from "../../../src/strategies/zora-get-tokenuri/extractor.mjs";
 
-test("catalog-get-tokenuri extractor", async (t) => {
+test("zora-get-tokenuri extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(
