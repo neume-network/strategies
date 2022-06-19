@@ -2,7 +2,7 @@
 import { getTokenUriFactory } from "../../strategy-factories/get-tokenuri/extractor.mjs";
 
 export const version = "0.0.1";
-export const name = "soundxyz";
+export const name = "soundxyz-call-tokenuri";
 export const props = {
   version,
   strategyName: name,

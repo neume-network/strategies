@@ -1,7 +1,7 @@
 // @format
 import { decodeSolidityHexStringFactory } from "../../strategy-factories/decode-solidity-hex-string-factory/transformer.mjs";
 
-export const name = "soundxyz";
+export const name = "soundxyz-call-tokenuri";
 export const version = "0.1.0";
 const nextStrategyName = "soundxyz-get-tokenuri";
 const resultKey = "tokenURI";
