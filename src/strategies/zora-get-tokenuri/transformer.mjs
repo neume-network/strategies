@@ -1,7 +1,7 @@
 // @format
 import logger from "../../logger.mjs";
 
-export const name = "catalog-get-tokenuri";
+export const name = "zora-get-tokenuri";
 const log = logger(name);
 export const version = "0.1.0";
 

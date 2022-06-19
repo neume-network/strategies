@@ -3,7 +3,7 @@ import { decodeSolidityHexStringFactory } from "../../strategy-factories/decode-
 
 export const name = "zora-call-tokenmetadatauri";
 export const version = "0.1.0";
-const nextStrategyName = "catalog-get-tokenuri";
+const nextStrategyName = "zora-get-tokenuri";
 const resultKey = "tokenURI";
 
 const { onClose, onError, onLine } = decodeSolidityHexStringFactory({
