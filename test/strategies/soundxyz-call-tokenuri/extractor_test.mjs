@@ -6,9 +6,9 @@ import { fileURLToPath } from "url";
 import test from "ava";
 
 import snapshotExtractor from "../../../utils/snapshot_extractor.mjs";
-import * as extractor from "../../../src/strategies/soundxyz/extractor.mjs";
+import * as extractor from "../../../src/strategies/soundxyz-call-tokenuri/extractor.mjs";
 
-test("soundxyzextractor", async (t) => {
+test("soundxyz-call-tokenuri extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(

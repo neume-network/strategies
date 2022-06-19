@@ -6,7 +6,7 @@ import { createReadStream } from "fs";
 import { toHex, encodeCallSignature } from "eth-fun";
 
 export const version = "0.0.1";
-export const name = "soundxyz";
+export const name = "soundxyz-call-tokenuri";
 export const props = {
   signatures: {
     tokenURI: "tokenURI(uint256)",
