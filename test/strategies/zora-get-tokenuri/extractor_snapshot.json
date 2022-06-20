@@ -3,8 +3,7 @@
   "expect": {
     "write": {
       "lines": [
-        "{\"metadata\":{\"tokenURI\":\"https://ipfs.fleek.co/ipfs/bafybeiclcorjknoyfc3vwvqk63nk3jhpfxzilrkqhsnvvvwooo7dotcopq\"},\"results\":{\"description\":\"\\\"solid gold blackberry like i'm richie rich\\\"    1st Dibs 2021 - \\\"test print\\\"\",\"mimeType\":\"image/png\",\"name\":\"cpfm cm5k\",\"version\":\"zora-20210101\"}}",
-        "{\"metadata\":{\"tokenURI\":\"https://cloudflare-ipfs.com/ipfs/bafkreidnz5jv6joayuol7f54zjluckrkz2v75qi62kv2kjnubyuz5e347i\"},\"results\":{\"description\":\"Metaverse New Generation\",\"mimeType\":\"image/jpeg\",\"name\":\"The Dead World\",\"version\":\"zora-20210101\"}}"
+        "{\"metadata\":{\"tokenURI\":\"https://neume.infura-ipfs.io/ipfs/bafybeifpxcq2hhbzuy2ich3duh7cjk4zk4czjl6ufbpmxep247ugwzsny4\"},\"results\":{\"description\":\"\",\"mimeType\":\"text/plain\",\"name\":\"\",\"version\":\"zora-20210101\"}}"
       ]
     }
   }

@@ -18,5 +18,4 @@ test("zora-get-tokenuri extractor", async (t) => {
 
   const result = await snapshotExtractor(extractor, snapshot);
   t.true(result.includes(snapshot.expect.write.lines[0]));
-  t.true(result.includes(snapshot.expect.write.lines[1]));
 });
