@@ -49,7 +49,7 @@ export function onClose() {
       {
         type: "extraction",
         version,
-        name: "soundxyz",
+        name: "soundxyz-call-tokenuri",
         args: [resolve(env.DATA_DIR, fileName)],
       },
       {
