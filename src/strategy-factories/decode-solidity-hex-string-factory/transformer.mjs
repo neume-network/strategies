@@ -12,17 +12,23 @@ export const decodeSolidityHexStringFactory = (props) => {
   const log = logger(strategyName);
 
   function onClose() {
-    const fileName = `${strategyName}-transformation`;
+    if (strategyName) {
+      const fileName = `${strategyName}-transformation`;
+      return {
+        write: null,
+        messages: [
+          {
+            type: "extraction",
+            version,
+            name: nextStrategyName,
+            args: [resolve(env.DATA_DIR, fileName)],
+          },
+        ],
+      };
+    }
     return {
       write: null,
-      messages: [
-        {
-          type: "extraction",
-          version,
-          name: nextStrategyName,
-          args: [resolve(env.DATA_DIR, fileName)],
-        },
-      ],
+      messages: [],
     };
   }
 
