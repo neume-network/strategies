@@ -78,7 +78,9 @@ export async function setupFinder() {
     if (strategy && strategy.module) {
       return strategy;
     } else {
-      throw new NotFoundError("Failed to find matching strategy.");
+      throw new NotFoundError(
+        `Failed to find matching strategy for name: "${name}" and type "${type}"`
+      );
     }
   };
 }
