@@ -15,11 +15,11 @@ export async function init(filePath) {
 
   let messages = [];
   for await (const line of rl) {
+    // NOTE: We're ignoring empty lines
+    if (line === "") continue;
     const data = JSON.parse(line);
     const { tokenURI, metadata } = data;
 
-    // NOTE: We're ignoring empty lines
-    if (tokenURI === "") continue;
     messages.push(makeRequest(tokenURI));
   }
   messages[messages.length - 1].last = true;
