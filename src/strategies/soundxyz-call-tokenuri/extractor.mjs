@@ -7,7 +7,7 @@ export const props = {
   version,
   strategyName: name,
   signature: "tokenURI(uint256)",
-  address: "0x01ab7d30525e4f3010af27a003180463a6c811a6",
+  filterFunc: ({ platform }) => platform === "sound",
 };
 
 const { init, update } = getTokenUriFactory(props);

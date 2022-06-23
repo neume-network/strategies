@@ -15,6 +15,7 @@ function generate(first, lastId) {
             nfts(first: ${first}, where: { id_gt: $lastId }) {
               id
               createdAtBlockNumber
+              platform
             }
           }`,
         variables: { lastId },
