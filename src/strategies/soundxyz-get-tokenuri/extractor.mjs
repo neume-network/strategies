@@ -14,7 +14,10 @@ export async function init(filePath) {
   });
 
   let messages = [];
-  for await (const tokenURI of rl) {
+  for await (const line of rl) {
+    const data = JSON.parse(line);
+    const { tokenURI, metadata } = data;
+
     // NOTE: We're ignoring empty lines
     if (tokenURI === "") continue;
     messages.push(makeRequest(tokenURI));
