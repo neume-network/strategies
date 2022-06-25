@@ -6,6 +6,7 @@ import { createReadStream } from "fs";
 import { once } from "events";
 import EventEmitter from "events";
 import { env } from "process";
+import { format } from "util";
 
 import Ajv from "ajv";
 import partition from "lodash.partition";
@@ -32,7 +33,10 @@ const ajv = new Ajv();
 const validate = ajv.compile(lifecycleMessage);
 class LifeCycleHandler extends EventEmitter {}
 
-function fill(buffer, write, messages) {
+function fill(buffer, write, messages, error) {
+  if (error) {
+    buffer.error ? buffer.error.push(error) : (buffer.error = [error]);
+  }
   if (write) {
     buffer.write += `${write}\n`;
   }
@@ -47,10 +51,10 @@ export async function lineReader(path, strategy) {
     crlfDelay: Infinity,
   });
 
-  let buffer = { write: "", messages: [] };
+  let buffer = { write: "", messages: [], error: null };
   rl.on("line", (line) => {
-    const { write, messages } = strategy.onLine(line);
-    buffer = fill(buffer, write, messages);
+    const { write, messages, error } = strategy.onLine(line);
+    buffer = fill(buffer, write, messages, error);
   });
   // TODO: Figure out how `onError` shall be handled.
   rl.on("error", (error) => {
@@ -59,8 +63,8 @@ export async function lineReader(path, strategy) {
   });
 
   await once(rl, "close");
-  const { write, messages } = strategy.onClose();
-  buffer = fill(buffer, write, messages);
+  const { write, messages, error } = strategy.onClose();
+  buffer = fill(buffer, write, messages, error);
   return buffer;
 }
 
@@ -109,6 +113,14 @@ async function transform(strategy, name, type) {
   return await lineReader(filePath, strategy);
 }
 
+function formatError(error) {
+  if (typeof error === "string") return format("%s\n", error);
+  if (Array.isArray(error)) {
+    return error.map((e) => format("%O\n", e)).join("");
+  }
+  return format("%O\n", error);
+}
+
 export async function run(strategy, type, fun, params) {
   let result;
   if (type === "extraction") {
@@ -123,6 +135,9 @@ export async function run(strategy, type, fun, params) {
 
   const filePath = generatePath(strategy.name, type);
   if (result) {
+    if (result.error) {
+      await write(filePath + "-errors", `${formatError(result.error)}`);
+    }
     if (result.write) {
       await write(filePath, `${result.write}\n`);
     }

@@ -46,7 +46,7 @@ export const decodeSolidityHexStringFactory = (props) => {
       log(err.toString());
       return {
         messages: [],
-        write: null,
+        error: err,
       };
     }
 
@@ -57,7 +57,7 @@ export const decodeSolidityHexStringFactory = (props) => {
       log(err.toString());
       return {
         messages: [],
-        write: null,
+        write: err,
       };
     }
     return {

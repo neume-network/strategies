@@ -156,7 +156,7 @@ export function update(message) {
   } else {
     return {
       messages: [],
-      write: null,
+      error: new Error("Unknown response: invalid message.results.length"),
     };
   }
 }

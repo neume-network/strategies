@@ -16,7 +16,10 @@ export function onLine(line) {
   // error when we're envoking `function onLine`.
   const data = JSON.parse(line);
   if (!data) {
-    throw new Error(`No data passed to "onLine" handler`);
+    return {
+      messages: [],
+      error: new Error(`No data passed to "onLine" handler`),
+    };
   }
   const expr = new RegExp(
     "^(?<address>0x[a-fA-F0-9]{40})\\/(?<tokenId>[0-9]*)$"
