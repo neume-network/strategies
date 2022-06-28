@@ -88,10 +88,11 @@ export async function setupFinder() {
 export function check(message) {
   const valid = validate(message);
   if (!valid) {
-    log(JSON.stringify(message));
+    const sMessage = JSON.stringify(message);
+    log(sMessage);
     log(validate.errors);
     throw new ValidationError(
-      "Found 1 or more validation error when checking lifecycle message."
+      `Found 1 or more validation error when checking lifecycle message: "${sMessage}"`
     );
   }
 }
