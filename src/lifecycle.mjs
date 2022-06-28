@@ -5,7 +5,7 @@ import { createInterface } from "readline";
 import { createReadStream } from "fs";
 import { once } from "events";
 import EventEmitter from "events";
-import { env } from "process";
+import { env, exit } from "process";
 
 import Ajv from "ajv";
 import partition from "lodash.partition";
@@ -160,6 +160,9 @@ export async function init(worker) {
 
   lch.on("message", async (message) => {
     check(message);
+    if (message.type === "exit") {
+      exit();
+    }
     const lifeCycleType = message.type;
     const strategy = finder(lifeCycleType, message.name);
     const messages = await run(strategy, lifeCycleType, "init", message.args);

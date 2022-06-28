@@ -9,7 +9,14 @@ export function onClose() {
   log("closed");
   return {
     write: null,
-    messages: [],
+    messages: [
+      {
+        type: "extraction",
+        version: "0.0.1",
+        name: "music-os-accumulator",
+        args: [],
+      },
+    ],
   };
 }
 
