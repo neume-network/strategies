@@ -27,6 +27,7 @@ export function onLine(line) {
   );
   nfts = nfts.map((nft, i) => {
     nft.createdAtBlockNumber = data[i].createdAtBlockNumber;
+    nft.platform = data[i].platform;
     return nft;
   });
 

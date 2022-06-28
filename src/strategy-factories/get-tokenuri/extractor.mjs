@@ -10,7 +10,7 @@ import { toHex, encodeCallSignature } from "eth-fun";
  * on the contract.
  * */
 export const getTokenUriFactory = (props) => {
-  const { strategyName, version, signature, address } = props;
+  const { strategyName, version, signature, filterFunc } = props;
 
   const options = {
     url: env.RPC_HTTP_HOST,
@@ -37,9 +37,9 @@ export const getTokenUriFactory = (props) => {
       messages = [
         ...messages,
         ...nfts
-          .filter(({ address }) => address === props.address)
-          .map(({ tokenId, createdAtBlockNumber }) =>
-            makeRequest(tokenId, createdAtBlockNumber)
+          .filter(filterFunc)
+          .map(({ tokenId, createdAtBlockNumber, address }) =>
+            makeRequest(tokenId, createdAtBlockNumber, address)
           ),
       ];
     }
@@ -50,7 +50,7 @@ export const getTokenUriFactory = (props) => {
     };
   }
 
-  function makeRequest(tokenId, blockNumber) {
+  function makeRequest(tokenId, blockNumber, address) {
     const data = encodeCallSignature(signature, ["uint256"], [tokenId]);
 
     const from = null;
