@@ -12,7 +12,7 @@ export const decodeSolidityHexStringFactory = (props) => {
   const log = logger(strategyName);
 
   function onClose() {
-    if (strategyName) {
+    if (strategyName && nextStrategyName) {
       const fileName = `${strategyName}-transformation`;
       return {
         write: null,

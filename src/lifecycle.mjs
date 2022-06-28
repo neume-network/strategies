@@ -160,11 +160,9 @@ export async function init(worker) {
     const messages = await run(strategy, lifeCycleType, "update", [message]);
 
     messages.worker.forEach((message) => {
-      check(message);
       worker.postMessage(message);
     });
     messages.lifecycle.forEach((message) => {
-      check(message);
       lch.emit("message", message);
     });
   });
