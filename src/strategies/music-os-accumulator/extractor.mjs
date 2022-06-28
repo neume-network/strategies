@@ -10,7 +10,10 @@ export const props = {};
 
 const strategies = [
   {
-    files: ["zora-get-tokenuri-transformation"],
+    files: [
+      "zora-get-tokenuri-transformation",
+      "soundxyz-get-tokenuri-transformation",
+    ],
     map: new Map(),
     accumulator: (map) => {
       return (line) => {
@@ -41,7 +44,10 @@ const strategies = [
           data.metadata.tokenId
         );
 
-        if (data.tokenURI.includes("https://")) {
+        if (
+          data.tokenURI.includes("https://") &&
+          data.tokenURI.includes("ipfs")
+        ) {
           const parts = data.tokenURI.split("/");
           const hash = parts.pop();
           data.tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
@@ -116,37 +122,42 @@ export async function init() {
     }
   }
 
-  // NOTE: Following code segment maps zora metadata and media blobs to neume
-  // track
-  const zoranfts = strategies[0].map;
-  const zorametadatatokenuris = strategies[1].map;
-  const zoratokenuris = strategies[2].map;
+  const data = {
+    metadata: strategies[0].map,
+    uris: strategies[1].map,
+    zora: {
+      tokenuri: strategies[2].map,
+    },
+  };
 
-  for (let [tokenuri, value] of zoranfts) {
-    const { metadata } = zorametadatatokenuris.get(tokenuri);
-    if (metadata) {
-      value.erc721.address = metadata.contract.address;
-      value.erc721.tokenId = metadata.tokenId;
+  const tracks = new Map();
+  for (let [tokenURI, metadata] of data.metadata) {
+    if (metadata.platform.name === "Catalog") {
+      const chainData = data.uris.get(tokenURI);
+      metadata.erc721.address = chainData.metadata.contract.address;
+      metadata.erc721.tokenId = chainData.metadata.tokenId;
 
-      const id = caip19(metadata.contract.address, metadata.tokenId);
-      const zTokenURI = zoratokenuris.get(id);
-      if (zTokenURI) {
-        value.manifestations[0].uri = zTokenURI.tokenURI;
-        zoranfts.set(tokenuri, value);
-      } else {
-        zoranfts.delete(tokenuri);
+      const caip19Id = caip19(
+        chainData.metadata.contract.address,
+        chainData.metadata.tokenId
+      );
+      const version =
+        metadata.erc721.metadata.version ||
+        (metadata.erc721.metadata.body &&
+          metadata.erc721.metadata.body.version);
+      const media = data.zora.tokenuri.get(caip19Id);
+
+      if (media && version && version.includes("catalog")) {
+        metadata.manifestations[0].uri = media.tokenURI;
+        tracks.set(tokenURI, metadata);
       }
-    } else {
-      zoranfts.delete(tokenuri);
+    } else if (metadata.platform.name === "Sound") {
+      const chainData = data.uris.get(tokenURI);
+      metadata.erc721.address = chainData.metadata.contract.address;
+      metadata.erc721.tokenId = chainData.metadata.tokenId;
+      tracks.set(tokenURI, metadata);
     }
   }
-  const zoraTracks = Array.from(zoranfts.values());
-  const catalogTracks = zoraTracks.filter((track) => {
-    const version =
-      track.erc721.metadata.version ||
-      (track.erc721.metadata.body && track.erc721.metadata.body.version);
-    return version && version.includes("catalog");
-  });
   return {
     messages: [
       {
@@ -154,7 +165,7 @@ export async function init() {
         version: "0.0.1",
       },
     ],
-    write: catalogTracks.map(JSON.stringify).join("\n"),
+    write: JSON.stringify(Array.from(tracks.values())),
   };
 }
 
