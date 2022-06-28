@@ -48,7 +48,7 @@ export function onClose() {
     messages: [
       {
         type: "exit",
-        version,
+        version: "0.0.1",
       },
     ],
     write: null,
