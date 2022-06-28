@@ -112,6 +112,9 @@ async function transform(strategy, name, type) {
 
 export async function run(strategy, type, fun, params) {
   let result;
+  log(
+    `Call type "${type}" function "${fun}" of strategy with name "${strategy.name}"`
+  );
   if (type === "extraction") {
     if (params) {
       result = await strategy.module[fun](...params);
@@ -155,8 +158,15 @@ export async function init(worker) {
     const lifeCycleType = "extraction";
     const strategy = finder(lifeCycleType, message.commissioner);
     const messages = await run(strategy, lifeCycleType, "update", [message]);
-    messages.worker.forEach((message) => worker.postMessage(message));
-    messages.lifecycle.forEach((message) => lch.emit("message", message));
+
+    messages.worker.forEach((message) => {
+      check(message);
+      worker.postMessage(message);
+    });
+    messages.lifecycle.forEach((message) => {
+      check(message);
+      lch.emit("message", message);
+    });
   });
 
   lch.on("message", async (message) => {
