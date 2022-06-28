@@ -112,9 +112,6 @@ async function transform(strategy, name, type) {
 
 export async function run(strategy, type, fun, params) {
   let result;
-  log(
-    `Call type "${type}" function "${fun}" of strategy with name "${strategy.name}"`
-  );
   if (type === "extraction") {
     if (params) {
       result = await strategy.module[fun](...params);
