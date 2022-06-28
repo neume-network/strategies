@@ -47,28 +47,8 @@ export function onClose() {
   return {
     messages: [
       {
-        type: "extraction",
+        type: "exit",
         version,
-        name: "soundxyz-call-tokenuri",
-        args: [resolve(env.DATA_DIR, fileName)],
-      },
-      {
-        type: "extraction",
-        version,
-        name: "zora-call-tokenuri",
-        args: [resolve(env.DATA_DIR, fileName)],
-      },
-      {
-        type: "extraction",
-        version,
-        name: "zora-call-tokenmetadatauri",
-        args: [resolve(env.DATA_DIR, fileName)],
-      },
-      {
-        type: "extraction",
-        version,
-        name: "soundxyz-metadata",
-        args: [resolve(env.DATA_DIR, fileName)],
       },
     ],
     write: null,
