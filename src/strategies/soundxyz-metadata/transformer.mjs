@@ -65,7 +65,14 @@ export function onLine(line) {
     };
   }
   return {
-    messages: [],
+    messages: [
+      {
+        type: "extraction",
+        version: "0.0.1",
+        name: "music-os-accumulator",
+        args: [],
+      },
+    ],
     write: JSON.stringify({
       results: editionMetadataObject,
       metadata: metadata,

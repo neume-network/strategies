@@ -148,7 +148,12 @@ export async function init() {
     return version && version.includes("catalog");
   });
   return {
-    messages: [],
+    messages: [
+      {
+        type: "exit",
+        version: "0.0.1",
+      },
+    ],
     write: catalogTracks.map(JSON.stringify).join("\n"),
   };
 }
