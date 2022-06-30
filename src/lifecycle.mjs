@@ -47,6 +47,7 @@ export async function lineReader(path, strategy) {
     crlfDelay: Infinity,
   });
 
+  log(`Starting transformer strategy with name "${strategy.name}"`);
   let buffer = { write: "", messages: [] };
   rl.on("line", (line) => {
     const { write, messages } = strategy.onLine(line);
@@ -59,6 +60,7 @@ export async function lineReader(path, strategy) {
   });
 
   await once(rl, "close");
+  log(`Ending transformer strategy with name "${strategy.name}"`);
   const { write, messages } = strategy.onClose();
   buffer = fill(buffer, write, messages);
   return buffer;
@@ -89,8 +91,7 @@ export function check(message) {
   const valid = validate(message);
   if (!valid) {
     const sMessage = JSON.stringify(message);
-    log(sMessage);
-    log(validate.errors);
+    log(JSON.stringify(validate.errors));
     throw new ValidationError(
       `Found 1 or more validation error when checking lifecycle message: "${sMessage}"`
     );
@@ -112,6 +113,13 @@ async function transform(strategy, name, type) {
 
 export async function run(strategy, type, fun, params) {
   let result;
+  if (fun === "init") {
+    log(
+      `Starting extractor with name "${
+        strategy.name
+      }" with fn "init" and params "${JSON.stringify(params)}"`
+    );
+  }
   if (type === "extraction") {
     if (params) {
       result = await strategy.module[fun](...params);
@@ -156,6 +164,10 @@ export async function init(worker) {
     const strategy = finder(lifeCycleType, message.commissioner);
     const messages = await run(strategy, lifeCycleType, "update", [message]);
 
+    if (messages && messages.length === 0) {
+      log(`Ending extractor strategy with name "${strategy.name}"`);
+    }
+
     messages.worker.forEach((message) => {
       worker.postMessage(message);
     });
@@ -166,6 +178,7 @@ export async function init(worker) {
 
   lch.on("message", async (message) => {
     check(message);
+    log(`Received new lifecycle message: "${JSON.stringify(message)}"`);
     if (message.type === "exit") {
       exit();
     }
