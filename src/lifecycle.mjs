@@ -172,7 +172,11 @@ export async function init(worker) {
     const strategy = finder(lifeCycleType, message.commissioner);
     const messages = await run(strategy, lifeCycleType, "update", [message]);
 
-    if (messages && messages.length === 0) {
+    if (
+      messages.lifecycle &&
+      messages.lifecycle.length >= 1 &&
+      messages.lifecycle[0].type === "transformation"
+    ) {
       log(`Ending extractor strategy with name "${strategy.name}"`);
     }
 
