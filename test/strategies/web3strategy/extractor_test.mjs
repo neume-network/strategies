@@ -13,5 +13,8 @@ test("web3subgraph extractor", async (t) => {
   );
 
   const result = await snapshotExtractor(web3Extractor, snapshot);
-  t.true(result.includes(snapshot.expect.write));
+  t.plan(snapshot.expect.write.length);
+  for (const assertion in snapshot.expect.write) {
+    t.true(result.includes(assertion));
+  }
 });

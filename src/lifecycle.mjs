@@ -28,6 +28,7 @@ const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
 };
+const timeout = 3000;
 const ajv = new Ajv();
 const validate = ajv.compile(lifecycleMessage);
 class LifeCycleHandler extends EventEmitter {}
@@ -151,6 +152,13 @@ export async function run(strategy, type, fun, params) {
   };
 }
 
+function applyTimeout(message) {
+  if (message.type === "https" || message.type === "json-rpc") {
+    message.options.timeout = timeout;
+  }
+  return message;
+}
+
 export async function init(worker) {
   const lch = new LifeCycleHandler();
   const finder = await setupFinder();
@@ -169,7 +177,7 @@ export async function init(worker) {
     }
 
     messages.worker.forEach((message) => {
-      worker.postMessage(message);
+      worker.postMessage(applyTimeout(message));
     });
     messages.lifecycle.forEach((message) => {
       lch.emit("message", message);
@@ -185,7 +193,9 @@ export async function init(worker) {
     const lifeCycleType = message.type;
     const strategy = finder(lifeCycleType, message.name);
     const messages = await run(strategy, lifeCycleType, "init", message.args);
-    messages.worker.forEach((message) => worker.postMessage(message));
+    messages.worker.forEach((message) =>
+      worker.postMessage(applyTimeout(message))
+    );
     messages.lifecycle.forEach((message) => lch.emit("message", message));
   });
 
