@@ -53,17 +53,17 @@ export function onLine(line) {
         {
           version,
           uri: datum.audio_url,
-          //mimetype: "audio",
+          mimetype: "audio",
         },
         {
           version,
           uri: datum.image,
-          //mimetype: "image",
+          mimetype: "image",
         },
         {
           version,
           uri: datum.animation_url,
-          //mimetype: "image",
+          mimetype: "image",
         },
       ],
     }),
