@@ -41,6 +41,7 @@ An extractor strategy must implement the following interface:
 
 ```ts
 interface Extractor {
+  name: String;
   props: Object;
   init(args...): Object<messages:  Message[], write: String>;
   update(message: Message): Object<messages: Message[], write: String>;
@@ -73,6 +74,7 @@ A transformer strategy must implement the following interface:
 
 ```ts
 interface Transformer {
+  name: String;
   onLine(line: String): Object<messages:  Message[], write: String>;
   onError(error: Error): any;
   onClose(): Object<messages:  Message[], write: String>;
