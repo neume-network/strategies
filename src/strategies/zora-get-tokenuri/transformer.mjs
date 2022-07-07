@@ -86,8 +86,7 @@ export function onLine(line) {
         metadata: {
           ...datum,
           name: title,
-          description,
-          //image: artwork.info.uri,
+          description
         },
       },
       manifestations: [
@@ -99,8 +98,8 @@ export function onLine(line) {
         },
         {
           version,
-          //uri: artwork.info.uri,
-          //mimetype: artwork.info.mimeType,
+          uri: artwork.info.uri,
+          mimetype: "image"
         },
       ],
     }),
