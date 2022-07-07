@@ -73,9 +73,9 @@ export async function setupFinder() {
   return (type, name) => {
     let strategy;
     if (type === "extraction") {
-      strategy = extractors.find((strategy) => strategy.name === name);
+      strategy = extractors.find((strategy) => strategy.module.name === name);
     } else if (type === "transformation") {
-      strategy = transformers.find((strategy) => strategy.name === name);
+      strategy = transformers.find((strategy) => strategy.module.name === name);
     }
 
     if (strategy && strategy.module) {
@@ -117,7 +117,7 @@ export async function run(strategy, type, fun, params) {
   if (fun === "init") {
     log(
       `Starting extractor with name "${
-        strategy.name
+        strategy.module.name
       }" with fn "init" and params "${JSON.stringify(params)}"`
     );
   }
@@ -128,10 +128,14 @@ export async function run(strategy, type, fun, params) {
       result = await strategy.module[fun]();
     }
   } else if (type === "transformation") {
-    result = await transform(strategy.module, strategy.name, "extraction");
+    result = await transform(
+      strategy.module,
+      strategy.module.name,
+      "extraction"
+    );
   }
 
-  const filePath = generatePath(strategy.name, type);
+  const filePath = generatePath(strategy.module.name, type);
   if (result) {
     if (result.write) {
       await write(filePath, `${result.write}\n`);
@@ -139,7 +143,7 @@ export async function run(strategy, type, fun, params) {
   } else {
     throw new Error(
       `Strategy "${
-        strategy.name
+        strategy.module.name
       }" and call "${fun}" didn't return a valid result: "${JSON.stringify(
         result
       )}"`
@@ -177,7 +181,7 @@ export async function init(worker) {
       messages.lifecycle.length >= 1 &&
       messages.lifecycle[0].type === "transformation"
     ) {
-      log(`Ending extractor strategy with name "${strategy.name}"`);
+      log(`Ending extractor strategy with name "${strategy.module.name}"`);
     }
 
     messages.worker.forEach((message) => {

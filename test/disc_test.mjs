@@ -25,17 +25,17 @@ test("interface compliance of transformer strategies", async (t) => {
     t.is(
       typeof transformer.module.onLine,
       "function",
-      `Error at ${transformer.name} onLine`
+      `Error at ${transformer.module.name} onLine`
     );
     t.is(
       typeof transformer.module.onError,
       "function",
-      `Error at ${transformer.name} onError`
+      `Error at ${transformer.module.name} onError`
     );
     t.is(
       typeof transformer.module.onClose,
       "function",
-      `Error at ${transformer.name} onClose`
+      `Error at ${transformer.module.name} onClose`
     );
   }
 });
@@ -58,7 +58,7 @@ test("test loading & validating extractors", async (t) => {
   t.truthy(extractors);
   t.plan(extractors.length * 4 + 1);
   for (const extractor of extractors) {
-    t.truthy(extractor.name);
+    t.truthy(extractor.module.name);
     t.is(typeof extractor.module.init, "function");
     t.is(typeof extractor.module.update, "function");
     t.is(typeof extractor.module.props, "object");

@@ -63,7 +63,10 @@ test("reading a file by line using the line reader", async (t) => {
   const strategies = (
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter(
-    (strategy) => strategy && strategy.name === "soundxyz-call-tokenuri"
+    (strategy) =>
+      strategy &&
+      strategy.module &&
+      strategy.module.name === "soundxyz-call-tokenuri"
   );
   const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
   await lineReader(path, strategy);
@@ -75,7 +78,10 @@ test("applying transformation strategies to a file", async (t) => {
   const strategies = (
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter(
-    (strategy) => strategy && strategy.name === "soundxyz-call-tokenuri"
+    (strategy) =>
+      strategy &&
+      strategy.module &&
+      strategy.module.name === "soundxyz-call-tokenuri"
   );
   await lineReader(dataPath, strategies[0].module);
   t.pass();

@@ -18,7 +18,6 @@ export async function loadStrategies(pathTip, fileName) {
 }
 
 export async function loadAll(paths, filename) {
-  const names = paths.map((path) => basename(path));
   const pImports = paths.map(
     async (path) => await import(resolve(path, filename))
   );
@@ -27,14 +26,13 @@ export async function loadAll(paths, filename) {
   return results
     .filter((result, i) => {
       if (result.status === "rejected") {
-        names.splice(i, 1);
         log(`Rejected loading strategy with reason: "${result.reason}"`);
         return false;
       } else {
         return true;
       }
     })
-    .map(({ value }, i) => ({ module: value, name: names[i] }));
+    .map(({ value }, i) => ({ module: value }));
 }
 
 export async function getdirdirs(path) {
