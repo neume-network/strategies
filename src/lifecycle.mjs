@@ -210,7 +210,7 @@ export async function init(worker) {
   lch.emit("message", {
     type: "extraction",
     version: "0.0.1",
-    name: "music-os-accumulator",
+    name: "web3subgraph",
     args: [],
   });
   //lch.emit("message", {
