@@ -55,5 +55,5 @@ test("catalog transformer", (t) => {
   // NOTE: zora-get-tokenuri implements neume-network/schema only partially
   // at this point, so we can't expect it to pass validation. Instead, we're
   // expecting errors to be thrown.
-  t.is(validate.errors[0].params.missingProperty, "address");
+  t.truthy(validate.errors[0].params.missingProperty);
 });

@@ -136,6 +136,7 @@ export async function init() {
       const chainData = data.uris.get(tokenURI);
       metadata.erc721.address = chainData.metadata.contract.address;
       metadata.erc721.tokenId = chainData.metadata.tokenId;
+      metadata.erc721.createdAt = chainData.metadata.block.number;
 
       const caip19Id = caip19(
         chainData.metadata.contract.address,
@@ -153,6 +154,7 @@ export async function init() {
       }
     } else if (metadata.platform.name === "Sound") {
       const chainData = data.uris.get(tokenURI);
+      metadata.erc721.createdAt = chainData.metadata.block.number;
       metadata.erc721.address = chainData.metadata.contract.address;
       metadata.erc721.tokenId = chainData.metadata.tokenId;
       tracks.set(tokenURI, metadata);
