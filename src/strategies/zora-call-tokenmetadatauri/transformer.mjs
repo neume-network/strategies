@@ -1,4 +1,7 @@
 // @format
+import { env } from "process";
+import { resolve } from "path";
+
 import { decodeSolidityHexStringFactory } from "../../strategy-factories/decode-solidity-hex-string-factory/transformer.mjs";
 
 export const name = "zora-call-tokenmetadatauri";
@@ -7,7 +10,7 @@ const nextStrategyMessage = {
   type: "extraction",
   version,
   name: "zora-get-tokenuri",
-  args: [],
+  args: [resolve(env.DATA_DIR, `${name}-transformation`)],
 };
 const resultKey = "tokenURI";
 
