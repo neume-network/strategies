@@ -48,7 +48,6 @@ export async function lineReader(path, strategy) {
     crlfDelay: Infinity,
   });
 
-  log(`Starting transformer strategy with name "${strategy.name}"`);
   let buffer = { write: "", messages: [] };
   rl.on("line", (line) => {
     const { write, messages } = strategy.onLine(line);
@@ -116,7 +115,7 @@ export async function run(strategy, type, fun, params) {
   let result;
   if (fun === "init") {
     log(
-      `Starting extractor with name "${
+      `Starting strategy with type "${type}" and name "${
         strategy.module.name
       }" with fn "init" and params "${JSON.stringify(params)}"`
     );
