@@ -47,14 +47,7 @@ export function update(message) {
     messages = [generate(props.first, lastId)];
     write = JSON.stringify(nfts);
   } else {
-    messages = [
-      {
-        type: "transformation",
-        version: "0.0.1",
-        name,
-        args: null,
-      },
-    ];
+    messages = [];
   }
   return {
     messages,

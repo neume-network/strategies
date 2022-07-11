@@ -64,17 +64,6 @@ export function makeRequest(tokenURI) {
 
 export function update(message) {
   let messages = [];
-  if (message.last) {
-    messages = [
-      {
-        type: "transformation",
-        version,
-        name,
-        args: null,
-      },
-    ];
-  }
-
   return {
     messages,
     write: JSON.stringify({
