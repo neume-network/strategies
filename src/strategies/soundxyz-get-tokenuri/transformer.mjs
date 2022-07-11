@@ -1,4 +1,7 @@
 // @format
+import { resolve } from "path";
+import { env } from "process";
+
 import { decodeCallOutput } from "eth-fun";
 
 import logger from "../../logger.mjs";
@@ -11,7 +14,14 @@ export function onClose() {
   log("closed");
   return {
     write: null,
-    messages: [],
+    messages: [
+      {
+        type: "extraction",
+        version,
+        name: "zora-call-tokenuri",
+        args: [resolve(env.DATA_DIR, `web3subgraph-transformation`)],
+      },
+    ],
   };
 }
 
@@ -53,20 +63,17 @@ export function onLine(line) {
         {
           version,
           uri: datum.audio_url,
-          // TODO
-          //mimetype: "audio/mp3",
+          mimetype: "audio",
         },
         {
           version,
           uri: datum.image,
-          // TODO
-          //mimetype: "image/jpeg",
+          mimetype: "image",
         },
         {
           version,
           uri: datum.animation_url,
-          // TODO
-          //mimetype: "image/gif",
+          mimetype: "image",
         },
       ],
     }),
