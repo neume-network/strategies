@@ -1,4 +1,7 @@
 // @format
+import { resolve } from "path";
+import { env } from "process";
+
 import { decodeCallOutput } from "eth-fun";
 
 import logger from "../../logger.mjs";
@@ -11,7 +14,14 @@ export function onClose() {
   log("closed");
   return {
     write: null,
-    messages: [],
+    messages: [
+      {
+        type: "extraction",
+        version,
+        name: "zora-call-tokenuri",
+        args: [resolve(env.DATA_DIR, `web3subgraph-transformation`)],
+      },
+    ],
   };
 }
 
