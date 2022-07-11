@@ -38,28 +38,15 @@ export function onLine(line) {
   const metadata = data.metadata;
   const datum = data.results;
 
-  let title, duration, artist, description, artwork;
-  if (datum.body) {
-    title = datum.body.title;
-    if (datum.body.duration) {
-      duration = `PT${Math.floor(datum.body.duration / 60)}M${(
-        datum.body.duration % 60
-      ).toFixed(0)}S`;
-    } else {
-      // TODO
-      duration = "";
-    }
-    if (datum.body.artist) {
-      artist = datum.body.artist;
-    }
-    if (datum.body.notes) {
-      description = datum.body.notes;
-    }
-    if (datum.body.artwork) {
-      artwork = datum.body.artwork;
-    }
-  } else if (datum.name) {
-    title = datum.name;
+  const title = datum?.body?.title || datum?.name;
+  const artist = datum?.body?.artist;
+  const description = datum?.body?.notes;
+  const artwork = datum?.body?.artwork?.info?.uri;
+  let duration;
+  if (datum.body && datum.body.duration) {
+    duration = `PT${Math.floor(datum.body.duration / 60)}M${(
+      datum.body.duration % 60
+    ).toFixed(0)}S`;
   }
 
   return {
@@ -86,7 +73,7 @@ export function onLine(line) {
         metadata: {
           ...datum,
           name: title,
-          description
+          description,
         },
       },
       manifestations: [
@@ -98,8 +85,8 @@ export function onLine(line) {
         },
         {
           version,
-          uri: artwork.info.uri,
-          mimetype: "image"
+          uri: artwork,
+          mimetype: "image",
         },
       ],
     }),
