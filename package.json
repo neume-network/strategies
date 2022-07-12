@@ -52,7 +52,7 @@
     "lodash.partition": "4.6.0"
   },
   "peerDependencies": {
-    "eth-fun": "0.9.0"
+    "eth-fun": "0.9.x"
   },
   "ava": {
     "timeout": "30s"
