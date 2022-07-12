@@ -6,7 +6,16 @@ export const name = "soundxyz-call-tokenuri";
 export const props = {
   version,
   strategyName: name,
-  signature: "tokenURI(uint256)",
+  signature: {
+    name: "tokenURI",
+    type: "function",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+  },
   filterFunc: ({ platform }) => platform === "sound",
 };
 

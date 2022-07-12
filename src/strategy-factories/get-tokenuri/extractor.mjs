@@ -3,7 +3,7 @@ import { env } from "process";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
 
-import { toHex, encodeCallSignature } from "eth-fun";
+import { toHex, encodeFunctionCall } from "eth-fun";
 
 /**
  * This strategy factory calls tokenURI(uint256) or equivalent function
@@ -51,7 +51,7 @@ export const getTokenUriFactory = (props) => {
   }
 
   function makeRequest(tokenId, blockNumber, address) {
-    const data = encodeCallSignature(signature, ["uint256"], [tokenId]);
+    const data = encodeFunctionCall(signature, [tokenId]);
 
     const from = null;
     return {

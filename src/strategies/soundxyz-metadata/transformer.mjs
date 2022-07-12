@@ -1,5 +1,5 @@
 // @format
-import { decodeCallOutput } from "eth-fun";
+import { decodeParameters } from "eth-fun";
 
 import logger from "../../logger.mjs";
 
@@ -26,7 +26,7 @@ export function onLine(line) {
   let editionMetadataArray = [];
 
   try {
-    editionMetadataArray = decodeCallOutput(
+    editionMetadataArray = decodeParameters(
       [
         "address",
         "uint256",

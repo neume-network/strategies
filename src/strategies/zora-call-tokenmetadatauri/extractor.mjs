@@ -6,7 +6,16 @@ export const name = "zora-call-tokenmetadatauri";
 export const props = {
   version,
   strategyName: name,
-  signature: "tokenMetadataURI(uint256)",
+  signature: {
+    name: "tokenMetadataURI",
+    type: "function",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+  },
   filterFunc: ({ address }) =>
     address === "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
 };

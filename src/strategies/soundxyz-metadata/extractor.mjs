@@ -3,14 +3,32 @@ import { env } from "process";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
 
-import { toHex, encodeCallSignature, decodeCallOutput } from "eth-fun";
+import { toHex, encodeFunctionCall, decodeParameters } from "eth-fun";
 
 const version = "0.0.1";
 export const name = "soundxyz-metadata";
 export const props = {
   signatures: {
-    tokenToEdition: "tokenToEdition(uint256)",
-    editions: "editions(uint256)",
+    tokenToEdition: {
+      name: "tokenToEdition",
+      type: "function",
+      inputs: [
+        {
+          name: "tokenId",
+          type: "uint256",
+        },
+      ],
+    },
+    editions: {
+      name: "editions",
+      type: "function",
+      inputs: [
+        {
+          name: "input",
+          type: "uint256",
+        },
+      ],
+    },
   },
   contract: {
     address: "0x01ab7d30525e4f3010af27a003180463a6c811a6",
@@ -54,11 +72,7 @@ export async function init(filePath) {
 }
 
 export function makeRequest(tokenId, blockNumber) {
-  const data = encodeCallSignature(
-    props.signatures.tokenToEdition,
-    ["uint256"],
-    [tokenId]
-  );
+  const data = encodeFunctionCall(props.signatures.tokenToEdition, [tokenId]);
 
   const from = null;
   return {
@@ -113,13 +127,9 @@ export function update(message) {
       }),
     };
   } else if (message.results.length === LENGTH_OF_TOKEN_TO_EDITION_RESPONSE) {
-    const edition = parseInt(decodeCallOutput(["uint256"], message.results));
+    const edition = parseInt(decodeParameters(["uint256"], message.results));
 
-    const data = encodeCallSignature(
-      props.signatures.editions,
-      ["uint256"],
-      [edition]
-    );
+    const data = encodeFunctionCall(props.signatures.editions, [edition]);
 
     const from = null;
     return {

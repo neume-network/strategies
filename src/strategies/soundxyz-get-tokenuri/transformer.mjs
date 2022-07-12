@@ -2,8 +2,6 @@
 import { resolve } from "path";
 import { env } from "process";
 
-import { decodeCallOutput } from "eth-fun";
-
 import logger from "../../logger.mjs";
 
 export const name = "soundxyz-get-tokenuri";

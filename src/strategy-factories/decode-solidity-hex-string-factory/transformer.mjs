@@ -2,7 +2,7 @@
 import { env } from "process";
 import { resolve } from "path";
 
-import { decodeCallOutput } from "eth-fun";
+import { decodeParameters } from "eth-fun";
 
 import logger from "../../logger.mjs";
 
@@ -44,7 +44,7 @@ export const decodeSolidityHexStringFactory = (props) => {
 
     let decodedOutput;
     try {
-      [decodedOutput] = decodeCallOutput(["string"], obj.results);
+      [decodedOutput] = decodeParameters(["string"], obj.results);
     } catch (err) {
       log(err.toString());
       return {
