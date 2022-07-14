@@ -24,8 +24,6 @@ const fileNames = {
   extractor: "extractor.mjs",
 };
 const timeout = 3000;
-const ajv = new Ajv();
-const validate = ajv.compile(lifecycleMessage);
 
 function fill(buffer, write, messages) {
   if (write) {
@@ -54,7 +52,6 @@ export async function lineReader(path, strategy) {
   });
 
   await once(rl, "close");
-  log(`Ending transformer strategy with name "${strategy.name}"`);
   const { write, messages } = strategy.onClose();
   buffer = fill(buffer, write, messages);
   return buffer;
@@ -81,28 +78,27 @@ export async function setupFinder() {
   };
 }
 
-export function check(message) {
-  const valid = validate(message);
-  if (!valid) {
-    const sMessage = JSON.stringify(message);
-    log(JSON.stringify(validate.errors));
-    throw new ValidationError(
-      `Found 1 or more validation error when checking lifecycle message: "${sMessage}"`
-    );
-  }
-}
-
-export function filterLifeCycle(messages) {
-  return messages.type === "extraction" || messages.type === "transformation";
-}
-
 export function generatePath(name, type) {
   return path.resolve(dataDir, `${name}-${type}`);
 }
 
 async function transform(strategy, name, type) {
   const filePath = generatePath(name, type);
-  return await lineReader(filePath, strategy);
+  const result = await lineReader(filePath, strategy);
+
+  if (result && result.write) {
+    const filePath = generatePath(
+      transformStrategy.module.name,
+      "transformation"
+    );
+    await write(filePath, `${result.write}\n`);
+  } else {
+    throw new Error(
+      `Strategy "${
+        strategy.module.name
+      }-tranformation" didn't return a valid result: "${JSON.stringify(result)}`
+    );
+  }
 }
 
 function applyTimeout(message) {
@@ -129,12 +125,6 @@ function extract(strategy, worker, messageRouter, args = []) {
       }
       return result;
     };
-
-    log(
-      `Starting strategy with type "${type}" and name "${
-        strategy.module.name
-      }" with fn "init" and params "${JSON.stringify(args)}"`
-    );
 
     const result = checkResult(await strategy.module.init(...args));
 
@@ -198,77 +188,101 @@ export async function init(worker) {
     messageRouter.emit(`${message.commissioner}-extraction`, message);
   });
 
-  const graph = [
-    [{ name: "web3subgraph", args: [] }],
+  // crawlPath[i] and crawlPath[i+1] are executed in sequence
+  // crawlPath[i][j] and crawlPath[i][j+1] are executed in parallel
+  // TODO: Define and check for valid message schema. Current lifecycle message schema
+  // doesn't work. https://github.com/neume-network/message-schema/issues/19
+  const crawlPath = [
+    [{ name: "web3subgraph", extractor: {}, transform: {} }],
     [
       {
         name: "soundxyz-call-tokenuri",
-        args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        extractor: {
+          args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        },
+        transformer: {},
       },
       {
         name: "zora-call-tokenuri",
-        args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        extractor: {
+          args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        },
+        transformer: {},
       },
       {
         name: "zora-call-tokenmetadatauri",
-        args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        extractor: {
+          args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        },
+        transformer: {},
       },
       {
         name: "soundxyz-metadata",
-        args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        extractor: {
+          args: [resolve(env.DATA_DIR, "web3subgraph-transformation")],
+        },
+        transformer: {},
       },
     ],
     [
       {
         name: "soundxyz-get-tokenuri",
-        args: [resolve(env.DATA_DIR, "soundxyz-call-tokenuri-transformation")],
+        extractor: {
+          args: [
+            resolve(env.DATA_DIR, "soundxyz-call-tokenuri-transformation"),
+          ],
+        },
+        transformer: {},
       },
       {
         name: "zora-get-tokenuri",
-        args: [
-          resolve(env.DATA_DIR, "zora-call-tokenmetadatauri-transformation"),
-        ],
+        extractor: {
+          args: [
+            resolve(env.DATA_DIR, "zora-call-tokenmetadatauri-transformation"),
+          ],
+        },
+        transformer: {},
       },
     ],
     [
       {
         name: "music-os-accumulator",
-        args: [],
+        extractor: { args: [] },
+        transformer: {},
       },
     ],
   ];
 
-  for await (const path of graph) {
+  for await (const path of crawlPath) {
     await Promise.all(
       path.map(async (strategy) => {
-        await extract(
-          finder("extraction", strategy.name),
-          worker,
-          messageRouter,
-          strategy.args
-        );
-
-        const transformStrategy = finder("transformation", strategy.name);
-
-        const result = await transform(
-          transformStrategy.module,
-          transformStrategy.module.name,
-          "extraction"
-        );
-
-        if (result && result.write) {
-          const filePath = generatePath(
-            transformStrategy.module.name,
-            "transformation"
+        if (strategy.extractor) {
+          const extractStrategy = finder("extraction", strategy.name);
+          log(
+            `Starting extractor strategy with name "${
+              extractStrategy.module.name
+            }" with params "${JSON.stringify(strategy.extractor.args)}"`
           );
-          await write(filePath, `${result.write}\n`);
-        } else {
-          throw new Error(
-            `Strategy "${
-              strategy.module.name
-            }-tranformation" didn't return a valid result: "${JSON.stringify(
-              result
-            )}`
+          await extract(
+            extractStrategy,
+            worker,
+            messageRouter,
+            strategy.extractor.args
+          );
+        }
+
+        if (strategy.transformer) {
+          const transformStrategy = finder("transformation", strategy.name);
+          log(
+            `Starting transformer strategy with name "${transformStrategy.module.name}"`
+          );
+          await transform(
+            transformStrategy.module,
+            transformStrategy.module.name,
+            "extraction"
+          );
+          log(
+            `Ending transformer strategy with name "${transformStrategy.module.name}"`
           );
         }
       })

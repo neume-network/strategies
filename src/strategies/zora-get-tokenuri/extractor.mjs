@@ -40,7 +40,6 @@ export async function init(filePath) {
     }
     messages.push(makeRequest(tokenURI));
   }
-  messages[messages.length - 1].last = true;
   return {
     write: null,
     messages,
