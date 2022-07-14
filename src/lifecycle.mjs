@@ -108,7 +108,7 @@ function applyTimeout(message) {
   return message;
 }
 
-function extract(strategy, worker, messageRouter, args = []) {
+export function extract(strategy, worker, messageRouter, args = []) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
     const type = "extraction";
@@ -171,6 +171,7 @@ function extract(strategy, worker, messageRouter, args = []) {
         worker.postMessage(applyTimeout(message));
       });
     } else {
+      messageRouter.off(`${strategy.module.name}-${type}`, callback);
       resolve();
     }
   });
