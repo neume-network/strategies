@@ -44,16 +44,8 @@ export function onError(error) {
 }
 
 export function onClose() {
-  const fileName = `${name}-transformation`;
   return {
-    messages: [
-      {
-        type: "extraction",
-        version,
-        name: "soundxyz-call-tokenuri",
-        args: [resolve(env.DATA_DIR, fileName)],
-      },
-    ],
+    messages: [],
     write: null,
   };
 }

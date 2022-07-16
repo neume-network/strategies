@@ -12,12 +12,6 @@ export const decodeSolidityHexStringFactory = (props) => {
   const log = logger(strategyName);
 
   function onClose() {
-    if (nextStrategyMessage) {
-      return {
-        write: null,
-        messages: [nextStrategyMessage],
-      };
-    }
     return {
       write: null,
       messages: [],

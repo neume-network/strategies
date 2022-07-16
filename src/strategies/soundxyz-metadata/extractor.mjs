@@ -111,16 +111,7 @@ export function update(message) {
 
   if (message.results.length === LENGTH_OF_EDITIONS_RESPONSE) {
     return {
-      messages: [
-        {
-          type: "transformation",
-          version,
-          name,
-          args: null,
-          results: null,
-          error: null,
-        },
-      ],
+      messages: [],
       write: JSON.stringify({
         metadata: message.metadata,
         results: message.results,
