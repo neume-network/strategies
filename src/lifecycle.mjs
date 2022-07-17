@@ -185,6 +185,12 @@ export async function init(worker, crawlPath) {
     messageRouter.emit(`${message.commissioner}-extraction`, message);
   });
 
+  log(
+    `Starting to execute strategies with the following crawlPath ${JSON.stringify(
+      crawlPath
+    )}`
+  );
+
   for await (const path of crawlPath) {
     await Promise.all(
       path.map(async (strategy) => {
