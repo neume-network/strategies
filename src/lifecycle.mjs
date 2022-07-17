@@ -15,10 +15,9 @@ import { loadStrategies, write } from "./disc.mjs";
 import logger from "./logger.mjs";
 
 const log = logger("lifecycle");
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const strategyDir = "./strategies";
 // TODO: https://github.com/neume-network/core/issues/33
-const dataDir = path.resolve(__dirname, "../../..", env.DATA_DIR);
+const dataDir = path.resolve(env.DATA_DIR);
 const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
