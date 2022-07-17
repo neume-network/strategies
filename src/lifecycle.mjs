@@ -87,16 +87,13 @@ async function transform(strategy, name, type) {
   const result = await lineReader(filePath, strategy);
 
   if (result && result.write) {
-    const filePath = generatePath(
-      transformStrategy.module.name,
-      "transformation"
-    );
+    const filePath = generatePath(name, "transformation");
     await write(filePath, `${result.write}\n`);
   } else {
     throw new Error(
-      `Strategy "${
-        strategy.module.name
-      }-tranformation" didn't return a valid result: "${JSON.stringify(result)}`
+      `Strategy "${name}-tranformation" didn't return a valid result: "${JSON.stringify(
+        result
+      )}`
     );
   }
 }
