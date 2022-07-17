@@ -6,18 +6,11 @@ import { decodeSolidityHexStringFactory } from "../../strategy-factories/decode-
 
 export const name = "zora-call-tokenuri";
 export const version = "0.1.0";
-const nextStrategyMessage = {
-  type: "extraction",
-  version,
-  name: "zora-call-tokenmetadatauri",
-  args: [resolve(env.DATA_DIR, `web3subgraph-transformation`)],
-};
 const resultKey = "tokenURI";
 
 const { onClose, onError, onLine } = decodeSolidityHexStringFactory({
   strategyName: name,
   version,
-  nextStrategyMessage,
   resultKey,
 });
 

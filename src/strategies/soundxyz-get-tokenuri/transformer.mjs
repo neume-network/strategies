@@ -12,14 +12,7 @@ export function onClose() {
   log("closed");
   return {
     write: null,
-    messages: [
-      {
-        type: "extraction",
-        version,
-        name: "zora-call-tokenuri",
-        args: [resolve(env.DATA_DIR, `web3subgraph-transformation`)],
-      },
-    ],
+    messages: [],
   };
 }
 

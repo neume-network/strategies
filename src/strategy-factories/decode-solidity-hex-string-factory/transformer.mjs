@@ -7,7 +7,7 @@ import { decodeParameters } from "eth-fun";
 import logger from "../../logger.mjs";
 
 export const decodeSolidityHexStringFactory = (props) => {
-  const { strategyName, version, nextStrategyMessage, resultKey } = props;
+  const { strategyName, version, resultKey } = props;
 
   const log = logger(strategyName);
 
