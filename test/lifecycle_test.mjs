@@ -16,7 +16,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 class Worker extends EventEmitter {
   postMessage(message) {
-    return router.emit(`${message.commissioner}-extraction`);
+    return router.emit(`${message.commissioner}-extraction`, {});
   }
 }
 

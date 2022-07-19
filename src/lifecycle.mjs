@@ -132,25 +132,29 @@ export function extract(strategy, worker, messageRouter, args = []) {
     const callback = async (message) => {
       numberOfMessages--;
 
-      const result = checkResult(strategy.module.update(message));
+      if (message.error) {
+        log(message.commissioner + ":" + message.error);
+      } else {
+        const result = checkResult(strategy.module.update(message));
 
-      if (!result)
-        reject(
-          `Strategy "${
-            strategy.module.name
-          }" and call init didn't return a valid result: "${JSON.stringify(
-            result
-          )}`
-        );
+        if (!result)
+          reject(
+            `Strategy "${
+              strategy.module.name
+            }" and call init didn't return a valid result: "${JSON.stringify(
+              result
+            )}`
+          );
 
-      result.messages?.forEach((message) => {
-        numberOfMessages++;
-        worker.postMessage(applyTimeout(message));
-      });
+        result.messages?.forEach((message) => {
+          numberOfMessages++;
+          worker.postMessage(applyTimeout(message));
+        });
 
-      if (result.write) {
-        const filePath = generatePath(strategy.module.name, type);
-        await write(filePath, `${result.write}\n`);
+        if (result.write) {
+          const filePath = generatePath(strategy.module.name, type);
+          await write(filePath, `${result.write}\n`);
+        }
       }
 
       if (numberOfMessages === 0) {
@@ -178,10 +182,6 @@ export async function init(worker, crawlPath) {
   const messageRouter = new EventEmitter();
 
   worker.on("message", async (message) => {
-    if (message.error) {
-      throw new Error(message.commissioner + ":" + message.error);
-    }
-
     messageRouter.emit(`${message.commissioner}-extraction`, message);
   });
 
