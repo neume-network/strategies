@@ -1,5 +1,5 @@
 //@format
-import path, { resolve } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
@@ -191,9 +191,9 @@ export async function init(worker, crawlPath) {
     )}`
   );
 
-  for await (const path of crawlPath) {
+  for await (const segment of crawlPath) {
     await Promise.all(
-      path.map(async (strategy) => {
+      segment.map(async (strategy) => {
         if (strategy.extractor) {
           const extractStrategy = finder("extraction", strategy.name);
           log(
