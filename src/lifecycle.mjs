@@ -115,7 +115,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
             strategy.module.name
           }-extraction" didn't return a valid result: "${JSON.stringify(
             result
-          )}`
+          )}"`
         );
         return;
       }
