@@ -207,6 +207,9 @@ export async function init(worker, crawlPath) {
             messageRouter,
             strategy.extractor.args
           );
+          log(
+            `Ending extractor strategy with name "${extractStrategy.module.name}"`
+          );
         }
 
         if (strategy.transformer) {
