@@ -92,7 +92,7 @@ async function transform(strategy, name, type) {
     throw new Error(
       `Strategy "${name}-tranformation" didn't return a valid result: "${JSON.stringify(
         result
-      )}`
+      )}"`
     );
   }
 }
