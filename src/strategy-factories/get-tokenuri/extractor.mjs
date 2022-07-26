@@ -43,7 +43,6 @@ export const getTokenUriFactory = (props) => {
           ),
       ];
     }
-    messages[messages.length - 1].last = true;
     return {
       write: null,
       messages,
@@ -83,20 +82,8 @@ export const getTokenUriFactory = (props) => {
   }
 
   function update(message) {
-    let messages = [];
-    if (message.last) {
-      messages = [
-        {
-          type: "transformation",
-          version,
-          name: strategyName,
-          args: null,
-        },
-      ];
-    }
-
     return {
-      messages,
+      messages: [],
       write: JSON.stringify({
         metadata: message.metadata,
         results: message.results,

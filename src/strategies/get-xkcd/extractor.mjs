@@ -29,14 +29,7 @@ export function update(message) {
   if (message.error && message.error.includes("404 Not Found")) {
     return {
       write: null,
-      messages: [
-        {
-          type: "transformation",
-          version,
-          name,
-          args: null,
-        },
-      ],
+      messages: [],
     };
   }
   const { num } = message.results;

@@ -22,7 +22,6 @@ export async function init(filePath) {
 
     messages.push(makeRequest(tokenURI));
   }
-  messages[messages.length - 1].last = true;
   return {
     write: null,
     messages,
@@ -44,20 +43,8 @@ export function makeRequest(tokenURI) {
 }
 
 export function update(message) {
-  let messages = [];
-  if (message.last) {
-    messages = [
-      {
-        type: "transformation",
-        version,
-        name,
-        args: null,
-      },
-    ];
-  }
-
   return {
-    messages,
+    messages: [],
     write: JSON.stringify({
       metadata: {
         tokenURI: message.options.url,

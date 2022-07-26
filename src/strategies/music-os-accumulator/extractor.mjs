@@ -161,12 +161,7 @@ export async function init() {
     }
   }
   return {
-    messages: [
-      {
-        type: "exit",
-        version: "0.0.1",
-      },
-    ],
+    messages: [],
     write: JSON.stringify(Array.from(tracks.values())),
   };
 }

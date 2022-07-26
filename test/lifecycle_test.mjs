@@ -1,11 +1,11 @@
 //@format
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-
+import EventEmitter from "events";
 import test from "ava";
 
 import { loadStrategies } from "../src/disc.mjs";
-import { check, lineReader, setupFinder } from "../src/lifecycle.mjs";
+import { extract, lineReader, setupFinder } from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -14,21 +14,14 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-test("test if checking valid lifecycle message passes check function", (t) => {
-  const invalidMessage = {
-    type: "extraction",
-    version: "0.0.1",
-    name: "web3subgraph",
-    args: null,
-  };
-  check(invalidMessage);
-  t.pass();
-});
+class Worker extends EventEmitter {
+  postMessage(message) {
+    return router.emit(`${message.commissioner}-extraction`, {});
+  }
+}
 
-test("checking if message throws", (t) => {
-  const invalidMessage = { hello: "world" };
-  t.throws(() => check(invalidMessage));
-});
+const worker = new Worker();
+const router = new EventEmitter();
 
 test("if launcher throws errors on invalid strategy type", async (t) => {
   const finder = await setupFinder();
@@ -93,4 +86,46 @@ test("loading strategies", async (t) => {
   const strategies = await loadStrategies(pathTip, fileName);
   t.is(strategies.length, 1);
   t.truthy(strategies);
+});
+
+test("if extract() resolves the promise and removes the listener on no new messages", async (t) => {
+  const mockMessage = {
+    type: "https",
+    commissioner: "mockMessage",
+    options: {},
+  };
+
+  const mockStrategy = {
+    module: {
+      name: mockMessage.commissioner,
+      init: () => {
+        return { messages: [mockMessage], write: null };
+      },
+      update: () => {
+        return { messages: [], write: null };
+      },
+    },
+  };
+
+  await extract(mockStrategy, worker, router);
+  t.deepEqual(router.eventNames(), []);
+  t.pass();
+});
+
+test("if extract() resolves the promise and removes the listener on no message from init", async (t) => {
+  const mockStrategy = {
+    module: {
+      name: "mock",
+      init: () => {
+        return { messages: [], write: null };
+      },
+      update: () => {
+        return { messages: [], write: null };
+      },
+    },
+  };
+
+  await extract(mockStrategy, worker, router);
+  t.deepEqual(router.eventNames(), []);
+  t.pass();
 });

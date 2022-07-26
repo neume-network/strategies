@@ -48,8 +48,7 @@
     ]
   },
   "dependencies": {
-    "@neume-network/message-schema": "0.3.1",
-    "lodash.partition": "4.6.0"
+    "@neume-network/message-schema": "0.3.1"
   },
   "peerDependencies": {
     "eth-fun": "0.9.x"
