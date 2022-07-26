@@ -7,7 +7,6 @@ import { once } from "events";
 import EventEmitter from "events";
 import { env, exit } from "process";
 
-import Ajv from "ajv";
 import { lifecycleMessage } from "@neume-network/message-schema";
 
 import { NotFoundError, ValidationError } from "./errors.mjs";
