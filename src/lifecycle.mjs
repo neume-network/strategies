@@ -143,7 +143,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
               strategy.module.name
             }" and call init didn't return a valid result: "${JSON.stringify(
               result
-            )}`
+            )}"`
           );
 
         result.messages?.forEach((message) => {
