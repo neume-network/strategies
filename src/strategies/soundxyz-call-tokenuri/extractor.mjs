@@ -1,5 +1,5 @@
 // @format
-import { getTokenUriFactory } from "../../strategy-factories/get-tokenuri/extractor.mjs";
+import { callTokenUriFactory } from "../../strategy-factories/call-tokenuri/extractor.mjs";
 
 export const version = "0.0.1";
 export const name = "soundxyz-call-tokenuri";
@@ -19,6 +19,6 @@ export const props = {
   filterFunc: ({ platform }) => platform === "sound",
 };
 
-const { init, update } = getTokenUriFactory(props);
+const { init, update } = callTokenUriFactory(props);
 
 export { init, update };
