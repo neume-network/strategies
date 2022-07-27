@@ -11,6 +11,12 @@ const options = {
   url: env.RPC_HTTP_HOST,
 };
 
+if (env.RPC_API_KEY) {
+  options.headers = {
+    Authorization: `Bearer ${env.RPC_API_KEY}`,
+  };
+}
+
 function callBlockLogs(number, end) {
   number = toHex(number);
   return {
