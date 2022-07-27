@@ -23,7 +23,8 @@ test("soundxyz-call-tokenuri transformer", (t) => {
       contract: { address: "0x01ab7d30525e4f3010af27a003180463a6c811a6" },
       tokenId: "1",
     },
-    tokenURI: "https://sound.xyz/api/metadata/66/1/1",
+    tokenURI:
+      "https://metadata.sound.xyz/v1/0x01ab7d30525e4f3010af27a003180463a6c811a6/1",
   };
   t.is(write, JSON.stringify(expected));
 });
