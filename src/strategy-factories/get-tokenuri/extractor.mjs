@@ -5,6 +5,8 @@ import { createReadStream } from "fs";
 
 import { toHex, encodeFunctionCall } from "eth-fun";
 
+const BLOCK_NUMBER = 15050010;
+
 /**
  * This strategy factory calls tokenURI(uint256) or equivalent function
  * on the contract.
@@ -65,7 +67,7 @@ export const getTokenUriFactory = (props) => {
           to: address,
           data,
         },
-        toHex(parseInt(blockNumber)),
+        toHex(BLOCK_NUMBER),
       ],
       metadata: {
         block: {
