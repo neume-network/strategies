@@ -99,8 +99,14 @@ export function extract(strategy, worker, messageRouter, args = []) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
     const type = "extraction";
+    const interval = setInterval(() => {
+      log(
+        `Running extractor ${strategy.module.name} with ${numberOfMessages} messages pending`
+      );
+    }, 2000);
     const checkResult = (result) => {
       if (!result) {
+        clearInterval(interval);
         reject(
           `Strategy "${
             strategy.module.name
@@ -128,7 +134,8 @@ export function extract(strategy, worker, messageRouter, args = []) {
       } else {
         const result = checkResult(strategy.module.update(message));
 
-        if (!result)
+        if (!result) {
+          clearInterval(interval);
           reject(
             `Strategy "${
               strategy.module.name
@@ -136,6 +143,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
               result
             )}"`
           );
+        }
 
         result.messages?.forEach((message) => {
           numberOfMessages++;
@@ -150,6 +158,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
       if (numberOfMessages === 0) {
         messageRouter.off(`${strategy.module.name}-${type}`, callback);
+        clearInterval(interval);
         resolve();
       }
     };
@@ -163,6 +172,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
       });
     } else {
       messageRouter.off(`${strategy.module.name}-${type}`, callback);
+      clearInterval(interval);
       resolve();
     }
   });
