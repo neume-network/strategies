@@ -102,6 +102,11 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
     const result = await strategy.module.init(...args);
     if (!result) {
+      const interval = setInterval(() => {
+        log(
+          `Running extractor ${strategy.module.name} with ${numberOfMessages} messages pending`
+        );
+      }, 2000);
       return reject(
         new Error(
           `Strategy "${
@@ -137,6 +142,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
       } else {
         const result = await strategy.module.update(message);
         if (!result) {
+          clearInterval(interval);
           messageRouter.off(`${strategy.module.name}-${type}`, callback);
           return reject(
             new Error(
@@ -171,6 +177,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
       if (numberOfMessages === 0) {
         log("Shutting down extraction in update callback function");
         messageRouter.off(`${strategy.module.name}-${type}`, callback);
+        clearInterval(interval);
         resolve();
       }
     };
@@ -185,6 +192,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
     } else {
       log("Shutting down extraction in init follow-up function");
       messageRouter.off(`${strategy.module.name}-${type}`, callback);
+      clearInterval(interval);
       resolve();
     }
   });
