@@ -40,29 +40,21 @@ function callBlockLogs(number, end) {
 }
 
 export function init(start = 0, end) {
+  const difference = end - start;
+
+  let messages = [];
+  for (let i of Array(difference).keys()) {
+    messages.push(callBlockLogs(start + i));
+  }
   return {
     write: null,
-    messages: [callBlockLogs(start, end)],
+    messages,
   };
 }
 
 export function update(message) {
-  const { fromBlock, toBlock } = message.params[0];
-  const { end } = message.metadata;
-  assert(
-    fromBlock === toBlock,
-    `"fromBlock" "${fromBlock}" and "toBlock" "${toBlock}" must be equal`
-  );
-  if (fromBlock >= end) {
-    return {
-      messages: [],
-      write: JSON.stringify(message.results),
-    };
-  } else {
-    const number = parseInt(fromBlock, 16) + 1;
-    return {
-      messages: [callBlockLogs(number, message.metadata.end)],
-      write: JSON.stringify(message.results),
-    };
-  }
+  return {
+    messages: [],
+    write: JSON.stringify(message.results),
+  };
 }
