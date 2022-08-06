@@ -3,7 +3,7 @@ module.exports = {
     "no-console": "error",
   },
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2021,
     sourceType: "module",
   },
   extends: [

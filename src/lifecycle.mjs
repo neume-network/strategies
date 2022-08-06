@@ -101,9 +101,9 @@ export function extract(strategy, worker, messageRouter, args = []) {
     const type = "extraction";
     const interval = setInterval(() => {
       log(
-        `Running extractor ${strategy.module.name} with ${numberOfMessages} messages pending`
+        `${strategy.module.name} extractor is running with ${numberOfMessages} messages pending`
       );
-    }, 2000);
+    }, 120_000);
     const checkResult = (result) => {
       if (!result) {
         clearInterval(interval);
