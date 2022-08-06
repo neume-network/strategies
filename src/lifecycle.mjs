@@ -21,7 +21,6 @@ const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
 };
-const timeout = 3000;
 
 function fill(buffer, write, messages) {
   if (write) {
@@ -96,13 +95,6 @@ async function transform(strategy, name, type) {
   }
 }
 
-function applyTimeout(message) {
-  if (message.type === "https" || message.type === "json-rpc") {
-    message.options.timeout = timeout;
-  }
-  return message;
-}
-
 export function extract(strategy, worker, messageRouter, args = []) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
@@ -147,7 +139,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
         result.messages?.forEach((message) => {
           numberOfMessages++;
-          worker.postMessage(applyTimeout(message));
+          worker.postMessage(message);
         });
 
         if (result.write) {
@@ -167,7 +159,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
     if (result.messages.length !== 0) {
       result.messages.forEach((message) => {
         numberOfMessages++;
-        worker.postMessage(applyTimeout(message));
+        worker.postMessage(message);
       });
     } else {
       messageRouter.off(`${strategy.module.name}-${type}`, callback);
