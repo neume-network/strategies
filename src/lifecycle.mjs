@@ -135,6 +135,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
         const result = checkResult(strategy.module.update(message));
 
         if (!result) {
+          messageRouter.off(`${strategy.module.name}-${type}`, callback);
           clearInterval(interval);
           reject(
             `Strategy "${
@@ -143,6 +144,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
               result
             )}"`
           );
+          return;
         }
 
         result.messages?.forEach((message) => {
