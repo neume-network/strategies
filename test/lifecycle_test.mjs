@@ -14,15 +14,6 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-class Worker extends EventEmitter {
-  postMessage(message) {
-    return router.emit(`${message.commissioner}-extraction`, {});
-  }
-}
-
-const worker = new Worker();
-const router = new EventEmitter();
-
 test("if launcher throws errors on invalid strategy type", async (t) => {
   const finder = await setupFinder();
   t.throws(() => finder({ type: "non-existent" }), {
@@ -88,6 +79,86 @@ test("loading strategies", async (t) => {
   t.truthy(strategies);
 });
 
+test("if extract rejects result if it is invalid", async (t) => {
+  const mockStrategy = {
+    module: {
+      name: "mockMessage",
+      init: () => {
+        return false;
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+  await t.throwsAsync(async () => await extract(mockStrategy, worker, router));
+});
+
+test("if extract function can handle bad results from update", async (t) => {
+  const name = "mockMessage";
+  const mockStrategy = {
+    module: {
+      name,
+      init: () => {
+        return {
+          messages: [{ commissioner: name }],
+          write: null,
+        };
+      },
+      update: () => {
+        return false;
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+  await t.throwsAsync(async () => await extract(mockStrategy, worker, router));
+  t.is(router.eventNames().length, 0);
+});
+
+test("if extract function can handle lifecycle errors", async (t) => {
+  const name = "mockMessage";
+  const mockStrategy = {
+    module: {
+      name,
+      init: () => {
+        return {
+          messages: [{ commissioner: name, error: "this is an error" }],
+          write: null,
+        };
+      },
+      update: () => {
+        t.fail();
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
+  await extract(mockStrategy, worker, router);
+  t.is(router.eventNames().length, 0);
+});
+
 test("if extract() resolves the promise and removes the listener on no new messages", async (t) => {
   const mockMessage = {
     type: "https",
@@ -107,6 +178,15 @@ test("if extract() resolves the promise and removes the listener on no new messa
     },
   };
 
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
   await extract(mockStrategy, worker, router);
   t.deepEqual(router.eventNames(), []);
   t.pass();
@@ -124,6 +204,15 @@ test("if extract() resolves the promise and removes the listener on no message f
       },
     },
   };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
 
   await extract(mockStrategy, worker, router);
   t.deepEqual(router.eventNames(), []);

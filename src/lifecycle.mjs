@@ -99,21 +99,19 @@ export function extract(strategy, worker, messageRouter, args = []) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
     const type = "extraction";
-    const checkResult = (result) => {
-      if (!result) {
-        reject(
+
+    const result = await strategy.module.init(...args);
+    if (!result) {
+      return reject(
+        new Error(
           `Strategy "${
             strategy.module.name
           }-extraction" didn't return a valid result: "${JSON.stringify(
             result
           )}"`
-        );
-        return;
-      }
-      return result;
-    };
-
-    const result = checkResult(await strategy.module.init(...args));
+        )
+      );
+    }
 
     if (result.write) {
       const filePath = generatePath(strategy.module.name, type);
@@ -121,21 +119,27 @@ export function extract(strategy, worker, messageRouter, args = []) {
     }
 
     const callback = async (message) => {
+      log(`Number of messages: ${numberOfMessages}`);
       numberOfMessages--;
 
       if (message.error) {
-        log(message.commissioner + ":" + message.error);
+        log(
+          `Received error message from worker for strategy "${message.commissioner}": "${message.error}"`
+        );
       } else {
-        const result = checkResult(strategy.module.update(message));
-
-        if (!result)
-          reject(
-            `Strategy "${
-              strategy.module.name
-            }" and call init didn't return a valid result: "${JSON.stringify(
-              result
-            )}"`
+        const result = await strategy.module.update(message);
+        if (!result) {
+          messageRouter.off(`${strategy.module.name}-${type}`, callback);
+          return reject(
+            new Error(
+              `Strategy "${
+                strategy.module.name
+              }-extraction" didn't return a valid result: "${JSON.stringify(
+                result
+              )}"`
+            )
           );
+        }
 
         result.messages?.forEach((message) => {
           numberOfMessages++;
@@ -172,7 +176,7 @@ export async function init(worker, crawlPath) {
   const finder = await setupFinder();
   const messageRouter = new EventEmitter();
 
-  worker.on("message", async (message) => {
+  worker.on("message", (message) => {
     messageRouter.emit(`${message.commissioner}-extraction`, message);
   });
 
@@ -182,43 +186,41 @@ export async function init(worker, crawlPath) {
     )}`
   );
 
-  for await (const segment of crawlPath) {
-    await Promise.all(
-      segment.map(async (strategy) => {
-        if (strategy.extractor) {
-          const extractStrategy = finder("extraction", strategy.name);
-          log(
-            `Starting extractor strategy with name "${
-              extractStrategy.module.name
-            }" with params "${JSON.stringify(strategy.extractor.args)}"`
-          );
-          await extract(
-            extractStrategy,
-            worker,
-            messageRouter,
-            strategy.extractor.args
-          );
-          log(
-            `Ending extractor strategy with name "${extractStrategy.module.name}"`
-          );
-        }
+  for (const segment of crawlPath) {
+    for await (const strategy of segment) {
+      if (strategy.extractor) {
+        const extractStrategy = finder("extraction", strategy.name);
+        log(
+          `Starting extractor strategy with name "${
+            extractStrategy.module.name
+          }" with params "${JSON.stringify(strategy.extractor.args)}"`
+        );
+        await extract(
+          extractStrategy,
+          worker,
+          messageRouter,
+          strategy.extractor.args
+        );
+        log(
+          `Ending extractor strategy with name "${extractStrategy.module.name}"`
+        );
+      }
 
-        if (strategy.transformer) {
-          const transformStrategy = finder("transformation", strategy.name);
-          log(
-            `Starting transformer strategy with name "${transformStrategy.module.name}"`
-          );
-          await transform(
-            transformStrategy.module,
-            transformStrategy.module.name,
-            "extraction"
-          );
-          log(
-            `Ending transformer strategy with name "${transformStrategy.module.name}"`
-          );
-        }
-      })
-    );
+      if (strategy.transformer) {
+        const transformStrategy = finder("transformation", strategy.name);
+        log(
+          `Starting transformer strategy with name "${transformStrategy.module.name}"`
+        );
+        await transform(
+          transformStrategy.module,
+          transformStrategy.module.name,
+          "extraction"
+        );
+        log(
+          `Ending transformer strategy with name "${transformStrategy.module.name}"`
+        );
+      }
+    }
   }
 
   log("All strategies executed");
