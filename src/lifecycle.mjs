@@ -115,12 +115,20 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
     if (result.write) {
       const filePath = generatePath(strategy.module.name, type);
-      await write(filePath, `${result.write}\n`);
+      try {
+        await write(filePath, `${result.write}\n`);
+      } catch (err) {
+        return reject(
+          new Error(
+            `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+          )
+        );
+      }
     }
 
     const callback = async (message) => {
-      log(`Number of messages: ${numberOfMessages}`);
       numberOfMessages--;
+      log(`Leftover Lifecycle Messages: ${numberOfMessages}`);
 
       if (message.error) {
         log(
@@ -148,11 +156,20 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
         if (result.write) {
           const filePath = generatePath(strategy.module.name, type);
-          await write(filePath, `${result.write}\n`);
+          try {
+            await write(filePath, `${result.write}\n`);
+          } catch (err) {
+            return reject(
+              new Error(
+                `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+              )
+            );
+          }
         }
       }
 
       if (numberOfMessages === 0) {
+        log("Shutting down extraction in update callback function");
         messageRouter.off(`${strategy.module.name}-${type}`, callback);
         resolve();
       }
@@ -166,6 +183,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
         worker.postMessage(message);
       });
     } else {
+      log("Shutting down extraction in init follow-up function");
       messageRouter.off(`${strategy.module.name}-${type}`, callback);
       resolve();
     }
