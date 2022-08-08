@@ -13,14 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/neume-network/strategies.git"
   },
-  "keywords": [
-    "data",
-    "music",
-    "web3",
-    "decentralized",
-    "tokens",
-    "nfts"
-  ],
+  "keywords": ["data", "music", "web3", "decentralized", "tokens", "nfts"],
   "author": "Tim Daubenschütz <tim@daubenschuetz.de> (https://timdaub.github.io/)",
   "license": "GPL-3.0-only",
   "bugs": {
@@ -29,6 +22,8 @@
   "homepage": "https://github.com/neume-network/strategies#readme",
   "devDependencies": {
     "@neume-network/extraction-worker": "0.6.0",
+    "ajv": "8.11.0",
+    "ajv-formats": "2.1.1",
     "ava": "4.2.0",
     "debug": "4.3.4",
     "dotenv": "16.0.1",
@@ -39,19 +34,14 @@
     "prettier": "2.6.2"
   },
   "lint-staged": {
-    "*.{mjs,js,css}": [
-      "npm run prettier",
-      "npm run eslint"
-    ]
+    "*.{mjs,js,css}": ["npm run prettier", "npm run eslint"]
   },
   "dependencies": {
     "@neume-network/message-schema": "0.3.1"
   },
   "peerDependencies": {
     "eth-fun": "0.9.x",
-    "@neume-network/schema": "0.3.x",
-    "ajv": "8.x.x",
-    "ajv-formats": "2.x.x"
+    "@neume-network/schema": "0.3.x"
   },
   "ava": {
     "timeout": "30s"
