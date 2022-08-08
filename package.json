@@ -29,6 +29,7 @@
   "homepage": "https://github.com/neume-network/strategies#readme",
   "devDependencies": {
     "@neume-network/extraction-worker": "0.6.0",
+    "@neume-network/schema": "0.3.1",
     "ajv": "8.11.0",
     "ajv-formats": "2.1.1",
     "ava": "4.2.0",
@@ -50,8 +51,7 @@
     "@neume-network/message-schema": "0.3.1"
   },
   "peerDependencies": {
-    "eth-fun": "0.9.x",
-    "@neume-network/schema": "0.3.x"
+    "eth-fun": "0.9.x"
   },
   "ava": {
     "timeout": "30s"

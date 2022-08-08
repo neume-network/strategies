@@ -10,7 +10,9 @@ export default async function snapshotExtractor(extractor, { inputs }) {
   const worker = new Worker(resolve(__dirname, "./worker_start.mjs"), {
     workerData: {
       queue: {
-        concurrent: 20,
+        options: {
+          concurrent: 20,
+        },
       },
     },
   });

@@ -99,14 +99,14 @@ export function extract(strategy, worker, messageRouter, args = []) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
     const type = "extraction";
+    const interval = setInterval(() => {
+      log(
+        `${strategy.module.name} extractor is running with ${numberOfMessages} messages pending`
+      );
+    }, 120_000);
 
     const result = await strategy.module.init(...args);
     if (!result) {
-      const interval = setInterval(() => {
-        log(
-          `${strategy.module.name} extractor is running with ${numberOfMessages} messages pending`
-        );
-      }, 120_000);
       return reject(
         new Error(
           `Strategy "${
