@@ -33,7 +33,7 @@ const workerValidator = ajv.compile(workerMessage);
  * Check, log and filter for valid worker messages.
  * For lack of better solution we are ignoring invalid messages.
  **/
-function filterValidWorkerMessages(messages) {
+export function filterValidWorkerMessages(messages) {
   return messages.filter((message) => {
     const valid = workerValidator(message);
 

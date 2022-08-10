@@ -12,6 +12,7 @@ import {
   transform,
   setupFinder,
   EXTRACTOR_CODES,
+  filterValidWorkerMessages,
 } from "../src/lifecycle.mjs";
 import {
   ValidationError,
@@ -249,4 +250,17 @@ test("if extract() resolves the promise and removes the listener on no message f
   t.is(code, EXTRACTOR_CODES.SHUTDOWN_IN_INIT);
   t.deepEqual(router.eventNames(), []);
   t.pass();
+});
+
+test("if filterValidWorkerMessages filters invalid message", async (t) => {
+  const messages = [mockMessage, {}, { ...mockMessage, type: "invalid-type" }];
+
+  const filteredMessages = filterValidWorkerMessages(messages);
+
+  t.is(filterValidWorkerMessages.length, 1);
+  t.is(filteredMessages[0], mockMessage);
+});
+
+test("if filterValidWorkerMessages throws error on invalid input", async (t) => {
+  t.throws(() => filterValidWorkerMessages(null));
 });
