@@ -1,17 +1,22 @@
 //@format
 import path from "path";
-import { fileURLToPath } from "url";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
 import { appendFile } from "fs/promises";
 import EventEmitter, { once } from "events";
-import { env, exit } from "process";
+import { env } from "process";
+import Ajv from "ajv";
+import { workerMessage } from "@neume-network/message-schema";
 
-import { lifecycleMessage } from "@neume-network/message-schema";
-
-import { NotFoundError, ValidationError } from "./errors.mjs";
+import { NotFoundError } from "./errors.mjs";
 import { loadStrategies, write } from "./disc.mjs";
 import logger from "./logger.mjs";
+
+export const EXTRACTOR_CODES = {
+  FAILURE: 1,
+  SHUTDOWN_IN_INIT: 2,
+  SHUTDOWN_IN_UPDATE: 3,
+};
 
 const log = logger("lifecycle");
 const strategyDir = "./strategies";
@@ -21,6 +26,29 @@ const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
 };
+const ajv = new Ajv();
+const workerValidator = ajv.compile(workerMessage);
+
+/**
+ * Check, log and filter for valid worker messages.
+ * For lack of better solution we are ignoring invalid messages.
+ **/
+function filterValidWorkerMessages(messages) {
+  return messages.filter((message) => {
+    const valid = workerValidator(message);
+
+    if (!valid) {
+      log(
+        "Found 1 or more validation error, ignoring worker message:",
+        message
+      );
+      log(workerValidator.errors);
+      return false;
+    }
+
+    return true;
+  });
+}
 
 export async function transform(strategy, sourcePath, outputPath) {
   const rl = createInterface({
@@ -34,12 +62,12 @@ export async function transform(strategy, sourcePath, outputPath) {
     if (write) {
       await appendFile(outputPath, `${write}\n`);
     }
-    buffer = [...buffer, ...messages];
+    buffer = [...buffer, ...filterValidWorkerMessages(messages)];
   });
   // TODO: Figure out how `onError` shall be handled.
   rl.on("error", (error) => {
     const { write, messages } = strategy.module.onError(error);
-    buffer = [...buffer, ...messages];
+    buffer = [...buffer, ...filterValidWorkerMessages(messages)];
   });
 
   await once(rl, "close");
@@ -47,7 +75,7 @@ export async function transform(strategy, sourcePath, outputPath) {
   if (write) {
     await appendFile(outputPath, `${write}\n`);
   }
-  buffer = [...buffer, ...messages];
+  buffer = [...buffer, ...filterValidWorkerMessages(messages)];
   return buffer;
 }
 
@@ -88,15 +116,13 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
     const result = await strategy.module.init(...args);
     if (!result) {
-      return reject(
-        new Error(
-          `Strategy "${
-            strategy.module.name
-          }-extraction" didn't return a valid result: "${JSON.stringify(
-            result
-          )}"`
-        )
+      const error = new Error(
+        `Strategy "${
+          strategy.module.name
+        }-extraction" didn't return a valid result: "${JSON.stringify(result)}"`
       );
+      error.code = EXTRACTOR_CODES.FAILURE;
+      return reject(error);
     }
 
     if (result.write) {
@@ -104,11 +130,11 @@ export function extract(strategy, worker, messageRouter, args = []) {
       try {
         await write(filePath, `${result.write}\n`);
       } catch (err) {
-        return reject(
-          new Error(
-            `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
-          )
+        const error = new Error(
+          `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
         );
+        error.code = EXTRACTOR_CODES.FAILURE;
+        return reject(error);
       }
     }
 
@@ -125,32 +151,34 @@ export function extract(strategy, worker, messageRouter, args = []) {
         if (!result) {
           clearInterval(interval);
           messageRouter.off(`${strategy.module.name}-${type}`, callback);
-          return reject(
-            new Error(
-              `Strategy "${
-                strategy.module.name
-              }-extraction" didn't return a valid result: "${JSON.stringify(
-                result
-              )}"`
-            )
+          const error = new Error(
+            `Strategy "${
+              strategy.module.name
+            }-extraction" didn't return a valid result: "${JSON.stringify(
+              result
+            )}"`
           );
+          error.code = EXTRACTOR_CODES.FAILURE;
+          return reject(error);
         }
 
-        result.messages?.forEach((message) => {
-          numberOfMessages++;
-          worker.postMessage(message);
-        });
+        if (result.messages?.length !== 0) {
+          filterValidWorkerMessages(result.messages).forEach((message) => {
+            numberOfMessages++;
+            worker.postMessage(message);
+          });
+        }
 
         if (result.write) {
           const filePath = generatePath(strategy.module.name, type);
           try {
             await write(filePath, `${result.write}\n`);
           } catch (err) {
-            return reject(
-              new Error(
-                `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
-              )
+            const error = new Error(
+              `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
             );
+            error.code = EXTRACTOR_CODES.FAILURE;
+            return reject(error);
           }
         }
       }
@@ -159,14 +187,19 @@ export function extract(strategy, worker, messageRouter, args = []) {
         log("Shutting down extraction in update callback function");
         messageRouter.off(`${strategy.module.name}-${type}`, callback);
         clearInterval(interval);
-        resolve();
+        resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_UPDATE });
       }
     };
 
     messageRouter.on(`${strategy.module.name}-${type}`, callback);
 
-    if (result.messages.length !== 0) {
-      result.messages.forEach((message) => {
+    let validWorkerMessages =
+      result.messages?.length !== 0
+        ? filterValidWorkerMessages(result.messages)
+        : 0;
+
+    if (validWorkerMessages.length > 0) {
+      validWorkerMessages.forEach((message) => {
         numberOfMessages++;
         worker.postMessage(message);
       });
@@ -174,7 +207,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
       log("Shutting down extraction in init follow-up function");
       messageRouter.off(`${strategy.module.name}-${type}`, callback);
       clearInterval(interval);
-      resolve();
+      resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_INIT });
     }
   });
 }
