@@ -122,6 +122,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
         }-extraction" didn't return a valid result: "${JSON.stringify(result)}"`
       );
       error.code = EXTRACTOR_CODES.FAILURE;
+      clearInterval(interval);
       return reject(error);
     }
 
@@ -134,6 +135,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
           `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
         );
         error.code = EXTRACTOR_CODES.FAILURE;
+        clearInterval(interval);
         return reject(error);
       }
     }
@@ -149,8 +151,6 @@ export function extract(strategy, worker, messageRouter, args = []) {
       } else {
         const result = await strategy.module.update(message);
         if (!result) {
-          clearInterval(interval);
-          messageRouter.off(`${strategy.module.name}-${type}`, callback);
           const error = new Error(
             `Strategy "${
               strategy.module.name
@@ -159,6 +159,8 @@ export function extract(strategy, worker, messageRouter, args = []) {
             )}"`
           );
           error.code = EXTRACTOR_CODES.FAILURE;
+          messageRouter.off(`${strategy.module.name}-${type}`, callback);
+          clearInterval(interval);
           return reject(error);
         }
 
@@ -178,6 +180,8 @@ export function extract(strategy, worker, messageRouter, args = []) {
               `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
             );
             error.code = EXTRACTOR_CODES.FAILURE;
+            messageRouter.off(`${strategy.module.name}-${type}`, callback);
+            clearInterval(interval);
             return reject(error);
           }
         }
