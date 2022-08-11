@@ -31,25 +31,24 @@ const ajv = new Ajv();
 const workerValidator = ajv.compile(workerMessage);
 const crawlPathValidator = ajv.compile(crawlPathSchema);
 
+function validateWorkerMessage(message) {
+  const valid = workerValidator(message);
+
+  if (!valid) {
+    log("Found 1 or more validation error, ignoring worker message:", message);
+    log(workerValidator.errors);
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Check, log and filter for valid worker messages.
  * For lack of better solution we are ignoring invalid messages.
  **/
 export function filterValidWorkerMessages(messages) {
-  return messages.filter((message) => {
-    const valid = workerValidator(message);
-
-    if (!valid) {
-      log(
-        "Found 1 or more validation error, ignoring worker message:",
-        message
-      );
-      log(workerValidator.errors);
-      return false;
-    }
-
-    return true;
-  });
+  return messages.filter(validateWorkerMessage);
 }
 
 export function validateCrawlPath(crawlPath) {
@@ -234,7 +233,14 @@ export async function init(worker, crawlPath) {
   const messageRouter = new EventEmitter();
 
   worker.on("message", (message) => {
-    messageRouter.emit(`${message.commissioner}-extraction`, message);
+    // This is fatal we can't continue
+    if (!message.commissioner) {
+      throw new Error(
+        `Can't redirect; message.commisioner is ${message.commissioner}`
+      );
+    } else {
+      messageRouter.emit(`${message.commissioner}-extraction`, message);
+    }
   });
 
   log(
