@@ -7,6 +7,7 @@ import EventEmitter, { once } from "events";
 import { env } from "process";
 import Ajv from "ajv";
 import { workerMessage } from "@neume-network/message-schema";
+import { crawlPath as crawlPathSchema } from "@neume-network/schema";
 
 import { NotFoundError } from "./errors.mjs";
 import { loadStrategies, write } from "./disc.mjs";
@@ -28,6 +29,7 @@ const fileNames = {
 };
 const ajv = new Ajv();
 const workerValidator = ajv.compile(workerMessage);
+const crawlPathValidator = ajv.compile(crawlPathSchema);
 
 /**
  * Check, log and filter for valid worker messages.
@@ -48,6 +50,16 @@ export function filterValidWorkerMessages(messages) {
 
     return true;
   });
+}
+
+export function validateCrawlPath(crawlPath) {
+  const valid = crawlPathValidator(crawlPath);
+
+  if (!valid) {
+    log("Found 1 or more validation error in crawl path:", crawlPath);
+    log(crawlPathValidator.errors);
+    throw new Error("Validation error in crawl path");
+  }
 }
 
 export async function transform(strategy, sourcePath, outputPath) {
@@ -217,6 +229,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
 }
 
 export async function init(worker, crawlPath) {
+  validateCrawlPath(crawlPath);
   const finder = await setupFinder();
   const messageRouter = new EventEmitter();
 

@@ -13,6 +13,7 @@ import {
   setupFinder,
   EXTRACTOR_CODES,
   filterValidWorkerMessages,
+  validateCrawlPath,
 } from "../src/lifecycle.mjs";
 import {
   ValidationError,
@@ -132,8 +133,6 @@ test("if extract rejects result if it is invalid", async (t) => {
     try {
       await extract(mockStrategy, worker, router);
     } catch (e) {
-      console.log(e.code, e instanceof Error);
-      console.log(e);
       throw e;
     }
   });
@@ -263,4 +262,22 @@ test("if filterValidWorkerMessages filters invalid message", async (t) => {
 
 test("if filterValidWorkerMessages throws error on invalid input", async (t) => {
   t.throws(() => filterValidWorkerMessages(null));
+});
+
+test("validateCrawlPath works for happy case", (t) => {
+  t.notThrows(() =>
+    validateCrawlPath([
+      [
+        {
+          name: "web3subgraph",
+          extractor: { args: ["9956"] },
+          transformer: {},
+        },
+      ],
+    ])
+  );
+});
+
+test("validateCrawlPath works for unhappy case", (t) => {
+  t.throws(() => validateCrawlPath([]));
 });
