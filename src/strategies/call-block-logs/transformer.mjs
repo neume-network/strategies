@@ -2,6 +2,7 @@
 import { Keccak } from "sha3";
 
 import logger from "../../logger.mjs";
+import { parseJSON } from "../../utils.mjs";
 
 export const name = "call-block-logs";
 const log = logger(name);
@@ -68,7 +69,7 @@ export function onLine(line) {
   });
   const addresses = Object.keys(contracts);
 
-  let logs = JSON.parse(line);
+  let logs = parseJSON(line, 100);
   logs = logs.filter(
     (log) =>
       selectors.includes(log.topics[0]) && addresses.includes(log.address)
