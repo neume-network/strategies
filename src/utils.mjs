@@ -14,7 +14,9 @@ export function parseJSON(value, distance = 10) {
       end = value.length;
     }
     const snippet = value.substring(start, end);
-    throw new SyntaxError(`JSON parsing error: "${snippet}"`);
+    throw new SyntaxError(
+      `JSON parsing error: "${snippet}", Original Error: "${err.toString()}"`
+    );
   }
   return parsed;
 }

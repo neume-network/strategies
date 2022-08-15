@@ -13,6 +13,7 @@ test("json parser throws useful message", (t) => {
     parseJSON(data);
   } catch (err) {
     t.true(err.toString().includes("invalid"));
+    t.true(err.toString().includes("position"));
   }
 });
 
@@ -23,5 +24,6 @@ test("json parser can handle big distance", (t) => {
     parseJSON(data, distance);
   } catch (err) {
     t.true(err.toString().includes("invalid"));
+    t.true(err.toString().includes("position"));
   }
 });
