@@ -16,9 +16,11 @@ const snapshot = fs
 test("call-block-logs transformer", (t) => {
   const { write } = onLine(snapshot);
 
-  t.plan(write.length * 4 + 1);
-  t.is(write.length, 3);
-  for (let log of write) {
+  const parsed = JSON.parse(write);
+  t.plan(parsed.length * 4 + 2);
+  t.is(typeof write, "string");
+  t.is(parsed.length, 3);
+  for (let log of parsed) {
     t.truthy(log.address);
     t.truthy(log.createdAtBlockNumber);
     t.truthy(log.platform);

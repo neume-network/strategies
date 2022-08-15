@@ -89,7 +89,7 @@ export function onLine(line) {
     platform: contracts[log.address].name,
   }));
   return {
-    write: logs,
+    write: JSON.stringify(logs),
     messages: [],
   };
 }
