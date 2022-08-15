@@ -69,7 +69,15 @@ export function onLine(line) {
   });
   const addresses = Object.keys(contracts);
 
-  let logs = parseJSON(line, 100);
+  let logs;
+  try {
+    logs = parseJSON(line, 100);
+  } catch (err) {
+    return {
+      write: null,
+      messages: [],
+    };
+  }
   logs = logs.filter(
     (log) =>
       selectors.includes(log.topics[0]) && addresses.includes(log.address)
