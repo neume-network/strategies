@@ -84,7 +84,7 @@ export function onLine(line) {
   );
 
   let write;
-  if (logs) {
+  if (logs.length) {
     write = JSON.stringify(logs);
   }
   return {
