@@ -1,5 +1,6 @@
 // @format
 import { Keccak } from "sha3";
+import { decodeLog } from "eth-fun";
 
 import logger from "../../logger.mjs";
 import { parseJSON } from "../../utils.mjs";
@@ -26,24 +27,24 @@ const contracts = {
   "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7": {
     name: "zora",
   },
-  // currently we're replicating the output of web3-music-subgraph and so we
-  // can't yet reproduce sound
-  //"0x0bc2a24ce568dad89691116d5b34deb6c203f342": {
-  //  name: "sound",
-  //},
   "0x78e3adc0e811e4f93bd9f1f9389b923c9a3355c2": {
-    name: "catalogv2",
+    name: "sound",
+  },
+  "0x0bc2a24ce568dad89691116d5b34deb6c203f342": {
+    name: "catalog",
+    version: "2.0.0",
   },
   "0xf5819e27b9bad9f97c177bf007c1f96f26d91ca6": {
     name: "noizd",
   },
   "0x2b5426a5b98a3e366230eba9f95a24f09ae4a584": {
-    name: "mintsongsv2",
+    name: "mintsongs",
+    version: "2.0.0",
   },
 };
 
 const events = [
-  //"CreatedArtist(uint256,string,string,address)",
+  "CreatedArtist(uint256,string,string,address)",
   "Transfer(address,address,uint256)",
 ];
 
@@ -60,6 +61,38 @@ Object.keys(contracts).forEach((contract) => {
     throw new Error("Contract address must be lower key");
   }
 });
+
+function decodeArtistAddress(log) {
+  const topics = log.topics;
+  topics.shift();
+  const result = decodeLog(
+    [
+      {
+        type: "uint256",
+        name: "artistId",
+      },
+      {
+        type: "string",
+        name: "name",
+      },
+      {
+        type: "string",
+        name: "symbol",
+      },
+      {
+        type: "address",
+        name: "artistAddress",
+        indexed: true,
+      },
+    ],
+    log.data,
+    topics
+  );
+  return result.artistAddress.toLowerCase();
+}
+
+const emptyB32 =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 export function onLine(line) {
   const selectors = events.map((evt) => {
@@ -78,10 +111,20 @@ export function onLine(line) {
       messages: [],
     };
   }
-  logs = logs.filter(
-    (log) =>
-      selectors.includes(log.topics[0]) && addresses.includes(log.address)
-  );
+  logs = logs.filter((log) => {
+    // NOTE: For sound's CreatedArtist, we're extracting the artist's address
+    // and then monitor all of that contract's mint events.
+    if (log.address === "0x78e3adc0e811e4f93bd9f1f9389b923c9a3355c2") {
+      addresses.push(decodeArtistAddress(log));
+      return false;
+    }
+    return (
+      log.topics[0] ===
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef" &&
+      log.topics[1] === emptyB32 &&
+      addresses.includes(log.address)
+    );
+  });
 
   let write;
   if (logs.length) {
