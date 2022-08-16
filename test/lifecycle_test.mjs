@@ -1,11 +1,13 @@
 //@format
+import { constants } from "fs";
+import { access, unlink } from "fs/promises";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import EventEmitter from "events";
 import test from "ava";
 
 import { loadStrategies } from "../src/disc.mjs";
-import { extract, lineReader, setupFinder } from "../src/lifecycle.mjs";
+import { extract, transform, setupFinder } from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -35,7 +37,8 @@ test("if launcher throws errors on invalid strategy name submission", async (t) 
 });
 
 test("reading a file by line using the line reader", async (t) => {
-  const path = resolve(__dirname, "./fixtures/file0.data");
+  const sourcePath = resolve(__dirname, "./fixtures/file0.data");
+  const outputPath = resolve(__dirname, "./fixtures/file0.output");
   let count = 0;
   t.plan(3);
   const lineHandlerMock = (line) => {
@@ -53,12 +56,14 @@ test("reading a file by line using the line reader", async (t) => {
       strategy.module.name === "soundxyz-call-tokenuri"
   );
   const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
-  await lineReader(path, strategy);
+  await transform({ module: strategy }, sourcePath, outputPath);
   t.is(count, 2);
+  await unlink(outputPath);
 });
 
 test("applying transformation strategies to a file", async (t) => {
-  const dataPath = resolve(__dirname, "./fixtures/file1.data");
+  const sourcePath = resolve(__dirname, "./fixtures/file1.data");
+  const outputPath = resolve(__dirname, "./fixtures/file1.output");
   const strategies = (
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter(
@@ -67,7 +72,15 @@ test("applying transformation strategies to a file", async (t) => {
       strategy.module &&
       strategy.module.name === "soundxyz-call-tokenuri"
   );
-  await lineReader(dataPath, strategies[0].module);
+  await transform(strategies[0], sourcePath, outputPath);
+  try {
+    await access(outputPath, constants.R_OK);
+  } catch (err) {
+    t.log(err);
+    t.fail();
+    return;
+  }
+  await unlink(outputPath);
   t.pass();
 });
 

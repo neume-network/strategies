@@ -3,8 +3,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
-import { once } from "events";
-import EventEmitter from "events";
+import { appendFile } from "fs/promises";
+import EventEmitter, { once } from "events";
 import { env, exit } from "process";
 
 import { lifecycleMessage } from "@neume-network/message-schema";
@@ -22,35 +22,32 @@ const fileNames = {
   extractor: "extractor.mjs",
 };
 
-function fill(buffer, write, messages) {
-  if (write) {
-    buffer.write += `${write}\n`;
-  }
-  buffer.messages = [...buffer.messages, ...messages];
-
-  return buffer;
-}
-
-export async function lineReader(path, strategy) {
+export async function transform(strategy, sourcePath, outputPath) {
   const rl = createInterface({
-    input: createReadStream(path),
+    input: createReadStream(sourcePath),
     crlfDelay: Infinity,
   });
 
-  let buffer = { write: "", messages: [] };
-  rl.on("line", (line) => {
-    const { write, messages } = strategy.onLine(line);
-    buffer = fill(buffer, write, messages);
+  let buffer = [];
+  rl.on("line", async (line) => {
+    const { write, messages } = strategy.module.onLine(line);
+    if (write) {
+      await appendFile(outputPath, `${write}\n`);
+    }
+    buffer = [...buffer, ...messages];
   });
   // TODO: Figure out how `onError` shall be handled.
   rl.on("error", (error) => {
-    const { write, messages } = strategy.onError(error);
-    buffer = fill(buffer, write, messages);
+    const { write, messages } = strategy.module.onError(error);
+    buffer = [...buffer, ...messages];
   });
 
   await once(rl, "close");
-  const { write, messages } = strategy.onClose();
-  buffer = fill(buffer, write, messages);
+  const { write, messages } = strategy.module.onClose();
+  if (write) {
+    await appendFile(outputPath, `${write}\n`);
+  }
+  buffer = [...buffer, ...messages];
   return buffer;
 }
 
@@ -77,22 +74,6 @@ export async function setupFinder() {
 
 export function generatePath(name, type) {
   return path.resolve(dataDir, `${name}-${type}`);
-}
-
-async function transform(strategy, name, type) {
-  const filePath = generatePath(name, type);
-  const result = await lineReader(filePath, strategy);
-
-  if (result && result.write) {
-    const filePath = generatePath(name, "transformation");
-    await write(filePath, `${result.write}\n`);
-  } else {
-    throw new Error(
-      `Strategy "${name}-tranformation" didn't return a valid result: "${JSON.stringify(
-        result
-      )}"`
-    );
-  }
 }
 
 export function extract(strategy, worker, messageRouter, args = []) {
@@ -237,11 +218,15 @@ export async function init(worker, crawlPath) {
         log(
           `Starting transformer strategy with name "${transformStrategy.module.name}"`
         );
-        await transform(
-          transformStrategy.module,
+        const sourcePath = generatePath(
           transformStrategy.module.name,
           "extraction"
         );
+        const outputPath = generatePath(
+          transformStrategy.module.name,
+          "transformation"
+        );
+        await transform(transformStrategy, sourcePath, outputPath);
         log(
           `Ending transformer strategy with name "${transformStrategy.module.name}"`
         );
