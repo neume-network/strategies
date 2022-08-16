@@ -82,14 +82,13 @@ export function onLine(line) {
     (log) =>
       selectors.includes(log.topics[0]) && addresses.includes(log.address)
   );
-  logs = logs.map((log) => ({
-    address: log.address,
-    tokenId: `${parseInt(log.topics[3], 16)}`,
-    createdAtBlockNumber: `${parseInt(log.blockNumber, 16)}`,
-    platform: contracts[log.address].name,
-  }));
+
+  let write;
+  if (logs) {
+    write = JSON.stringify(logs);
+  }
   return {
-    write: JSON.stringify(logs),
+    write,
     messages: [],
   };
 }

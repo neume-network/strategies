@@ -17,13 +17,11 @@ test("call-block-logs transformer", (t) => {
   const { write } = onLine(snapshot);
 
   const parsed = JSON.parse(write);
-  t.plan(parsed.length * 4 + 2);
+  t.plan(parsed.length * 2 + 2);
   t.is(typeof write, "string");
   t.is(parsed.length, 3);
   for (let log of parsed) {
     t.truthy(log.address);
-    t.truthy(log.createdAtBlockNumber);
-    t.truthy(log.platform);
-    t.truthy(log.tokenId);
+    t.truthy(log.topics);
   }
 });
