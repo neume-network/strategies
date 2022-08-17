@@ -278,6 +278,6 @@ test("validateCrawlPath works for happy case", (t) => {
   );
 });
 
-test("validateCrawlPath works for unhappy case", (t) => {
+test("validateCrawlPath throws for undefined crawl path", (t) => {
   t.throws(() => validateCrawlPath([]));
 });
