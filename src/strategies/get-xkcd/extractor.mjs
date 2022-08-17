@@ -4,7 +4,7 @@ export const props = {};
 
 const templateURI = (num) => `https://xkcd.com/${num}/info.0.json`;
 
-export function init(start = 0) {
+export function init(start = 1) {
   return {
     write: null,
     messages: [
