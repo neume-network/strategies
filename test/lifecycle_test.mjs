@@ -7,7 +7,14 @@ import EventEmitter from "events";
 import test from "ava";
 
 import { loadStrategies } from "../src/disc.mjs";
-import { extract, transform, setupFinder } from "../src/lifecycle.mjs";
+import {
+  extract,
+  transform,
+  setupFinder,
+  EXTRACTOR_CODES,
+  filterValidWorkerMessages,
+  validateCrawlPath,
+} from "../src/lifecycle.mjs";
 import {
   ValidationError,
   NotFoundError,
@@ -15,6 +22,18 @@ import {
 } from "../src/errors.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const mockMessage = {
+  type: "https",
+  commissioner: "mockMessage",
+  version: "0.0.1",
+  error: null,
+  results: null,
+  options: {
+    url: "",
+    method: "GET",
+  },
+};
 
 test("if launcher throws errors on invalid strategy type", async (t) => {
   const finder = await setupFinder();
@@ -110,17 +129,22 @@ test("if extract rejects result if it is invalid", async (t) => {
 
   const worker = new Worker();
   const router = new EventEmitter();
-  await t.throwsAsync(async () => await extract(mockStrategy, worker, router));
+  await t.throwsAsync(async () => {
+    try {
+      await extract(mockStrategy, worker, router);
+    } catch (e) {
+      throw e;
+    }
+  });
 });
 
 test("if extract function can handle bad results from update", async (t) => {
-  const name = "mockMessage";
   const mockStrategy = {
     module: {
-      name,
+      name: mockMessage.commissioner,
       init: () => {
         return {
-          messages: [{ commissioner: name }],
+          messages: [mockMessage],
           write: null,
         };
       },
@@ -143,13 +167,12 @@ test("if extract function can handle bad results from update", async (t) => {
 });
 
 test("if extract function can handle lifecycle errors", async (t) => {
-  const name = "mockMessage";
   const mockStrategy = {
     module: {
-      name,
+      name: mockMessage.commissioner,
       init: () => {
         return {
-          messages: [{ commissioner: name, error: "this is an error" }],
+          messages: [{ ...mockMessage, error: "this is an error" }],
           write: null,
         };
       },
@@ -168,17 +191,12 @@ test("if extract function can handle lifecycle errors", async (t) => {
   const worker = new Worker();
   const router = new EventEmitter();
 
-  await extract(mockStrategy, worker, router);
+  const { code } = await extract(mockStrategy, worker, router);
+  t.is(code, EXTRACTOR_CODES.SHUTDOWN_IN_UPDATE);
   t.is(router.eventNames().length, 0);
 });
 
 test("if extract() resolves the promise and removes the listener on no new messages", async (t) => {
-  const mockMessage = {
-    type: "https",
-    commissioner: "mockMessage",
-    options: {},
-  };
-
   const mockStrategy = {
     module: {
       name: mockMessage.commissioner,
@@ -227,7 +245,39 @@ test("if extract() resolves the promise and removes the listener on no message f
   const worker = new Worker();
   const router = new EventEmitter();
 
-  await extract(mockStrategy, worker, router);
+  const { code } = await extract(mockStrategy, worker, router);
+  t.is(code, EXTRACTOR_CODES.SHUTDOWN_IN_INIT);
   t.deepEqual(router.eventNames(), []);
   t.pass();
+});
+
+test("if filterValidWorkerMessages filters invalid message", async (t) => {
+  const messages = [mockMessage, {}, { ...mockMessage, type: "invalid-type" }];
+
+  const filteredMessages = filterValidWorkerMessages(messages);
+
+  t.is(filterValidWorkerMessages.length, 1);
+  t.is(filteredMessages[0], mockMessage);
+});
+
+test("if filterValidWorkerMessages throws error on invalid input", async (t) => {
+  t.throws(() => filterValidWorkerMessages(null));
+});
+
+test("validateCrawlPath works for happy case", (t) => {
+  t.notThrows(() =>
+    validateCrawlPath([
+      [
+        {
+          name: "web3subgraph",
+          extractor: { args: ["9956"] },
+          transformer: {},
+        },
+      ],
+    ])
+  );
+});
+
+test("validateCrawlPath throws for empty crawl path", (t) => {
+  t.throws(() => validateCrawlPath([]));
 });
