@@ -75,7 +75,7 @@ test("reading a file by line using the line reader", async (t) => {
       strategy.module.name === "soundxyz-call-tokenuri"
   );
   const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
-  await transform({ module: strategy }, sourcePath, outputPath);
+  await transform({ module: strategy }, sourcePath, outputPath, []);
   t.is(count, 2);
   await unlink(outputPath);
 });
@@ -91,7 +91,36 @@ test("applying transformation strategies to a file", async (t) => {
       strategy.module &&
       strategy.module.name === "soundxyz-call-tokenuri"
   );
-  await transform(strategies[0], sourcePath, outputPath);
+  await transform(strategies[0], sourcePath, outputPath, []);
+  try {
+    await access(outputPath, constants.R_OK);
+  } catch (err) {
+    t.log(err);
+    t.fail();
+    return;
+  }
+  await unlink(outputPath);
+  t.pass();
+});
+
+test("strategy transformer should receive inputs", async (t) => {
+  const sourcePath = resolve(__dirname, "./fixtures/file1.data");
+  const outputPath = resolve(__dirname, "./fixtures/file2.output");
+  t.plan(3);
+  const lineHandlerMock = (line, arg1) => {
+    t.is(arg1, "arg1");
+    return { write: "hello world", messages: [] };
+  };
+  const strategies = (
+    await loadStrategies("./strategies", "transformer.mjs")
+  ).filter(
+    (strategy) =>
+      strategy &&
+      strategy.module &&
+      strategy.module.name === "soundxyz-call-tokenuri"
+  );
+  const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
+  await transform({ module: strategy }, sourcePath, outputPath, ["arg1"]);
   try {
     await access(outputPath, constants.R_OK);
   } catch (err) {
