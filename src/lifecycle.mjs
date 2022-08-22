@@ -61,7 +61,7 @@ export function validateCrawlPath(crawlPath) {
   }
 }
 
-export async function transform(strategy, sourcePath, outputPath) {
+export async function transform(strategy, sourcePath, outputPath, args) {
   const rl = createInterface({
     input: createReadStream(sourcePath),
     crlfDelay: Infinity,
@@ -69,7 +69,7 @@ export async function transform(strategy, sourcePath, outputPath) {
 
   let buffer = [];
   rl.on("line", async (line) => {
-    const { write, messages } = strategy.module.onLine(line);
+    const { write, messages } = strategy.module.onLine(line, ...args);
     if (write) {
       await appendFile(outputPath, `${write}\n`);
     }
@@ -274,15 +274,19 @@ export async function init(worker, crawlPath) {
         log(
           `Starting transformer strategy with name "${transformStrategy.module.name}"`
         );
-        const sourcePath = generatePath(
-          transformStrategy.module.name,
-          "extraction"
-        );
+        const sourcePath =
+          strategy.transformer.args?.[0] ??
+          generatePath(transformStrategy.module.name, "extraction");
         const outputPath = generatePath(
           transformStrategy.module.name,
           "transformation"
         );
-        await transform(transformStrategy, sourcePath, outputPath);
+        await transform(
+          transformStrategy,
+          sourcePath,
+          outputPath,
+          strategy.transformer.args ? strategy.transformer.args.slice(1) : []
+        );
         log(
           `Ending transformer strategy with name "${transformStrategy.module.name}"`
         );
