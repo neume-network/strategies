@@ -1,17 +1,23 @@
 //@format
 import path from "path";
-import { fileURLToPath } from "url";
 import { createInterface } from "readline";
 import { createReadStream } from "fs";
-import { once } from "events";
-import EventEmitter from "events";
-import { env, exit } from "process";
+import { appendFile } from "fs/promises";
+import EventEmitter, { once } from "events";
+import { env } from "process";
+import Ajv from "ajv";
+import { workerMessage } from "@neume-network/message-schema";
+import { crawlPath as crawlPathSchema } from "@neume-network/schema";
 
-import { lifecycleMessage } from "@neume-network/message-schema";
-
-import { NotFoundError, ValidationError } from "./errors.mjs";
+import { NotFoundError } from "./errors.mjs";
 import { loadStrategies, write } from "./disc.mjs";
 import logger from "./logger.mjs";
+
+export const EXTRACTOR_CODES = {
+  FAILURE: 1,
+  SHUTDOWN_IN_INIT: 2,
+  SHUTDOWN_IN_UPDATE: 3,
+};
 
 const log = logger("lifecycle");
 const strategyDir = "./strategies";
@@ -21,36 +27,66 @@ const fileNames = {
   transformer: "transformer.mjs",
   extractor: "extractor.mjs",
 };
+const ajv = new Ajv();
+const workerValidator = ajv.compile(workerMessage);
+const crawlPathValidator = ajv.compile(crawlPathSchema);
 
-function fill(buffer, write, messages) {
-  if (write) {
-    buffer.write += `${write}\n`;
+function validateWorkerMessage(message) {
+  const valid = workerValidator(message);
+
+  if (!valid) {
+    log("Found 1 or more validation error, ignoring worker message:", message);
+    log(workerValidator.errors);
+    return false;
   }
-  buffer.messages = [...buffer.messages, ...messages];
 
-  return buffer;
+  return true;
 }
 
-export async function lineReader(path, strategy) {
+/**
+ * Check, log and filter for valid worker messages.
+ * For lack of better solution we are ignoring invalid messages.
+ **/
+export function filterValidWorkerMessages(messages) {
+  return messages.filter(validateWorkerMessage);
+}
+
+export function validateCrawlPath(crawlPath) {
+  const valid = crawlPathValidator(crawlPath);
+
+  if (!valid) {
+    log("Found 1 or more validation error in crawl path:", crawlPath);
+    log(crawlPathValidator.errors);
+    throw new Error("Validation error in crawl path");
+  }
+}
+
+export async function transform(strategy, sourcePath, outputPath, args) {
   const rl = createInterface({
-    input: createReadStream(path),
+    input: createReadStream(sourcePath),
     crlfDelay: Infinity,
   });
 
-  let buffer = { write: "", messages: [] };
-  rl.on("line", (line) => {
-    const { write, messages } = strategy.onLine(line);
-    buffer = fill(buffer, write, messages);
+  let buffer = [];
+  rl.on("line", async (line) => {
+    const { write, messages } = strategy.module.onLine(line, ...args);
+    if (write) {
+      await appendFile(outputPath, `${write}\n`);
+    }
+    buffer = [...buffer, ...filterValidWorkerMessages(messages)];
   });
   // TODO: Figure out how `onError` shall be handled.
   rl.on("error", (error) => {
-    const { write, messages } = strategy.onError(error);
-    buffer = fill(buffer, write, messages);
+    const { write, messages } = strategy.module.onError(error);
+    buffer = [...buffer, ...filterValidWorkerMessages(messages)];
   });
 
   await once(rl, "close");
-  const { write, messages } = strategy.onClose();
-  buffer = fill(buffer, write, messages);
+  const { write, messages } = strategy.module.onClose();
+  if (write) {
+    await appendFile(outputPath, `${write}\n`);
+  }
+  buffer = [...buffer, ...filterValidWorkerMessages(messages)];
   return buffer;
 }
 
@@ -79,22 +115,6 @@ export function generatePath(name, type) {
   return path.resolve(dataDir, `${name}-${type}`);
 }
 
-async function transform(strategy, name, type) {
-  const filePath = generatePath(name, type);
-  const result = await lineReader(filePath, strategy);
-
-  if (result && result.write) {
-    const filePath = generatePath(name, "transformation");
-    await write(filePath, `${result.write}\n`);
-  } else {
-    throw new Error(
-      `Strategy "${name}-tranformation" didn't return a valid result: "${JSON.stringify(
-        result
-      )}"`
-    );
-  }
-}
-
 export function extract(strategy, worker, messageRouter, args = []) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
@@ -107,15 +127,14 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
     const result = await strategy.module.init(...args);
     if (!result) {
-      return reject(
-        new Error(
-          `Strategy "${
-            strategy.module.name
-          }-extraction" didn't return a valid result: "${JSON.stringify(
-            result
-          )}"`
-        )
+      const error = new Error(
+        `Strategy "${
+          strategy.module.name
+        }-extraction" didn't return a valid result: "${JSON.stringify(result)}"`
       );
+      error.code = EXTRACTOR_CODES.FAILURE;
+      clearInterval(interval);
+      return reject(error);
     }
 
     if (result.write) {
@@ -123,11 +142,12 @@ export function extract(strategy, worker, messageRouter, args = []) {
       try {
         await write(filePath, `${result.write}\n`);
       } catch (err) {
-        return reject(
-          new Error(
-            `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
-          )
+        const error = new Error(
+          `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
         );
+        error.code = EXTRACTOR_CODES.FAILURE;
+        clearInterval(interval);
+        return reject(error);
       }
     }
 
@@ -142,34 +162,38 @@ export function extract(strategy, worker, messageRouter, args = []) {
       } else {
         const result = await strategy.module.update(message);
         if (!result) {
-          clearInterval(interval);
-          messageRouter.off(`${strategy.module.name}-${type}`, callback);
-          return reject(
-            new Error(
-              `Strategy "${
-                strategy.module.name
-              }-extraction" didn't return a valid result: "${JSON.stringify(
-                result
-              )}"`
-            )
+          const error = new Error(
+            `Strategy "${
+              strategy.module.name
+            }-extraction" didn't return a valid result: "${JSON.stringify(
+              result
+            )}"`
           );
+          error.code = EXTRACTOR_CODES.FAILURE;
+          messageRouter.off(`${strategy.module.name}-${type}`, callback);
+          clearInterval(interval);
+          return reject(error);
         }
 
-        result.messages?.forEach((message) => {
-          numberOfMessages++;
-          worker.postMessage(message);
-        });
+        if (result.messages?.length !== 0) {
+          filterValidWorkerMessages(result.messages).forEach((message) => {
+            numberOfMessages++;
+            worker.postMessage(message);
+          });
+        }
 
         if (result.write) {
           const filePath = generatePath(strategy.module.name, type);
           try {
             await write(filePath, `${result.write}\n`);
           } catch (err) {
-            return reject(
-              new Error(
-                `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
-              )
+            const error = new Error(
+              `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
             );
+            error.code = EXTRACTOR_CODES.FAILURE;
+            messageRouter.off(`${strategy.module.name}-${type}`, callback);
+            clearInterval(interval);
+            return reject(error);
           }
         }
       }
@@ -178,14 +202,19 @@ export function extract(strategy, worker, messageRouter, args = []) {
         log("Shutting down extraction in update callback function");
         messageRouter.off(`${strategy.module.name}-${type}`, callback);
         clearInterval(interval);
-        resolve();
+        resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_UPDATE });
       }
     };
 
     messageRouter.on(`${strategy.module.name}-${type}`, callback);
 
-    if (result.messages.length !== 0) {
-      result.messages.forEach((message) => {
+    let validWorkerMessages =
+      result.messages?.length !== 0
+        ? filterValidWorkerMessages(result.messages)
+        : 0;
+
+    if (validWorkerMessages.length > 0) {
+      validWorkerMessages.forEach((message) => {
         numberOfMessages++;
         worker.postMessage(message);
       });
@@ -193,17 +222,25 @@ export function extract(strategy, worker, messageRouter, args = []) {
       log("Shutting down extraction in init follow-up function");
       messageRouter.off(`${strategy.module.name}-${type}`, callback);
       clearInterval(interval);
-      resolve();
+      resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_INIT });
     }
   });
 }
 
 export async function init(worker, crawlPath) {
+  validateCrawlPath(crawlPath);
   const finder = await setupFinder();
   const messageRouter = new EventEmitter();
 
   worker.on("message", (message) => {
-    messageRouter.emit(`${message.commissioner}-extraction`, message);
+    // This is fatal we can't continue
+    if (!message.commissioner) {
+      throw new Error(
+        `Can't redirect; message.commisioner is ${message.commissioner}`
+      );
+    } else {
+      messageRouter.emit(`${message.commissioner}-extraction`, message);
+    }
   });
 
   log(
@@ -237,10 +274,18 @@ export async function init(worker, crawlPath) {
         log(
           `Starting transformer strategy with name "${transformStrategy.module.name}"`
         );
-        await transform(
-          transformStrategy.module,
+        const sourcePath =
+          strategy.transformer.args?.[0] ??
+          generatePath(transformStrategy.module.name, "extraction");
+        const outputPath = generatePath(
           transformStrategy.module.name,
-          "extraction"
+          "transformation"
+        );
+        await transform(
+          transformStrategy,
+          sourcePath,
+          outputPath,
+          strategy.transformer.args ? strategy.transformer.args.slice(1) : []
         );
         log(
           `Ending transformer strategy with name "${transformStrategy.module.name}"`

@@ -1,6 +1,6 @@
 // @format
 import { constants, statSync } from "fs";
-import { readdir, stat, appendFile, access } from "fs/promises";
+import { readdir, stat, appendFile } from "fs/promises";
 import { resolve, dirname, basename } from "path";
 import { fileURLToPath } from "url";
 

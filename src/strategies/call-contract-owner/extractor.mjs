@@ -56,12 +56,24 @@ export async function init(filePath) {
     if (line === "") continue;
     const nfts = JSON.parse(line);
 
-    nfts.forEach(({ address, createdAtBlockNumber }) =>
-      contracts.add({ address, block: { number: createdAtBlockNumber } })
-    );
+    nfts.forEach(({ address, createdAtBlockNumber }) => {
+      // NOTE: In a previous iteration of this code we added JS objects to the
+      // Set in expectation that JS would spot duplicates. It doesn't so we've
+      // decided to go with a primitive id constructed as a string.
+      const id = `${address}/${createdAtBlockNumber}`;
+      contracts.add(id);
+    });
   }
 
-  const contractList = Array.from(contracts.values());
+  const contractList = Array.from(contracts.values()).map((value) => {
+    const [address, blockNumber] = value.split("/");
+    return {
+      address,
+      block: {
+        number: blockNumber,
+      },
+    };
+  });
   return {
     messages: contractList.map(({ address, block }) =>
       makeRequest(address, block.number)
