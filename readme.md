@@ -21,6 +21,8 @@ WARNING: This repository is under active development and APIs aren't stable.
 
 ## implementing new strategies
 
+Checkout the [quickstart guide](https://github.com/neume-network/strategies/blob/main/docs/quickstart.md) for a in-depth walkthrough.
+
 ### high-level checklist for implementation
 
 - Any external request message passed to @neume-network/extraction-worker must

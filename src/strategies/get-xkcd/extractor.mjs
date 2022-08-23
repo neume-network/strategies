@@ -1,6 +1,16 @@
 const version = "0.0.1";
 export const name = "get-xkcd";
 export const props = {};
+import logger from "./logger.mjs";
+import { schema } from "./schema.mjs";
+import Ajv from "ajv";
+
+const log = logger(name);
+
+const validator = new Ajv();
+const validate = validator.compile(schema);
+
+const MAX_PAGE = 19;
 
 const templateURI = (num) => `https://xkcd.com/${num}/info.0.json`;
 
@@ -25,25 +35,48 @@ export function init(start = 1) {
 export function update(message) {
   // TODO: There's a bug in neume-network/extraction-worker that doesn't
   // allow us to get back the error: https://github.com/neume-network/extraction-worker/issues/34
-  if (message.error && message.error.includes("404 Not Found")) {
+  if (message.error) {
+    // handle the error
+    log(message.error);
+    // stop the crawler if necessary
     return {
-      write: null,
-      messages: [],
+      type: "exit",
+      version: "1.0",
     };
   }
+
+  const data = message.results;
+  if (!validate(data)) {
+    log(validate.errors);
+    return {
+      type: "exit",
+      version: "1.0",
+    };
+  }
+
+  const toBeStored = JSON.stringify(data);
+
   const { num } = message.results;
+  if (num >= MAX_PAGE) {
+    return {
+      type: "exit",
+      version: "1.0",
+    };
+  }
+
+  let options = {
+    url: templateURI(num + 1),
+    method: "GET",
+  };
+
   return {
     // NOTE: Check results in your data directory at ./get-xkcd-extraction
-    write: JSON.stringify(message.results),
+    write: toBeStored,
     messages: [
       {
         type: "https",
         version,
-        options: {
-          // NOTE: We're iterating over all numbers here
-          url: templateURI(num + 1),
-          method: "GET",
-        },
+        options: options,
         results: null,
         error: null,
       },
