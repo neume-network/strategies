@@ -13,7 +13,7 @@ This guide will show you the steps to crawl XKCD.
 
 First off, the `core` expects, both for `init` and `update`, a message compliant to the [schema definition for https strategies](https://github.com/neume-network/schema/blob/main/src/schema.mjs).
 
-the `init` function message should provide the starting state of the crawling. For XKCD, we would write something like:
+The `init` function message should provide the starting state of the crawling. For XKCD, we would write something like:
 ```
 {
     write: null,
