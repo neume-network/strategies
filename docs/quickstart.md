@@ -55,7 +55,7 @@ The function, ideally, should take care of the following:
 * prepare the data for storing. This step should make sure that any future consumer of the data will find all that's required to process it.
 * define if and what to crawl next
 
-The `core` provided message will contain the following data:
+The `core` provided message will contain the following data along with the original message:
 ```
 {
     "error": string,
