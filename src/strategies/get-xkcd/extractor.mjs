@@ -39,9 +39,10 @@ export function update(message) {
   if (message.error) {
     // handle the error
     log(message.error);
-    // continue
+
+    // continue the crawling if possible (in this case, we are not able to retrieve the next page)
     return {
-      resuls: null,
+      write: null,
       messages: [],
     };
   }
