@@ -1,5 +1,5 @@
 # quickstart
-As described in the [README](https://github.com/neume-network/strategies/readme.md), a strategy requires an `extractor` and, optionally, a `transformer`:
+As described in the [README](https://github.com/neume-network/strategies/readme.md), a strategy requires an `extractor` or a `transformer` or both:
 
 - every run of the `update` function of the `extractor` should pull a chunk of the data from the source, be it a page, a time range etc
 - once the extraction process is finished, the transformation part begins. This is executed on a per-line basis (`onLine`) and should prepare the data to be compliant with the schema of the final dataset.
@@ -55,7 +55,7 @@ The function, ideally, should take care of the following:
 * prepare the data for storing. This step should make sure that any future consumer of the data will find all that's required to process it.
 * define if and what to crawl next
 
-The `core` provided message will contain the following data:
+The `core` provided message will contain the following data along with the original message:
 ```
 {
     "error": string,
