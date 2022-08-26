@@ -49,7 +49,6 @@ export async function init(filePath) {
 export function makeRequest(tokenURI) {
   return {
     type: "https",
-    commissioner: name,
     version,
     options: {
       url: tokenURI,

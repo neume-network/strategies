@@ -77,7 +77,6 @@ export function makeRequest(tokenId, blockNumber) {
   const from = null;
   return {
     type: "json-rpc",
-    commissioner: name,
     options: props.options,
     version,
     method: "eth_call",
@@ -127,7 +126,6 @@ export function update(message) {
       messages: [
         {
           type: "json-rpc",
-          commissioner: name,
           options: props.options,
           version,
           method: "eth_call",

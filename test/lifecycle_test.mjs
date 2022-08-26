@@ -12,7 +12,7 @@ import {
   transform,
   setupFinder,
   EXTRACTOR_CODES,
-  filterValidWorkerMessages,
+  prepareMessages,
   validateCrawlPath,
 } from "../src/lifecycle.mjs";
 import {
@@ -23,9 +23,9 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const mockMessageCommissioner = "mockCommissioner";
 const mockMessage = {
   type: "https",
-  commissioner: "mockMessage",
   version: "0.0.1",
   error: null,
   results: null,
@@ -170,7 +170,7 @@ test("if extract rejects result if it is invalid", async (t) => {
 test("if extract function can handle bad results from update", async (t) => {
   const mockStrategy = {
     module: {
-      name: mockMessage.commissioner,
+      name: mockMessageCommissioner,
       init: () => {
         return {
           messages: [mockMessage],
@@ -198,7 +198,7 @@ test("if extract function can handle bad results from update", async (t) => {
 test("if extract function can handle lifecycle errors", async (t) => {
   const mockStrategy = {
     module: {
-      name: mockMessage.commissioner,
+      name: mockMessageCommissioner,
       init: () => {
         return {
           messages: [{ ...mockMessage, error: "this is an error" }],
@@ -228,7 +228,7 @@ test("if extract function can handle lifecycle errors", async (t) => {
 test("if extract() resolves the promise and removes the listener on no new messages", async (t) => {
   const mockStrategy = {
     module: {
-      name: mockMessage.commissioner,
+      name: mockMessageCommissioner,
       init: () => {
         return { messages: [mockMessage], write: null };
       },
@@ -280,17 +280,17 @@ test("if extract() resolves the promise and removes the listener on no message f
   t.pass();
 });
 
-test("if filterValidWorkerMessages filters invalid message", async (t) => {
+test("if prepareMessages filters invalid message and prepare message for worker", async (t) => {
   const messages = [mockMessage, {}, { ...mockMessage, type: "invalid-type" }];
 
-  const filteredMessages = filterValidWorkerMessages(messages);
+  const preparedMessages = prepareMessages(messages, mockMessageCommissioner);
 
-  t.is(filterValidWorkerMessages.length, 1);
-  t.is(filteredMessages[0], mockMessage);
+  t.is(preparedMessages.length, 1);
+  t.is(preparedMessages[0].commissioner, mockMessageCommissioner);
 });
 
 test("if filterValidWorkerMessages throws error on invalid input", async (t) => {
-  t.throws(() => filterValidWorkerMessages(null));
+  t.throws(() => prepareMessages(null));
 });
 
 test("validateCrawlPath works for happy case", (t) => {

@@ -57,7 +57,6 @@ export const callTokenUriFactory = (props) => {
     const from = null;
     return {
       type: "json-rpc",
-      commissioner: strategyName,
       options,
       version,
       method: "eth_call",

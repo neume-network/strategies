@@ -44,11 +44,19 @@ function validateWorkerMessage(message) {
 }
 
 /**
- * Check, log and filter for valid worker messages.
+ * Prepare messages by adding commisioner, filtering
+ * invalid messages and logging them.
  * For lack of better solution we are ignoring invalid messages.
  **/
-export function filterValidWorkerMessages(messages) {
-  return messages.filter(validateWorkerMessage);
+export function prepareMessages(messages, commissioner) {
+  return messages
+    .map((message) => {
+      return {
+        commissioner,
+        ...message,
+      };
+    })
+    .filter(validateWorkerMessage);
 }
 
 export function validateCrawlPath(crawlPath) {
@@ -73,12 +81,12 @@ export async function transform(strategy, sourcePath, outputPath, args) {
     if (write) {
       await appendFile(outputPath, `${write}\n`);
     }
-    buffer = [...buffer, ...filterValidWorkerMessages(messages)];
+    buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   });
   // TODO: Figure out how `onError` shall be handled.
   rl.on("error", (error) => {
     const { write, messages } = strategy.module.onError(error);
-    buffer = [...buffer, ...filterValidWorkerMessages(messages)];
+    buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   });
 
   await once(rl, "close");
@@ -86,7 +94,7 @@ export async function transform(strategy, sourcePath, outputPath, args) {
   if (write) {
     await appendFile(outputPath, `${write}\n`);
   }
-  buffer = [...buffer, ...filterValidWorkerMessages(messages)];
+  buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   return buffer;
 }
 
@@ -157,7 +165,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
       if (message.error) {
         log(
-          `Received error message from worker for strategy "${message.commissioner}": "${message.error}"`
+          `Received error message from worker for strategy "${strategy.module.name}": "${message.error}"`
         );
       } else {
         const result = await strategy.module.update(message);
@@ -176,10 +184,12 @@ export function extract(strategy, worker, messageRouter, args = []) {
         }
 
         if (result.messages?.length !== 0) {
-          filterValidWorkerMessages(result.messages).forEach((message) => {
-            numberOfMessages++;
-            worker.postMessage(message);
-          });
+          prepareMessages(result.messages, strategy.module.name).forEach(
+            (message) => {
+              numberOfMessages++;
+              worker.postMessage(message);
+            }
+          );
         }
 
         if (result.write) {
@@ -208,13 +218,13 @@ export function extract(strategy, worker, messageRouter, args = []) {
 
     messageRouter.on(`${strategy.module.name}-${type}`, callback);
 
-    let validWorkerMessages =
+    let preparedMessages =
       result.messages?.length !== 0
-        ? filterValidWorkerMessages(result.messages)
+        ? prepareMessages(result.messages, strategy.module.name)
         : 0;
 
-    if (validWorkerMessages.length > 0) {
-      validWorkerMessages.forEach((message) => {
+    if (preparedMessages.length > 0) {
+      preparedMessages.forEach((message) => {
         numberOfMessages++;
         worker.postMessage(message);
       });
@@ -236,7 +246,7 @@ export async function init(worker, crawlPath) {
     // This is fatal we can't continue
     if (!message.commissioner) {
       throw new Error(
-        `Can't redirect; message.commisioner is ${message.commissioner}`
+        `Can't redirect; message.commissioner is ${message.commissioner}`
       );
     } else {
       messageRouter.emit(`${message.commissioner}-extraction`, message);
