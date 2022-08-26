@@ -43,7 +43,7 @@ The `init` function message should provide the starting state of the crawling. F
   * `url`: the URL pointing to the first chunk to crawl. First page on XKCD is `1`
   * `method`: GET, POST
   * `headers`: if any specific header should be sent to the source, it shall be specified here (for instance authorization headers)
-  * `body`: same
+  * `body`: same, value must be type of `String`
 * `results`: this field will be used by the core to pass the output of the crawling to the `update` function
 
 Once the `init` message has been returned, the `core` will fetch the first chunk of data and pass it to `update`. 
