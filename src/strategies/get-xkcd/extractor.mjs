@@ -38,10 +38,10 @@ export function update(message) {
   if (message.error) {
     // handle the error
     log(message.error);
-    // stop the crawler if necessary
+    // continue
     return {
-      type: "exit",
-      version: "1.0",
+      resuls: null,
+      messages: [],
     };
   }
 

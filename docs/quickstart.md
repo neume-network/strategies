@@ -46,7 +46,7 @@ The `init` function message should provide the starting state of the crawling. F
   * `body`: same, value must be type of `String`
 * `results`: this field will be used by the core to pass the output of the crawling to the `update` function
 
-Once the `init` message has been returned, the `core` will fetch the first chunk of data and pass it to `update`. 
+Once the `init` message has been returned, the `core` will fetch the first chunk of data and pass it to `update`. The `update` function can perform operations on the result and store it and/or fetch more data by returning messages in a similar way to `init`. For each non-exit message returned by the `update`, the function is called with the results of the crawl.
 
 The function, ideally, should take care of the following:
 
@@ -73,10 +73,11 @@ The strategy will have to
 if(message.error) {
     // handle the error
     console.error(message.error);
-    // stop the crawler if necessary
+    
+    // continue the crawling if possible (in this case, we are not able to retrieve the next page)
     return {
-      type: "exit",
-      version: "1.0"
+      write: null,
+      messages: [],
     };
 }
 ```
