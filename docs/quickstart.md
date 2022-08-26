@@ -1,5 +1,5 @@
 # quickstart
-As described in the [README](https://github.com/neume-network/strategies/readme.md), a strategy requires an `extractor` and, optionally, a `transformer`:
+As described in the [README](https://github.com/neume-network/strategies/readme.md), a strategy requires an `extractor` or a `transformer` or both:
 
 - every run of the `update` function of the `extractor` should pull a chunk of the data from the source, be it a page, a time range etc
 - once the extraction process is finished, the transformation part begins. This is executed on a per-line basis (`onLine`) and should prepare the data to be compliant with the schema of the final dataset.
