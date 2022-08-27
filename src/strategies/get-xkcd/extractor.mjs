@@ -1,7 +1,7 @@
 const version = "0.0.1";
 export const name = "get-xkcd";
 export const props = {};
-import logger from "./logger.mjs";
+import logger from "../../logger.mjs";
 import { schema } from "./schema.mjs";
 import Ajv from "ajv";
 
