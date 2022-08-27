@@ -41,7 +41,6 @@ function callBlockLogs(number) {
   number = toHex(number);
   return {
     type: "json-rpc",
-    commissioner: name,
     method: "eth_getLogs",
     params: [
       {

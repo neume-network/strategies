@@ -27,7 +27,6 @@ const signature = {
 export function makeRequest(to, blockNumber) {
   return {
     type: "json-rpc",
-    commissioner: name,
     method: "eth_call",
     params: [
       {

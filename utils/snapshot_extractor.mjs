@@ -3,6 +3,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { once } from "events";
 import { Worker } from "worker_threads";
+import { prepareMessages } from "../src/lifecycle.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -38,7 +39,7 @@ export default async function snapshotExtractor(extractor, { inputs }) {
     const ret = extractor.update(message);
     if (ret.write) write(ret.write);
 
-    ret.messages
+    prepareMessages(ret.messages, extractor.name)
       .filter(({ type }) => type !== "extraction" && type !== "transformation")
       .forEach((message) => {
         postMessage(message);
@@ -53,7 +54,7 @@ export default async function snapshotExtractor(extractor, { inputs }) {
   const ret = await extractor.init(...inputs);
   if (ret.write) write(ret.write);
 
-  ret.messages
+  prepareMessages(ret.messages, extractor.name)
     .filter(({ type }) => type !== "extraction" && type !== "transformation")
     .forEach((message) => {
       postMessage(message);

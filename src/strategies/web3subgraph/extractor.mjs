@@ -5,7 +5,6 @@ export const name = "web3subgraph";
 function generate(first, lastId) {
   return {
     type: "graphql",
-    commissioner: name,
     version,
     options: {
       url: "https://api.thegraph.com/subgraphs/name/timdaub/web3musicsubgraph",

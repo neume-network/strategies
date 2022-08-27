@@ -10,7 +10,6 @@ export function init(start = 1) {
     messages: [
       {
         type: "https",
-        commissioner: name,
         version,
         options: {
           url: templateURI(start),
@@ -39,7 +38,6 @@ export function update(message) {
     messages: [
       {
         type: "https",
-        commissioner: name,
         version,
         options: {
           // NOTE: We're iterating over all numbers here
