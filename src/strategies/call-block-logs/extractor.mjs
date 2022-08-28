@@ -76,15 +76,8 @@ export function update(message) {
   if (message?.method == "eth_blockNumber") {
     let endBlockNumber = message.metadata.end;
     const latestBlockNumber = parseInt(message.results);
-    if (
-      endBlockNumber > latestBlockNumber &&
-      message.metadata.start <= latestBlockNumber
-    ) {
-      log(
-        `Submitted end block number "${endBlockNumber}" is bigger than current chain tip block number "${latestBlockNumber}. Setting end block number to latest block number."`
-      );
-      endBlockNumber = latestBlockNumber;
-    } else {
+
+    if (message.metadata.start > latestBlockNumber) {
       log(
         `Start block number "${message.metadata.start}" is bigger than network's current block number "${latestBlockNumber}"`
       );
@@ -92,6 +85,13 @@ export function update(message) {
         write: null,
         messages: [{ type: "exit" }],
       };
+    }
+
+    if (endBlockNumber > latestBlockNumber) {
+      log(
+        `Submitted end block number "${endBlockNumber}" is bigger than current chain tip block number "${latestBlockNumber}. Setting end block number to latest block number."`
+      );
+      endBlockNumber = latestBlockNumber;
     }
 
     return {

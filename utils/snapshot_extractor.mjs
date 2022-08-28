@@ -54,13 +54,16 @@ export default async function snapshotExtractor(extractor, { inputs }) {
   const ret = await extractor.init(...inputs);
   if (ret.write) write(ret.write);
 
-  prepareMessages(ret.messages, extractor.name)
-    .filter(({ type }) => type !== "extraction" && type !== "transformation")
-    .forEach((message) => {
+  const preparedMessages = prepareMessages(ret.messages, extractor.name).filter(
+    ({ type }) => type !== "extraction" && type !== "transformation"
+  );
+
+  if (preparedMessages.length) {
+    preparedMessages.forEach((message) => {
       postMessage(message);
     });
-
-  await once(worker, "exit");
+    await once(worker, "exit");
+  }
 
   return writeResult;
 }

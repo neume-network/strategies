@@ -14,12 +14,14 @@ const snapshot = fs
   .toString();
 
 test("call-block-logs transformer", (t) => {
-  const { write } = onLine(snapshot);
+  const { write } = onLine(snapshot, resolve(__dirname, "./contracts"), [
+    "Transfer(address,address,uint256)",
+  ]);
 
   const parsed = JSON.parse(write);
   t.plan(parsed.length * 4 + 2);
   t.is(typeof write, "string");
-  t.is(parsed.length, 5);
+  t.is(parsed.length, 2);
   for (let log of parsed) {
     t.truthy(log.address);
     t.truthy(log.topics);

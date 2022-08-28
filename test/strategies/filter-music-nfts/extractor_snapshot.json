@@ -1,0 +1,6 @@
+{
+  "inputs": ["./extractor_input_data", {"0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7": {"name": "zora"}, "0x0bc2a24ce568dad89691116d5b34deb6c203f342": {"name": "catalog"}}],
+  "expect": {
+    "write": "{\"0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7\":{\"name\":\"zora\"},\"0x0bc2a24ce568dad89691116d5b34deb6c203f342\":{\"name\":\"catalog\"},\"0xca13eaa6135d719e743ffebb5c26de4ce2f9600c\":{\"name\":\"sound\"}}\n"
+  }
+}

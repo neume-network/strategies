@@ -5,6 +5,10 @@ import { createReadStream } from "fs";
 
 import { toHex, encodeFunctionCall } from "eth-fun";
 
+// Instead of querying at the block number soundxyz NFT
+// was minted, we query at a higher block number because
+// soundxyz changed their tokenURI and the previous one
+// doesn't work anymore. https://github.com/neume-network/data/issues/19
 const BLOCK_NUMBER = 15050010;
 
 /**
@@ -66,7 +70,7 @@ export const callTokenUriFactory = (props) => {
           to: address,
           data,
         },
-        toHex(BLOCK_NUMBER),
+        toHex(Math.max(parseInt(blockNumber), BLOCK_NUMBER)),
       ],
       metadata: {
         block: {
