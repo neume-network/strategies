@@ -126,7 +126,7 @@ export function onLine(line) {
     );
   });
 
-  let write;
+  let write = "";
   if (logs.length) {
     write = JSON.stringify(logs);
   }
