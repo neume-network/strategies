@@ -21,9 +21,7 @@ export function onError(error) {
   throw error;
 }
 
-let validatedContracts;
-
-export function onLine(line, contracts) {
+export function onLine(line) {
   let logs;
   try {
     logs = parseJSON(line, 100);
@@ -34,11 +32,11 @@ export function onLine(line, contracts) {
     };
   }
 
-  logs = logs.map((log) => ({
+  logs = logs.map(({ metadata, log }) => ({
     address: log.address,
     tokenId: `${BigInt(log.topics[3]).toString(10)}`,
     createdAtBlockNumber: `${parseInt(log.blockNumber, 16)}`,
-    platform: contracts[log.address].name,
+    platform: metadata.platform,
   }));
 
   let write;

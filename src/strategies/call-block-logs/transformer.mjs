@@ -100,31 +100,41 @@ export function onLine(line) {
     keccak256.update(evt);
     return `0x${keccak256.digest("hex")}`;
   });
-  const addresses = Object.keys(contracts);
 
   let logs;
   try {
     logs = parseJSON(line, 100);
   } catch (err) {
+    log(err.toString());
     return {
       write: null,
       messages: [],
     };
   }
-  logs = logs.filter((log) => {
-    // NOTE: For sound's CreatedArtist, we're extracting the artist's address
-    // and then monitor all of that contract's mint events.
-    if (log.address === "0x78e3adc0e811e4f93bd9f1f9389b923c9a3355c2") {
-      addresses.push(decodeArtistAddress(log));
-      return false;
-    }
-    return (
-      log.topics[0] ===
-        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef" &&
-      log.topics[1] === emptyB32 &&
-      addresses.includes(log.address)
-    );
-  });
+
+  logs = logs
+    .filter((log) => {
+      // NOTE: For sound's CreatedArtist, we're extracting the artist's address
+      // and then monitor all of that contract's mint events.
+      if (log.address === "0x78e3adc0e811e4f93bd9f1f9389b923c9a3355c2") {
+        const artistAddress = decodeArtistAddress(log);
+        contracts[artistAddress] =
+          contracts["0x78e3adc0e811e4f93bd9f1f9389b923c9a3355c2"];
+        return false;
+      }
+      return (
+        log.topics[0] ===
+          "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef" &&
+        log.topics[1] === emptyB32 &&
+        Object.keys(contracts).includes(log.address)
+      );
+    })
+    .map((log) => ({
+      metadata: {
+        platform: contracts[log.address],
+      },
+      log,
+    }));
 
   let write;
   if (logs.length) {
