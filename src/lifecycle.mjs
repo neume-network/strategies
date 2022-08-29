@@ -1,8 +1,7 @@
 //@format
 import path from "path";
 import { createInterface } from "readline";
-import { createReadStream } from "fs";
-import { appendFile } from "fs/promises";
+import { createReadStream, appendFileSync } from "fs";
 import EventEmitter, { once } from "events";
 import { env } from "process";
 import Ajv from "ajv";
@@ -10,7 +9,7 @@ import { workerMessage } from "@neume-network/message-schema";
 import { crawlPath as crawlPathSchema } from "@neume-network/schema";
 
 import { NotFoundError } from "./errors.mjs";
-import { loadStrategies, write } from "./disc.mjs";
+import { loadStrategies } from "./disc.mjs";
 import logger from "./logger.mjs";
 
 export const EXTRACTOR_CODES = {
@@ -79,7 +78,7 @@ export async function transform(strategy, sourcePath, outputPath, args) {
   rl.on("line", async (line) => {
     const { write, messages } = strategy.module.onLine(line, ...args);
     if (write) {
-      await appendFile(outputPath, `${write}\n`);
+      appendFileSync(outputPath, `${write}\n`);
     }
     buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   });
@@ -92,7 +91,7 @@ export async function transform(strategy, sourcePath, outputPath, args) {
   await once(rl, "close");
   const { write, messages } = strategy.module.onClose();
   if (write) {
-    await appendFile(outputPath, `${write}\n`);
+    appendFileSync(outputPath, `${write}\n`);
   }
   buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   return buffer;
@@ -148,7 +147,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
     if (result.write) {
       const filePath = generatePath(strategy.module.name, type);
       try {
-        await write(filePath, `${result.write}\n`);
+        appendFileSync(filePath, `${result.write}\n`);
       } catch (err) {
         const error = new Error(
           `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
@@ -195,7 +194,7 @@ export function extract(strategy, worker, messageRouter, args = []) {
         if (result.write) {
           const filePath = generatePath(strategy.module.name, type);
           try {
-            await write(filePath, `${result.write}\n`);
+            appendFileSync(filePath, `${result.write}\n`);
           } catch (err) {
             const error = new Error(
               `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`

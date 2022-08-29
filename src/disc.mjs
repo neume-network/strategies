@@ -42,10 +42,6 @@ export async function getdirdirs(path) {
     .map((file) => resolve(path, file));
 }
 
-export async function write(path, rows) {
-  await appendFile(path, rows);
-}
-
 export function toCSV(list) {
   return list.map((entry) => Object.values(entry).join(",")).join("\n");
 }
