@@ -7,7 +7,7 @@ import test from "ava";
 
 import { onLine } from "../../../src/strategies/call-block-logs/transformer.mjs";
 
-const snapshot = [
+const snapshot0 = [
   {
     address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
     topics: [
@@ -98,6 +98,9 @@ const snapshot = [
     logIndex: "0x123",
     removed: false,
   },
+];
+
+const snapshot1 = [
   {
     address: "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c",
     topics: [
@@ -119,11 +122,11 @@ const snapshot = [
 ];
 
 test("call-block-logs transformer", (t) => {
-  const { write } = onLine(JSON.stringify(snapshot));
+  const res0 = onLine(JSON.stringify(snapshot0));
+  const res1 = onLine(JSON.stringify(snapshot1));
 
-  const parsed = JSON.parse(write);
-  t.plan(parsed.length * 6 + 4);
-  t.is(typeof write, "string");
+  const parsed = [...JSON.parse(res0.write), ...JSON.parse(res1.write)];
+  t.plan(parsed.length * 6 + 3);
   t.is(parsed.length, 5);
   t.is(parsed[4].log.address, "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c");
   t.is(parsed[4].metadata.platform.name, "sound");
