@@ -23,7 +23,6 @@ if (env.RPC_API_KEY) {
 function blockNumber(start, end) {
   return {
     type: "json-rpc",
-    commissioner: name,
     method: "eth_blockNumber",
     params: [],
     metadata: {
