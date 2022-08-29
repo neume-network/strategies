@@ -128,9 +128,13 @@ test("call-block-logs transformer", (t) => {
   t.truthy(res0.write);
   t.truthy(res1.write);
   const parsed = [...JSON.parse(res0.write), ...JSON.parse(res1.write)];
-  t.plan(parsed.length * 6 + 3);
+  t.plan(parsed.length * 6 + 5);
   t.is(parsed.length, 5);
-  for (let log of parsed) {
+  t.is(parsed[4].log.address, "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c");
+  t.is(parsed[4].metadata.platform.name, "sound");
+  for (let { metadata, log } of parsed) {
+    t.truthy(metadata.platform);
+    t.truthy(metadata.platform.name);
     t.truthy(log.address);
     t.truthy(log.topics);
     t.is(
