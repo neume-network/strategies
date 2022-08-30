@@ -1,9 +1,0 @@
-{
-  "inputs": ["0xe17fa72cf70898d4bed5dbca2f389881f15d0490/22"],
-  "expect": {
-    "write": [
-      "0xf5819e27b9bad9f97c177bf007c1f96f26d91ca6/7",
-      "0xefd2dfa5930ddb3d95fb62c731bb4065ae55a8bc/340282366920938463463374607431768211458"
-    ]
-  }
-}
