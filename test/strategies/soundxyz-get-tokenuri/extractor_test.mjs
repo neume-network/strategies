@@ -19,3 +19,16 @@ test("soundxyz-get-tokenuri extractor", async (t) => {
   const result = await snapshotExtractor(soundxyz, snapshot);
   t.is(result, snapshot.expect.write);
 });
+
+test("if soundxyz-get-tokenuri can gracefully shut down if no data is available to process", async (t) => {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+
+  const snapshot = JSON.parse(
+    fs.readFileSync(resolve(__dirname, "./extractor_snapshot.json"))
+  );
+
+  snapshot.inputs[0] = "non-existent-file";
+
+  const result = await snapshotExtractor(soundxyz, snapshot);
+  t.is(result, "");
+});
