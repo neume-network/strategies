@@ -16,7 +16,7 @@ export const props = {
       },
     ],
   },
-  filterFunc: ({ platform }) => platform === "sound",
+  filterFunc: ({ platform }) => platform.name === "sound",
 };
 
 const { init, update } = callTokenUriFactory(props);
