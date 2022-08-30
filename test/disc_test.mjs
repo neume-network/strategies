@@ -1,6 +1,5 @@
 //@format
 import { constants } from "fs";
-import { access, unlink } from "fs/promises";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 

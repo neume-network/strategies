@@ -1,20 +1,13 @@
 //@format
 import test from "ava";
-import { access, readdir } from "fs/promises";
+import { readdir } from "fs/promises";
 
-const STRAGIES_PATH = "../src/strategies";
+import { fileExists } from "../src/disc.mjs";
 
-const checkIfFileExists = async (filePath) => {
-  try {
-    await access(filePath);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
+const STRATEGIES_PATH = "../src/strategies";
 
 test("if strategy name is the same as directory name", async (t) => {
-  const source = new URL(STRAGIES_PATH, import.meta.url);
+  const source = new URL(STRATEGIES_PATH, import.meta.url);
 
   const directories = (await readdir(source, { withFileTypes: true })).filter(
     (dirent) => dirent.isDirectory()
@@ -25,10 +18,13 @@ test("if strategy name is the same as directory name", async (t) => {
       const name = dir.name;
       const sources = await Promise.all(
         [
-          new URL(`${STRAGIES_PATH}/${name}/extractor.mjs`, import.meta.url),
-          new URL(`${STRAGIES_PATH}/${name}/transformer.mjs`, import.meta.url),
+          new URL(`${STRATEGIES_PATH}/${name}/extractor.mjs`, import.meta.url),
+          new URL(
+            `${STRATEGIES_PATH}/${name}/transformer.mjs`,
+            import.meta.url
+          ),
         ].map(async (url) => {
-          if (await checkIfFileExists(url)) {
+          if (await fileExists(url)) {
             return url;
           }
         })

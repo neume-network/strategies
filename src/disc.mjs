@@ -1,6 +1,6 @@
 // @format
 import { constants, statSync } from "fs";
-import { readdir, stat, appendFile } from "fs/promises";
+import { readdir, stat, appendFile, access } from "fs/promises";
 import { resolve, dirname, basename } from "path";
 import { fileURLToPath } from "url";
 
@@ -10,6 +10,15 @@ const log = logger("disc");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const strategyDir = "./strategies";
+
+export async function fileExists(filePath) {
+  try {
+    await access(filePath);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 export async function loadStrategies(pathTip, fileName) {
   const strategyDir = resolve(__dirname, pathTip);
