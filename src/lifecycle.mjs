@@ -9,7 +9,7 @@ import { workerMessage } from "@neume-network/message-schema";
 import { crawlPath as crawlPathSchema } from "@neume-network/schema";
 
 import { NotFoundError } from "./errors.mjs";
-import { loadStrategies } from "./disc.mjs";
+import { fileExists, loadStrategies } from "./disc.mjs";
 import logger from "./logger.mjs";
 
 export const EXTRACTOR_CODES = {
@@ -69,6 +69,12 @@ export function validateCrawlPath(crawlPath) {
 }
 
 export async function transform(strategy, sourcePath, outputPath, args) {
+  if (!(await fileExists(sourcePath))) {
+    log(
+      `Skipping "${strategy.module.name}" transformation as sourcePath file doesn't exist "${sourcePath}"`
+    );
+    return;
+  }
   const rl = createInterface({
     input: createReadStream(sourcePath),
     crlfDelay: Infinity,

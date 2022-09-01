@@ -35,6 +35,17 @@ const mockMessage = {
   },
 };
 
+test("if function transform gracefully returns when sourceFile doesn't exist", async (t) => {
+  const strategy = {
+    module: {
+      name: "test-strategy",
+    },
+  };
+  const sourcePath = "doesn't exist";
+  const result = await transform(strategy, sourcePath);
+  t.falsy(result);
+});
+
 test("if launcher throws errors on invalid strategy type", async (t) => {
   const finder = await setupFinder();
   t.throws(() => finder({ type: "non-existent" }), {
