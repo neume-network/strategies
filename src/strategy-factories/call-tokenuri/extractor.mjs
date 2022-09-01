@@ -5,6 +5,9 @@ import { createReadStream } from "fs";
 
 import { toHex, encodeFunctionCall } from "eth-fun";
 
+import logger from "../../logger.mjs";
+import { fileExists } from "../../disc.mjs";
+
 // Instead of querying at the block number soundxyz NFT
 // was minted, we query at a higher block number because
 // soundxyz changed their tokenURI and the previous one
@@ -17,6 +20,7 @@ const BLOCK_NUMBER = 15050010;
  * */
 export const callTokenUriFactory = (props) => {
   const { strategyName, version, signature, filterFunc } = props;
+  const log = logger(strategyName);
 
   const options = {
     url: env.RPC_HTTP_HOST,
@@ -29,6 +33,15 @@ export const callTokenUriFactory = (props) => {
   }
 
   async function init(filePath) {
+    if (!(await fileExists(filePath))) {
+      log(
+        `Skipping "${strategyName}" extractor execution as file doesn't exist "${filePath}"`
+      );
+      return {
+        write: "",
+        messages: [],
+      };
+    }
     const rl = createInterface({
       input: createReadStream(filePath),
       crlfDelay: Infinity,
