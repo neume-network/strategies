@@ -7,6 +7,7 @@ import { env } from "process";
 import Ajv from "ajv";
 import { workerMessage } from "@neume-network/message-schema";
 import { crawlPath as crawlPathSchema } from "@neume-network/schema";
+import util from "util";
 
 import { NotFoundError } from "./errors.mjs";
 import { fileExists, loadStrategies } from "./disc.mjs";
@@ -259,9 +260,13 @@ export async function init(worker, crawlPath) {
   });
 
   log(
-    `Starting to execute strategies with the following crawlPath ${JSON.stringify(
-      crawlPath
-    )}`
+    `Starting to execute strategies with the following crawlPath`,
+    util.inspect(crawlPath, {
+      depth: null,
+      colors: true,
+      breakLength: "Infinity",
+      compact: true,
+    })
   );
 
   for (const segment of crawlPath) {
