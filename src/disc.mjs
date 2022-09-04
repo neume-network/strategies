@@ -11,6 +11,15 @@ const log = logger("disc");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const strategyDir = "./strategies";
 
+export async function fileExists(filePath) {
+  try {
+    await access(filePath);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function loadStrategies(pathTip, fileName) {
   const strategyDir = resolve(__dirname, pathTip);
   const strategies = await getdirdirs(strategyDir);
@@ -40,10 +49,6 @@ export async function getdirdirs(path) {
   return directories
     .filter((file) => statSync(resolve(path, file)).isDirectory())
     .map((file) => resolve(path, file));
-}
-
-export async function write(path, rows) {
-  await appendFile(path, rows);
 }
 
 export function toCSV(list) {

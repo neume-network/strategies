@@ -5,12 +5,22 @@ import { createReadStream } from "fs";
 
 import { toHex, encodeFunctionCall } from "eth-fun";
 
+import logger from "../../logger.mjs";
+import { fileExists } from "../../disc.mjs";
+
+// Instead of querying at the block number soundxyz NFT
+// was minted, we query at a higher block number because
+// soundxyz changed their tokenURI and the previous one
+// doesn't work anymore. https://github.com/neume-network/data/issues/19
+const BLOCK_NUMBER = 15050010;
+
 /**
  * This strategy factory calls tokenURI(uint256) or equivalent function
  * on the contract.
  * */
-export const getTokenUriFactory = (props) => {
+export const callTokenUriFactory = (props) => {
   const { strategyName, version, signature, filterFunc } = props;
+  const log = logger(strategyName);
 
   const options = {
     url: env.RPC_HTTP_HOST,
@@ -23,6 +33,15 @@ export const getTokenUriFactory = (props) => {
   }
 
   async function init(filePath) {
+    if (!(await fileExists(filePath))) {
+      log(
+        `Skipping "${strategyName}" extractor execution as file doesn't exist "${filePath}"`
+      );
+      return {
+        write: "",
+        messages: [],
+      };
+    }
     const rl = createInterface({
       input: createReadStream(filePath),
       crlfDelay: Infinity,
@@ -43,7 +62,6 @@ export const getTokenUriFactory = (props) => {
           ),
       ];
     }
-    messages[messages.length - 1].last = true;
     return {
       write: null,
       messages,
@@ -56,7 +74,6 @@ export const getTokenUriFactory = (props) => {
     const from = null;
     return {
       type: "json-rpc",
-      commissioner: strategyName,
       options,
       version,
       method: "eth_call",
@@ -66,7 +83,7 @@ export const getTokenUriFactory = (props) => {
           to: address,
           data,
         },
-        toHex(parseInt(blockNumber)),
+        toHex(Math.max(parseInt(blockNumber), BLOCK_NUMBER)),
       ],
       metadata: {
         block: {
@@ -83,20 +100,8 @@ export const getTokenUriFactory = (props) => {
   }
 
   function update(message) {
-    let messages = [];
-    if (message.last) {
-      messages = [
-        {
-          type: "transformation",
-          version,
-          name: strategyName,
-          args: null,
-        },
-      ];
-    }
-
     return {
-      messages,
+      messages: [],
       write: JSON.stringify({
         metadata: message.metadata,
         results: message.results,

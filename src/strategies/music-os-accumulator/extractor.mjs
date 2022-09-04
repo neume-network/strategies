@@ -4,8 +4,12 @@ import { createReadStream } from "fs";
 import { env } from "process";
 import { resolve } from "path";
 
+import logger from "../../logger.mjs";
+import { fileExists } from "../../disc.mjs";
+
 const version = "0.0.1";
 export const name = "music-os-accumulator";
+const log = logger(name);
 export const props = {};
 
 const strategies = [
@@ -97,6 +101,12 @@ const strategies = [
 ];
 
 async function lineReader(filePath, accumulator) {
+  if (!(await fileExists(filePath))) {
+    log(
+      `Couldn't find source file in music-os-accumulator for file "${filePath}"`
+    );
+    return;
+  }
   const rl = createInterface({
     input: createReadStream(filePath),
     crlfDelay: Infinity,
@@ -161,12 +171,7 @@ export async function init() {
     }
   }
   return {
-    messages: [
-      {
-        type: "exit",
-        version: "0.0.1",
-      },
-    ],
+    messages: [],
     write: JSON.stringify(Array.from(tracks.values())),
   };
 }

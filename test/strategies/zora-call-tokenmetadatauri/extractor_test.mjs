@@ -1,5 +1,5 @@
 // @format
-import fs from "fs";
+import fs from "fs/promises";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -12,11 +12,11 @@ test("zora-call-tokenmetadatauri extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(
-    fs.readFileSync(resolve(__dirname, "./extractor_snapshot.json"))
+    await fs.readFile(resolve(__dirname, "./extractor_snapshot.json"))
   );
 
   snapshot.inputs[0] = resolve(__dirname, snapshot.inputs[0]);
 
   const result = await snapshotExtractor(zora, snapshot);
-  t.is(result, snapshot.expect.write);
+  t.deepEqual(JSON.parse(result), JSON.parse(snapshot.expect.write));
 });

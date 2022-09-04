@@ -1,6 +1,5 @@
 //@format
 import { constants } from "fs";
-import { access, unlink } from "fs/promises";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -10,7 +9,6 @@ import {
   loadStrategies,
   toJSON,
   toCSV,
-  write,
   getdirdirs,
   loadAll,
 } from "../src/disc.mjs";
@@ -71,21 +69,6 @@ test("reading directory files", async (t) => {
   t.true(dirs.includes(resolve(path, "src")));
   t.true(dirs.includes(resolve(path, "test")));
   t.false(dirs.includes(resolve(path, "readme.md")));
-});
-
-test("writing csv to disk", async (t) => {
-  const path = "data.csv";
-  const header = "a,b";
-  const rows = "1,2";
-  await write(path, header, rows);
-  try {
-    await access(path, constants.R_OK);
-  } catch (err) {
-    t.log(err);
-    t.fail();
-  }
-  await unlink(path);
-  t.pass();
 });
 
 test("transforming to CSV", (t) => {

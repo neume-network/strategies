@@ -21,6 +21,8 @@ WARNING: This repository is under active development and APIs aren't stable.
 
 ## implementing new strategies
 
+Checkout the [quickstart guide](https://github.com/neume-network/strategies/blob/main/docs/quickstart.md) for a in-depth walkthrough.
+
 ### high-level checklist for implementation
 
 - Any external request message passed to @neume-network/extraction-worker must
@@ -33,7 +35,7 @@ WARNING: This repository is under active development and APIs aren't stable.
 
 To implement a strategy with maximum efficiency, we recommend doing all
 on-chain and off-chain requests using the [extraction Worker
-API](https://github.com/neume-network/core/tree/main/src/services/extractor#extractor-worker-api).
+API](https://github.com/neume-network/extraction-worker#extractor-worker-api).
 
 ### extractor strategy interface definition
 

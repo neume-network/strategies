@@ -1,6 +1,5 @@
 // @format
-import { env } from "process";
-import fs from "fs";
+import fs from "fs/promises";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import test from "ava";
@@ -12,7 +11,7 @@ test("zora-get-tokenuri extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(
-    fs.readFileSync(resolve(__dirname, "./extractor_snapshot.json"))
+    await fs.readFile(resolve(__dirname, "./extractor_snapshot.json"))
   );
 
   snapshot.inputs[0] = resolve(__dirname, snapshot.inputs[0]);
@@ -31,4 +30,17 @@ test("zora-get-tokenuri extractor", async (t) => {
   t.truthy(res2.metadata.tokenURI);
   delete res2.metadata.tokenURI;
   t.deepEqual(res1, expected);
+});
+
+test("if zora-get-tokenuri can gracefully shutdown if no call-tokenuri file is present", async (t) => {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+
+  const snapshot = JSON.parse(
+    await fs.readFile(resolve(__dirname, "./extractor_snapshot.json"))
+  );
+
+  snapshot.inputs[0] = "non-existent";
+
+  const result = await snapshotExtractor(extractor, snapshot);
+  t.is(result, "");
 });
