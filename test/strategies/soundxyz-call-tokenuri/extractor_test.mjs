@@ -18,5 +18,5 @@ test("soundxyz-call-tokenuri extractor", async (t) => {
   snapshot.inputs[0] = resolve(__dirname, snapshot.inputs[0]);
 
   const result = await snapshotExtractor(extractor, snapshot);
-  t.is(result, snapshot.expect.write);
+  t.deepEqual(JSON.parse(result), JSON.parse(snapshot.expect.write));
 });

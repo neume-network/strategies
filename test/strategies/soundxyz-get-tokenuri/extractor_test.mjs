@@ -17,7 +17,7 @@ test("soundxyz-get-tokenuri extractor", async (t) => {
   snapshot.inputs[0] = resolve(__dirname, snapshot.inputs[0]);
 
   const result = await snapshotExtractor(soundxyz, snapshot);
-  t.is(result, snapshot.expect.write);
+  t.deepEqual(JSON.parse(result), JSON.parse(snapshot.expect.write));
 });
 
 test("if soundxyz-get-tokenuri can gracefully shut down if no data is available to process", async (t) => {

@@ -65,5 +65,5 @@ test.skip("call-block-logs extractor", async (t) => {
   snapshot.inputs = content;
 
   const result = await snapshotExtractor(blockLogs, snapshot);
-  t.is(result, snapshot.expect.write);
+  t.deepEqual(JSON.parse(result), JSON.parse(snapshot.expect.write));
 });
