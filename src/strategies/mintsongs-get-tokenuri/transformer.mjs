@@ -3,7 +3,7 @@ import logger from "../../logger.mjs";
 
 export const name = "mintsongs-get-tokenuri";
 const log = logger(name);
-export const version = "0.0.1";
+export const version = "2.0.0";
 
 export function onClose() {
   log("closed");
@@ -59,11 +59,10 @@ export function onLine(line) {
       },
       erc721: {
         version,
-        createdAt: metadata.block.number,
-        tokenId: metadata.tokenId,
-        // TODO
-        //address: nft[1],
-        tokenURI: metadata.tokenURI,
+        createdAt: metadata?.block?.number,
+        tokenId: metadata?.tokenId,
+        address: metadata?.contract?.address,
+        tokenURI: metadata?.tokenURI,
         metadata: {
           ...datum,
           name: title,
@@ -77,6 +76,8 @@ export function onLine(line) {
           mimetype: "image",
         },
       ],
+      // TODO
+      // owner: {}
     }),
   };
 }
