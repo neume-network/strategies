@@ -1,8 +1,4 @@
 //@format
-import fs from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
-
 import test from "ava";
 
 import { onLine } from "../../../src/strategies/call-block-logs/transformer.mjs";
