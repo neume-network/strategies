@@ -121,9 +121,37 @@ const snapshot1 = [
   },
 ];
 
+test("if call-block-logs transformer throws when passing in upper-cased contract addresses", (t) => {
+  const contracts = {
+    "0xabEFBc9fD2F806065b4f3C237d4b59D9A97Bcac7": {
+      name: "zora",
+    },
+  };
+  t.throws(() => onLine(JSON.stringify(snapshot0), contracts));
+});
+
 test("call-block-logs transformer", (t) => {
-  const res0 = onLine(JSON.stringify(snapshot0));
-  const res1 = onLine(JSON.stringify(snapshot1));
+  const contracts = {
+    "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7": {
+      name: "zora",
+    },
+    "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c": {
+      name: "sound",
+    },
+    "0x0bc2a24ce568dad89691116d5b34deb6c203f342": {
+      name: "catalog",
+      version: "2.0.0",
+    },
+    "0xf5819e27b9bad9f97c177bf007c1f96f26d91ca6": {
+      name: "noizd",
+    },
+    "0x2b5426a5b98a3e366230eba9f95a24f09ae4a584": {
+      name: "mintsongs",
+      version: "2.0.0",
+    },
+  };
+  const res0 = onLine(JSON.stringify(snapshot0), contracts);
+  const res1 = onLine(JSON.stringify(snapshot1), contracts);
 
   t.truthy(res0.write);
   t.truthy(res1.write);
