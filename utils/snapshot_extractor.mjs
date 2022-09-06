@@ -32,7 +32,7 @@ export default async function snapshotExtractor(extractor, { inputs }) {
   worker.on("message", (message) => {
     if (message.error) {
       worker.emit("exit");
-      console.error(message);
+      console.error("Encountered error in SnapshotExtractor", message);
       throw new Error(message.error);
     }
 
