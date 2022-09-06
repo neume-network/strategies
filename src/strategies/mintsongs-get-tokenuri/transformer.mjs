@@ -59,7 +59,7 @@ export function onLine(line) {
       },
       erc721: {
         version,
-        createdAt: metadata?.block?.number,
+        createdAt: parseInt(metadata?.block?.number, 10),
         tokenId: metadata?.tokenId,
         address: metadata?.contract?.address,
         tokenURI: metadata?.tokenURI,
