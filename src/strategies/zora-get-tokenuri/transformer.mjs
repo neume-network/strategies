@@ -3,7 +3,7 @@ import logger from "../../logger.mjs";
 
 export const name = "zora-get-tokenuri";
 const log = logger(name);
-export const version = "0.1.0";
+export const version = "1.0.0";
 
 export function onClose() {
   log("closed");

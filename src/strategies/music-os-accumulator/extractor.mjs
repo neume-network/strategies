@@ -98,6 +98,26 @@ const strategies = [
       };
     },
   },
+  {
+    files: ["catalog-get-tokenuri-transformation"],
+    map: [],
+    accumulator: (list) => {
+      return (line) => {
+        const data = JSON.parse(line);
+        list.push(data);
+      };
+    },
+  },
+  {
+    files: ["mintsongs-get-tokenuri-transformation"],
+    map: [],
+    accumulator: (list) => {
+      return (line) => {
+        const data = JSON.parse(line);
+        list.push(data);
+      };
+    },
+  },
 ];
 
 async function lineReader(filePath, accumulator) {
@@ -138,11 +158,15 @@ export async function init() {
     zora: {
       tokenuri: strategies[2].map,
     },
+    catalog: strategies[3].map,
   };
 
   const tracks = new Map();
   for (let [tokenURI, metadata] of data.metadata) {
-    if (metadata.platform.name === "Catalog") {
+    if (
+      metadata.platform.name === "Catalog" &&
+      metadata.platform.version === "1.0.0"
+    ) {
       const chainData = data.uris.get(tokenURI);
       metadata.erc721.address = chainData.metadata.contract.address;
       metadata.erc721.tokenId = chainData.metadata.tokenId;
@@ -170,9 +194,12 @@ export async function init() {
       tracks.set(tokenURI, metadata);
     }
   }
+  let trackList = Array.from(tracks.values());
+  trackList = [...trackList, ...strategies[3].map];
+  trackList = [...trackList, ...strategies[4].map];
   return {
     messages: [],
-    write: JSON.stringify(Array.from(tracks.values())),
+    write: JSON.stringify(trackList),
   };
 }
 
