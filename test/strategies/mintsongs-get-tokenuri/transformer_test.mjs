@@ -82,7 +82,5 @@ test("mintsongs-get-tokenuri transformer", async (t) => {
   const data = JSON.parse(write);
   const valid = validate(data);
 
-  t.false(valid);
-  t.is(validate.errors.length, 1);
-  t.is(data.erc721.tokenURI, payload.metadata.tokenURI);
+  t.true(valid);
 });
