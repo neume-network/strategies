@@ -50,10 +50,7 @@ test("if call-block-logs adjusts end block number when start block is in range o
   t.is(messages[0].params[0].fromBlock, "0xeb2206");
 });
 
-// NOTE: Since we now use `init` to first download the network's current block,
-// it seems `snapshotExtractor` isn't capable of waiting a number of messages
-// before return the results.
-test.skip("call-block-logs extractor", async (t) => {
+test("call-block-logs extractor", async (t) => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const snapshot = JSON.parse(
