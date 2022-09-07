@@ -184,6 +184,7 @@ export async function init() {
 
       if (media && version && version.includes("catalog")) {
         metadata.manifestations[0].uri = media.tokenURI;
+        metadata.manifestations[0].mimetype = "audio";
         tracks.set(tokenURI, metadata);
       }
     } else if (metadata.platform.name === "Sound") {
