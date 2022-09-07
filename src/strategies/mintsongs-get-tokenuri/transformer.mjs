@@ -31,10 +31,8 @@ export function onLine(line) {
   const metadata = data.metadata;
   const datum = data.results;
 
-  const title = datum?.project?.title ?? datum?.name;
   const artist = datum?.artist;
   const description = datum?.description;
-  const artwork = datum?.project?.artwork?.uri;
   let duration;
   if (datum?.duration) {
     duration = `PT${Math.floor(datum.duration / 60)}M${(
@@ -46,7 +44,7 @@ export function onLine(line) {
     messages: [],
     write: JSON.stringify({
       version,
-      title,
+      title: datum.title,
       duration,
       artist: {
         version,
@@ -67,15 +65,20 @@ export function onLine(line) {
         tokenURI: metadata?.tokenURI,
         metadata: {
           ...datum,
-          name: title,
+          name: datum.title,
           description,
         },
       },
       manifestations: [
         {
           version,
-          uri: artwork,
-          mimetype: "image",
+          uri: datum.losslessAudio,
+          mimetype: datum.mimeType,
+        },
+        {
+          version,
+          uri: datum.artwork.uri,
+          mimetype: datum.artwork.mimeType,
         },
       ],
     }),
