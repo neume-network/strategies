@@ -139,106 +139,117 @@ export function extract(strategy, worker, messageRouter, args = []) {
       );
     }, 120_000);
 
-    const result = await strategy.module.init(...args);
-    if (!result) {
-      const error = new Error(
-        `Strategy "${
-          strategy.module.name
-        }-extraction" didn't return a valid result: "${JSON.stringify(result)}"`
-      );
-      error.code = EXTRACTOR_CODES.FAILURE;
-      clearInterval(interval);
-      return reject(error);
-    }
-
-    if (result.write) {
-      const filePath = generatePath(strategy.module.name, type);
-      try {
-        appendFileSync(filePath, `${result.write}\n`);
-      } catch (err) {
-        const error = new Error(
-          `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
-        );
-        error.code = EXTRACTOR_CODES.FAILURE;
-        clearInterval(interval);
-        return reject(error);
-      }
-    }
-
     const callback = async (message) => {
       numberOfMessages--;
       log(`Leftover Lifecycle Messages: ${numberOfMessages}`);
 
-      if (message.error) {
-        log(
-          `Received error message from worker for strategy "${strategy.module.name}": "${message.error}"`
-        );
-      } else {
-        const result = await strategy.module.update(message);
-        if (!result) {
-          const error = new Error(
-            `Strategy "${
-              strategy.module.name
-            }-extraction" didn't return a valid result: "${JSON.stringify(
-              result
-            )}"`
+      try {
+        if (message.error) {
+          log(
+            `Received error message from worker for strategy "${strategy.module.name}": "${message.error}"`
           );
-          error.code = EXTRACTOR_CODES.FAILURE;
-          messageRouter.off(`${strategy.module.name}-${type}`, callback);
-          clearInterval(interval);
-          return reject(error);
-        }
-
-        if (result.messages?.length !== 0) {
-          prepareMessages(result.messages, strategy.module.name).forEach(
-            (message) => {
-              numberOfMessages++;
-              worker.postMessage(message);
-            }
-          );
-        }
-
-        if (result.write) {
-          const filePath = generatePath(strategy.module.name, type);
-          try {
-            appendFileSync(filePath, `${result.write}\n`);
-          } catch (err) {
+        } else {
+          const result = await strategy.module.update(message);
+          if (!result) {
             const error = new Error(
-              `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+              `Strategy "${
+                strategy.module.name
+              }-extraction" didn't return a valid result: "${JSON.stringify(
+                result
+              )}"`
             );
             error.code = EXTRACTOR_CODES.FAILURE;
-            messageRouter.off(`${strategy.module.name}-${type}`, callback);
-            clearInterval(interval);
-            return reject(error);
+            throw err;
+          }
+
+          if (result.messages?.length !== 0) {
+            prepareMessages(result.messages, strategy.module.name).forEach(
+              (message) => {
+                numberOfMessages++;
+                worker.postMessage(message);
+              }
+            );
+          }
+
+          if (result.write) {
+            const filePath = generatePath(strategy.module.name, type);
+            try {
+              appendFileSync(filePath, `${result.write}\n`);
+            } catch (err) {
+              const error = new Error(
+                `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+              );
+              error.code = EXTRACTOR_CODES.FAILURE;
+              throw err;
+            }
           }
         }
-      }
 
-      if (numberOfMessages === 0) {
-        log("Shutting down extraction in update callback function");
-        messageRouter.off(`${strategy.module.name}-${type}`, callback);
-        clearInterval(interval);
-        resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_UPDATE });
+        if (numberOfMessages === 0) {
+          log("Shutting down extraction in update callback function");
+          cleanup();
+          resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_UPDATE });
+        }
+      } catch (err) {
+        log(`Error in lifecycle extract function: ${err.message}`);
+        cleanup();
+        reject(err);
       }
     };
 
-    messageRouter.on(`${strategy.module.name}-${type}`, callback);
-
-    let preparedMessages =
-      result.messages?.length !== 0
-        ? prepareMessages(result.messages, strategy.module.name)
-        : 0;
-
-    if (preparedMessages.length > 0) {
-      preparedMessages.forEach((message) => {
-        numberOfMessages++;
-        worker.postMessage(message);
-      });
-    } else {
-      log("Shutting down extraction in init follow-up function");
-      messageRouter.off(`${strategy.module.name}-${type}`, callback);
+    const cleanup = () => {
       clearInterval(interval);
-      resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_INIT });
+      messageRouter.off(`${strategy.module.name}-${type}`, callback);
+    };
+
+    try {
+      const result = await strategy.module.init(...args);
+      if (!result) {
+        const error = new Error(
+          `Strategy "${
+            strategy.module.name
+          }-extraction" didn't return a valid result: "${JSON.stringify(
+            result
+          )}"`
+        );
+        error.code = EXTRACTOR_CODES.FAILURE;
+        throw error;
+      }
+
+      if (result.write) {
+        const filePath = generatePath(strategy.module.name, type);
+        try {
+          appendFileSync(filePath, `${result.write}\n`);
+        } catch (err) {
+          const error = new Error(
+            `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+          );
+          error.code = EXTRACTOR_CODES.FAILURE;
+          throw error;
+        }
+      }
+
+      messageRouter.on(`${strategy.module.name}-${type}`, callback);
+
+      let preparedMessages =
+        result.messages?.length !== 0
+          ? prepareMessages(result.messages, strategy.module.name)
+          : 0;
+
+      if (preparedMessages.length > 0) {
+        preparedMessages.forEach((message) => {
+          numberOfMessages++;
+          worker.postMessage(message);
+        });
+      } else {
+        log("Shutting down extraction in init follow-up function");
+        cleanup();
+        resolve({ code: EXTRACTOR_CODES.SHUTDOWN_IN_INIT });
+      }
+    } catch (err) {
+      log(`Error in lifecycle extract function: ${err.message}`);
+      cleanup();
+      reject(err);
     }
   });
 }

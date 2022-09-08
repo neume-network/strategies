@@ -291,6 +291,65 @@ test("if extract() resolves the promise and removes the listener on no message f
   t.pass();
 });
 
+test("if extract function rejects promise on any unhandled error by update", async (t) => {
+  const mockStrategy = {
+    module: {
+      name: "mockMessage",
+      init: () => {
+        return { messages: [mockMessage], write: null };
+      },
+      update: () => {
+        throw new Error("Error in update");
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
+  await t.throwsAsync(
+    async () => {
+      await extract(mockStrategy, worker, router);
+    },
+    { message: "Error in update" }
+  );
+  t.deepEqual(router.eventNames(), []);
+});
+
+test("if extract function rejects promise on any unhandled error by init", async (t) => {
+  const mockStrategy = {
+    module: {
+      name: "mockMessage",
+      init: () => {
+        throw new Error("Error in init");
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
+  await t.throwsAsync(
+    async () => {
+      await extract(mockStrategy, worker, router);
+    },
+    { message: "Error in init" }
+  );
+  t.deepEqual(router.eventNames(), []);
+});
+
 test("if prepareMessages filters invalid message and prepare message for worker", async (t) => {
   const messages = [mockMessage, {}, { ...mockMessage, type: "invalid-type" }];
 
