@@ -4,6 +4,8 @@ import { createReadStream } from "fs";
 import { env } from "process";
 import { resolve } from "path";
 
+import uniqWith from "lodash.uniqwith";
+
 import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
 
@@ -143,6 +145,13 @@ function caip19(address, tokenId) {
   return `eip155:1/erc721:${address}/${tokenId}`;
 }
 
+function isUnique(arrVal, othVal) {
+  return (
+    arrVal.erc721.address === othVal.erc721.address &&
+    arrVal.erc721.tokenId == othVal.erc721.tokenId
+  );
+}
+
 export async function init() {
   const maps = [];
   for await (const strategyType of strategies) {
@@ -158,7 +167,6 @@ export async function init() {
     zora: {
       tokenuri: strategies[2].map,
     },
-    catalog: strategies[3].map,
   };
 
   const tracks = new Map();
@@ -198,6 +206,8 @@ export async function init() {
   let trackList = Array.from(tracks.values());
   trackList = [...trackList, ...strategies[3].map];
   trackList = [...trackList, ...strategies[4].map];
+  // NOTE: See: https://github.com/neume-network/strategies/issues/246#issuecomment-1240365903
+  trackList = uniqWith(trackList, isUnique);
   return {
     messages: [],
     write: JSON.stringify(trackList),

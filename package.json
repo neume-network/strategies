@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@neume-network/message-schema": "0.3.1",
+    "lodash.uniqwith": "4.5.0",
     "sha3": "2.1.4"
   },
   "peerDependencies": {
