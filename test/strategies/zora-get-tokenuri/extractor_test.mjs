@@ -22,14 +22,10 @@ test("zora-get-tokenuri extractor", async (t) => {
   const expected = JSON.parse(snapshot.expect.write.lines[0]);
   delete expected.metadata.tokenURI;
 
-  let [res1, res2] = result.split("\n");
-  res1 = JSON.parse(res1);
-  t.truthy(res1.metadata.tokenURI);
-  delete res1.metadata.tokenURI;
-  res2 = JSON.parse(res2);
-  t.truthy(res2.metadata.tokenURI);
-  delete res2.metadata.tokenURI;
-  t.deepEqual(res1, expected);
+  let res = JSON.parse(result);
+  t.truthy(res.metadata.tokenURI);
+  delete res.metadata.tokenURI;
+  t.deepEqual(res, expected);
 });
 
 test("if zora-get-tokenuri can gracefully shutdown if no call-tokenuri file is present", async (t) => {
