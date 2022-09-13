@@ -65,6 +65,15 @@ function generateMessages(start, end) {
 }
 
 export function init(start = 0, end) {
+  if (end < start) {
+    log(
+      `End (${end}) block number is smaller than start (${start}) block number`
+    );
+    return {
+      write: null,
+      messages: [{ type: "exit" }],
+    };
+  }
   return {
     write: null,
     messages: [blockNumber(start, end)],
