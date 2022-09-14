@@ -7,6 +7,7 @@ import { toHex, encodeFunctionCall } from "eth-fun";
 
 import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
+import { eth_callSchema } from "./schema.mjs";
 
 // Instead of querying at the block number soundxyz NFT
 // was minted, we query at a higher block number because
@@ -95,6 +96,7 @@ export const callTokenUriFactory = (props) => {
         tokenId,
       },
       results: null,
+      schema: eth_callSchema,
       error: null,
     };
   }

@@ -1,10 +1,12 @@
 //@format
 import { env } from "process";
+import { readFile } from "fs/promises";
 import assert from "assert";
 
 import { toHex } from "eth-fun";
 
 import logger from "../../logger.mjs";
+import { eth_blockNumberSchema, eth_getLogsSchema } from "./schemas.mjs";
 
 const version = "0.0.1";
 export const name = "call-block-logs";
@@ -32,6 +34,7 @@ function blockNumber(start, end) {
     version,
     options,
     results: null,
+    schema: eth_blockNumberSchema,
     error: null,
   };
 }
@@ -50,6 +53,7 @@ function callBlockLogs(number) {
     version,
     options,
     results: null,
+    schema: eth_getLogsSchema,
     error: null,
   };
 }
