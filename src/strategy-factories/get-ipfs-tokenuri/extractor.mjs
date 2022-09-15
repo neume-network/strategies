@@ -7,7 +7,7 @@ import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
 
 export const getIpfsTokenUriFactory = (props) => {
-  const { strategyName, options, version } = props;
+  const { strategyName, options, version, schema } = props;
   const log = logger(strategyName);
 
   if (env.IPFS_HTTPS_GATEWAY_KEY) {
@@ -69,6 +69,7 @@ export const getIpfsTokenUriFactory = (props) => {
         headers: options.headers,
       },
       results: null,
+      schema,
       error: null,
     };
   };

@@ -5,6 +5,7 @@ import { createReadStream, appendFileSync } from "fs";
 import EventEmitter, { once } from "events";
 import { env } from "process";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import { workerMessage } from "@neume-network/message-schema";
 import { crawlPath as crawlPathSchema } from "@neume-network/schema";
 import util from "util";
@@ -28,6 +29,7 @@ const fileNames = {
   extractor: "extractor.mjs",
 };
 const ajv = new Ajv();
+addFormats(ajv);
 const workerValidator = ajv.compile(workerMessage);
 const crawlPathValidator = ajv.compile(crawlPathSchema);
 
