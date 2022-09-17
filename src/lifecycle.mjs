@@ -177,11 +177,11 @@ export function extract(strategy, worker, messageRouter, args = []) {
         );
       } else {
         let valid = true;
-        const validator = ajv.compile(message.schema);
+        let validator;
         if (message.schema) {
+          validator = ajv.compile(message.schema);
           valid = validator(message.results);
         }
-
         if (valid) {
           const result = await strategy.module.update(message);
           if (!result) {
