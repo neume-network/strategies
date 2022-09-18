@@ -12,7 +12,7 @@ addFormats(ajv);
 test("mintsongs-get-tokenuri transformer", async (t) => {
   const payload = {
     metadata: {
-      block: { number: "15249235" },
+      block: { number: 15249235 },
       contract: { address: "0x2b5426a5b98a3e366230eba9f95a24f09ae4a584" },
       tokenId: "136",
       tokenURI:

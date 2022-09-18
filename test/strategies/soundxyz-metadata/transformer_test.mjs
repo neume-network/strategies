@@ -16,6 +16,6 @@ test("soundxyz-metadata transformer", (t) => {
   const { write } = onLine(snapshot.expect.write);
   t.is(
     write,
-    '{"results":{"fundingRecipient":"0x92526B99715AFeEd324Fb56EcAFcac8056379300","price":"100000000000000000","numSold":"6","quantity":"25","royaltyBPS":"1000","startTime":"1646605996","endTime":"4294967295","presaleQuantity":"25","signerAddress":"0xA66CDDA1817C85eD3D232a5Affd17673E933D8a7"},"metadata":{"block":{"number":"14323199"},"contract":{"address":"0x01ab7d30525e4f3010af27a003180463a6c811a6"},"tokenId":"1"}}'
+    '{"results":{"fundingRecipient":"0x92526B99715AFeEd324Fb56EcAFcac8056379300","price":"100000000000000000","numSold":"6","quantity":"25","royaltyBPS":"1000","startTime":"1646605996","endTime":"4294967295","presaleQuantity":"25","signerAddress":"0xA66CDDA1817C85eD3D232a5Affd17673E933D8a7"},"metadata":{"block":{"number":14323199},"contract":{"address":"0x01ab7d30525e4f3010af27a003180463a6c811a6"},"tokenId":"1"}}'
   );
 });
