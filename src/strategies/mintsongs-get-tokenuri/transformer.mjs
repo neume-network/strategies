@@ -59,7 +59,7 @@ export function onLine(line) {
         // TODO: Remove hardcoded owner value
         owner: "0x681452d95caef97a88d25a452dc1bc2b62d7f134",
         version,
-        createdAt: parseInt(metadata?.block?.number, 10),
+        createdAt: metadata?.block?.number,
         tokenId: metadata?.tokenId,
         address: metadata?.contract?.address,
         tokenURI: metadata?.tokenURI,

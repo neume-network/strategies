@@ -86,7 +86,7 @@ export function makeRequest(tokenId, blockNumber) {
         to: props.contract.address,
         data,
       },
-      toHex(parseInt(blockNumber)),
+      toHex(blockNumber),
     ],
     metadata: {
       block: {
@@ -135,7 +135,7 @@ export function update(message) {
               to: props.contract.address,
               data,
             },
-            toHex(parseInt(message.metadata.block.number)),
+            toHex(message.metadata.block.number),
           ],
           metadata: {
             block: {

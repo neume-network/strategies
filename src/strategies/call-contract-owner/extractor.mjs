@@ -34,7 +34,7 @@ export function makeRequest(to, blockNumber) {
         to,
         data: encodeFunctionSignature(signature),
       },
-      toHex(parseInt(blockNumber, 10)),
+      toHex(blockNumber, 10),
     ],
     version,
     options,
