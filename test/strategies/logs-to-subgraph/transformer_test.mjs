@@ -107,24 +107,32 @@ test("if event logs are appropriately migrated to web3subgraph compatible NFT ID
       tokenId: "7437",
       createdAtBlockNumber: 14005508,
       platform: { name: "zora" },
+      transactionHash:
+        "0x578e40828fa70d7bcb95df6ac42ea5d4367729daac34faa5d8aba839e8196fcc",
     },
     {
       address: "0x0bc2a24ce568dad89691116d5b34deb6c203f342",
       tokenId: "1",
       createdAtBlockNumber: 14617046,
       platform: { name: "catalog", version: "2.0.0" },
+      transactionHash:
+        "0x15688480a318ba0c14a6462466a9ed000dd70212b16cf669b627c3eaea5ee4ca",
     },
     {
       address: "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c",
       tokenId: "680564733841876926926749214863536422962",
       createdAtBlockNumber: 14757111,
       platform: { name: "sound" },
+      transactionHash:
+        "0x963e9bfc038f87742cc6cd300b178fb8bd33fd6c2de5ee12b37081d23c16af73",
     },
     {
       address: "0xfd830f101f83df78b37f7a39514fcf132f7d3668",
       tokenId: "340282366920938463463374607431768211465",
       createdAtBlockNumber: 3735928559,
       platform: { name: "sound" },
+      transactionHash:
+        "0x399d8b5b48b9c61398f84488f6873c73da12dd80f586bcad40aa5e67c1681dfc",
     },
   ];
   t.is(write, JSON.stringify(expected));

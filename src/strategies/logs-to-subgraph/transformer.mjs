@@ -37,6 +37,7 @@ export function onLine(line) {
     tokenId: `${BigInt(log.topics[3]).toString(10)}`,
     createdAtBlockNumber: parseInt(log.blockNumber, 16),
     platform: metadata.platform,
+    transactionHash: log.transactionHash,
   }));
 
   let write;
