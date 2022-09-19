@@ -10,14 +10,11 @@ ecosystem.
 
 ## installation and contributing
 
-Unless you want to run this repository's unit tests, for now, this repository
-can't run by itself. Instead, we recommend you run it as a submodule of
-neume-network/core. Please follow [its installation
-instructions](https://github.com/neume-network/core#installation).
-
-## work-in-progress
-
-WARNING: This repository is under active development and APIs aren't stable.
+- It's best to install the strategies repository via
+  [neume-network/core](https://github.com/neume-network/core) as `npm i` will
+  download the submodule and install its dependencies
+- To run the tests via `npm run test` a properly set up `.env` is necessary. We
+  recommend softlinking from core's `.env` file using `ln`
 
 ## implementing new strategies
 
