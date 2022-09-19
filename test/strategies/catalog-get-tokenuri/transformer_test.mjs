@@ -12,7 +12,7 @@ addFormats(ajv);
 test("catalog-get-tokenuri transformer", async (t) => {
   const payload = {
     metadata: {
-      block: { number: "14618792" },
+      block: { number: 14618792 },
       contract: { address: "0x0bc2a24ce568dad89691116d5b34deb6c203f342" },
       tokenId: "10",
       tokenURI:

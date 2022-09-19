@@ -35,7 +35,7 @@ export function onLine(line) {
   logs = logs.map(({ metadata, log }) => ({
     address: log.address,
     tokenId: `${BigInt(log.topics[3]).toString(10)}`,
-    createdAtBlockNumber: `${parseInt(log.blockNumber, 16)}`,
+    createdAtBlockNumber: parseInt(log.blockNumber, 16),
     platform: metadata.platform,
   }));
 

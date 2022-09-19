@@ -105,25 +105,25 @@ test("if event logs are appropriately migrated to web3subgraph compatible NFT ID
     {
       address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
       tokenId: "7437",
-      createdAtBlockNumber: "14005508",
+      createdAtBlockNumber: 14005508,
       platform: { name: "zora" },
     },
     {
       address: "0x0bc2a24ce568dad89691116d5b34deb6c203f342",
       tokenId: "1",
-      createdAtBlockNumber: "14617046",
+      createdAtBlockNumber: 14617046,
       platform: { name: "catalog", version: "2.0.0" },
     },
     {
       address: "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c",
       tokenId: "680564733841876926926749214863536422962",
-      createdAtBlockNumber: "14757111",
+      createdAtBlockNumber: 14757111,
       platform: { name: "sound" },
     },
     {
       address: "0xfd830f101f83df78b37f7a39514fcf132f7d3668",
       tokenId: "340282366920938463463374607431768211465",
-      createdAtBlockNumber: "3735928559",
+      createdAtBlockNumber: 3735928559,
       platform: { name: "sound" },
     },
   ];

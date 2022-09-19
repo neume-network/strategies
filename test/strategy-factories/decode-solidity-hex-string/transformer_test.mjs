@@ -7,7 +7,7 @@ test("decode-solidity-hex-string", async (t) => {
   const line = {
     metadata: {
       block: {
-        number: "15235699",
+        number: 15235699,
       },
       contract: {
         address: "0x2b5426a5b98a3e366230eba9f95a24f09ae4a584",

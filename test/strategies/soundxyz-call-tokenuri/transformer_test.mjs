@@ -18,7 +18,7 @@ test("soundxyz-call-tokenuri transformer", (t) => {
   const expected = {
     metadata: {
       block: {
-        number: "14323199",
+        number: 14323199,
       },
       contract: { address: "0x01ab7d30525e4f3010af27a003180463a6c811a6" },
       tokenId: "1",

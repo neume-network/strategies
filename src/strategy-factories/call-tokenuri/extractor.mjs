@@ -84,7 +84,7 @@ export const callTokenUriFactory = (props) => {
           to: address,
           data,
         },
-        toHex(Math.max(parseInt(blockNumber), BLOCK_NUMBER)),
+        toHex(Math.max(blockNumber, BLOCK_NUMBER)),
       ],
       metadata: {
         block: {
