@@ -3,9 +3,13 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { once } from "events";
 import { Worker } from "worker_threads";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import { prepareMessages } from "../src/lifecycle.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const ajv = new Ajv();
+addFormats(ajv);
 
 export default async function snapshotExtractor(extractor, { inputs }) {
   const worker = new Worker(resolve(__dirname, "./worker_start.mjs"), {
@@ -36,14 +40,25 @@ export default async function snapshotExtractor(extractor, { inputs }) {
       throw new Error(message.error);
     }
 
-    const ret = extractor.update(message);
-    if (ret.write) write(ret.write);
+    let valid = true;
+    let validator;
+    if (message.schema) {
+      validator = ajv.compile(message.schema);
+      valid = validator(message.results);
+    }
 
-    prepareMessages(ret.messages, extractor.name)
-      .filter(({ type }) => type !== "extraction" && type !== "transformation")
-      .forEach((message) => {
-        postMessage(message);
-      });
+    if (valid) {
+      const ret = extractor.update(message);
+      if (ret.write) write(ret.write);
+
+      prepareMessages(ret.messages, extractor.name)
+        .filter(
+          ({ type }) => type !== "extraction" && type !== "transformation"
+        )
+        .forEach((message) => {
+          postMessage(message);
+        });
+    }
 
     numberOfPostedMessages--;
     if (numberOfPostedMessages === 0) {

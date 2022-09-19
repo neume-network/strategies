@@ -236,6 +236,88 @@ test("if extract function can handle lifecycle errors", async (t) => {
   t.is(router.eventNames().length, 0);
 });
 
+test("if extract function can verify schema if result is correct", async (t) => {
+  const mockStrategy = {
+    module: {
+      name: mockMessageCommissioner,
+      init: () => {
+        return {
+          messages: [
+            {
+              ...mockMessage,
+              schema: {
+                type: "string",
+                pattern: "^0x[a-fA-F0-9]+$",
+              },
+            },
+          ],
+          write: null,
+        };
+      },
+      update: () => {
+        t.pass(); // since message is valid the update function should be called
+        return { messages: [], write: null };
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, {
+        ...message,
+        results: "0x12345",
+      });
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
+  await extract(mockStrategy, worker, router);
+  t.plan(2);
+  t.is(router.eventNames().length, 0);
+});
+
+test("if extract function can verify schema if result in incorrect", async (t) => {
+  const mockStrategy = {
+    module: {
+      name: mockMessageCommissioner,
+      init: () => {
+        return {
+          messages: [
+            {
+              ...mockMessage,
+              schema: {
+                type: "string",
+                pattern: "^0x[a-fA-F0-9]+$",
+              },
+            },
+          ],
+          write: null,
+        };
+      },
+      update: () => {
+        t.fail(); // since message is invalid the update function shouldn't be called
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, {
+        ...message,
+        results: "12345",
+      });
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
+  await extract(mockStrategy, worker, router);
+  t.is(router.eventNames().length, 0);
+});
+
 test("if extract() resolves the promise and removes the listener on no new messages", async (t) => {
   const mockStrategy = {
     module: {

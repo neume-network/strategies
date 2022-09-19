@@ -5,6 +5,7 @@ import { createReadStream, appendFileSync } from "fs";
 import EventEmitter, { once } from "events";
 import { env } from "process";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import { workerMessage } from "@neume-network/message-schema";
 import { crawlPath as crawlPathSchema } from "@neume-network/schema";
 import util from "util";
@@ -28,6 +29,7 @@ const fileNames = {
   extractor: "extractor.mjs",
 };
 const ajv = new Ajv();
+addFormats(ajv);
 const workerValidator = ajv.compile(workerMessage);
 const crawlPathValidator = ajv.compile(crawlPathSchema);
 
@@ -174,43 +176,56 @@ export function extract(strategy, worker, messageRouter, args = []) {
           `Received error message from worker for strategy "${strategy.module.name}": "${message.error}"`
         );
       } else {
-        const result = await strategy.module.update(message);
-        if (!result) {
-          const error = new Error(
-            `Strategy "${
-              strategy.module.name
-            }-extraction" didn't return a valid result: "${JSON.stringify(
-              result
-            )}"`
-          );
-          error.code = EXTRACTOR_CODES.FAILURE;
-          messageRouter.off(`${strategy.module.name}-${type}`, callback);
-          clearInterval(interval);
-          return reject(error);
+        let valid = true;
+        let validator;
+        if (message.schema) {
+          validator = ajv.compile(message.schema);
+          valid = validator(message.results);
         }
-
-        if (result.messages?.length !== 0) {
-          prepareMessages(result.messages, strategy.module.name).forEach(
-            (message) => {
-              numberOfMessages++;
-              worker.postMessage(message);
-            }
-          );
-        }
-
-        if (result.write) {
-          const filePath = generatePath(strategy.module.name, type);
-          try {
-            appendFileSync(filePath, `${result.write}\n`);
-          } catch (err) {
+        if (valid) {
+          const result = await strategy.module.update(message);
+          if (!result) {
             const error = new Error(
-              `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+              `Strategy "${
+                strategy.module.name
+              }-extraction" didn't return a valid result: "${JSON.stringify(
+                result
+              )}"`
             );
             error.code = EXTRACTOR_CODES.FAILURE;
             messageRouter.off(`${strategy.module.name}-${type}`, callback);
             clearInterval(interval);
             return reject(error);
           }
+
+          if (result.messages?.length !== 0) {
+            prepareMessages(result.messages, strategy.module.name).forEach(
+              (message) => {
+                numberOfMessages++;
+                worker.postMessage(message);
+              }
+            );
+          }
+
+          if (result.write) {
+            const filePath = generatePath(strategy.module.name, type);
+            try {
+              appendFileSync(filePath, `${result.write}\n`);
+            } catch (err) {
+              const error = new Error(
+                `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+              );
+              error.code = EXTRACTOR_CODES.FAILURE;
+              messageRouter.off(`${strategy.module.name}-${type}`, callback);
+              clearInterval(interval);
+              return reject(error);
+            }
+          }
+        } else {
+          log(
+            `Invalid schema for ${JSON.stringify(message.results)}`,
+            validator.errors
+          );
         }
       }
 
