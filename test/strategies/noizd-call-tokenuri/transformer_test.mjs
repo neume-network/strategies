@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 
 import test from "ava";
 
-import { onLine } from "../../../src/strategies/soundxyz-call-tokenuri/transformer.mjs";
+import { onLine } from "../../../src/strategies/noizd-call-tokenuri/transformer.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -13,7 +13,7 @@ const snapshot = JSON.parse(
   fs.readFileSync(resolve(__dirname, "./extractor_snapshot.json"))
 );
 
-test("soundxyz-call-tokenuri transformer", (t) => {
+test("noizd-call-tokenuri transformer", (t) => {
   const { write } = onLine(snapshot.expect.write);
   const expected = {
     metadata: {
