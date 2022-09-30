@@ -4,7 +4,6 @@ import { env } from "process";
 
 const version = "0.0.1";
 export const name = "get-minter";
-export const props = {};
 import logger from "../../logger.mjs";
 
 const log = logger(name);

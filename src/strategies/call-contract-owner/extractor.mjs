@@ -6,7 +6,6 @@ import { toHex, encodeFunctionSignature } from "eth-fun";
 
 const version = "0.0.1";
 export const name = "call-contract-owner";
-export const props = {};
 
 const options = {
   url: env.RPC_HTTP_HOST,

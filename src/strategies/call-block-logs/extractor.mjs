@@ -11,7 +11,6 @@ import { eth_blockNumberSchema, eth_getLogsSchema } from "./schemas.mjs";
 const version = "0.0.1";
 export const name = "call-block-logs";
 const log = logger(name);
-export const props = {};
 const options = {
   url: env.RPC_HTTP_HOST,
 };

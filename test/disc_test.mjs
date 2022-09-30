@@ -45,7 +45,6 @@ test("interface compliance of extractors strategies", async (t) => {
   for (const extractor of extractors) {
     t.is(typeof extractor.module.init, "function");
     t.is(typeof extractor.module.update, "function");
-    t.is(typeof extractor.module.props, "object");
   }
 });
 
@@ -59,7 +58,6 @@ test("test loading & validating extractors", async (t) => {
     t.truthy(extractor.module.name);
     t.is(typeof extractor.module.init, "function");
     t.is(typeof extractor.module.update, "function");
-    t.is(typeof extractor.module.props, "object");
   }
 });
 

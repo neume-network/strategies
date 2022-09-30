@@ -12,7 +12,6 @@ import { fileExists } from "../../disc.mjs";
 const version = "0.0.1";
 export const name = "music-os-accumulator";
 const log = logger(name);
-export const props = {};
 
 const strategies = [
   {

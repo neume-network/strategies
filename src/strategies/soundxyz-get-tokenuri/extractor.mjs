@@ -9,7 +9,6 @@ import { fileExists } from "../../disc.mjs";
 export const version = "0.0.1";
 export const name = "soundxyz-get-tokenuri";
 const log = logger(name);
-export const props = {};
 
 export async function init(filePath) {
   if (!(await fileExists(filePath))) {

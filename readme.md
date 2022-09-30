@@ -41,7 +41,6 @@ An extractor strategy must implement the following interface:
 ```ts
 interface Extractor {
   name: String;
-  props: Object;
   init(args...): Object<messages:  Message[], write: String>;
   update(message: Message): Object<messages: Message[], write: String>;
 }
@@ -54,8 +53,6 @@ A neume-network extraction message is layed out similarly to a react.js
 component in that foundamentally, it is a component implementing lifecycle
 methods.
 
-- A component has `props` as in "properties" that can be defined before
-  instantiation of the component.
 - The `init` function is called when the component is mounted into the core
   process.
 - Upon completion of the `init` task, `update` is called until `update`'s
