@@ -18,14 +18,16 @@ const strategies = [
     files: [
       "zora-get-tokenuri-transformation",
       "soundxyz-get-tokenuri-transformation",
-      "noizd-get-tokenuri-transformation",
     ],
     map: new Map(),
     accumulator: (map) => {
       return (line) => {
         const data = JSON.parse(line);
 
-        data.tokenURI = normalifyTokenURI(data.tokenURI);
+        if (data.tokenURI) {
+          data.tokenURI = normalifyTokenURI(data.tokenURI);
+        }
+        data.erc721.tokenURI = normalifyTokenURI(data.erc721.tokenURI);
 
         map.set(data.erc721.tokenURI, data);
       };
@@ -35,7 +37,6 @@ const strategies = [
     files: [
       "zora-call-tokenmetadatauri-transformation",
       "soundxyz-call-tokenuri-transformation",
-      "noizd-call-tokenuri-transformation",
     ],
     map: new Map(),
     accumulator: (map) => {
@@ -83,6 +84,16 @@ const strategies = [
   },
   {
     files: ["mintsongs-get-tokenuri-transformation"],
+    map: [],
+    accumulator: (list) => {
+      return (line) => {
+        const data = JSON.parse(line);
+        list.push(data);
+      };
+    },
+  },
+  {
+    files: ["noizd-get-tokenuri-transformation"],
     map: [],
     accumulator: (list) => {
       return (line) => {
@@ -177,10 +188,7 @@ export async function init() {
         metadata.manifestations[0].mimetype = "audio";
         tracks.set(tokenURI, metadata);
       }
-    } else if (
-      metadata.platform.name === "Sound" ||
-      metadata.platform.name === "Noizd"
-    ) {
+    } else if (metadata.platform.name === "Sound") {
       const chainData = data.uris.get(tokenURI);
       metadata.erc721.createdAt = chainData.metadata.block.number;
       metadata.erc721.address = chainData.metadata.contract.address;
@@ -191,6 +199,7 @@ export async function init() {
   let trackList = Array.from(tracks.values());
   trackList = [...trackList, ...strategies[3].map];
   trackList = [...trackList, ...strategies[4].map];
+  trackList = [...trackList, ...strategies[5].map];
   // NOTE: See: https://github.com/neume-network/strategies/issues/246#issuecomment-1240365903
   trackList = uniqWith(trackList, isUnique);
   return {
