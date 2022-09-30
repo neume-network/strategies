@@ -25,6 +25,16 @@ export function onLine(line) {
     return;
   }
 
+  const { blockNumber } = logs[0].log;
+  if (!blockNumber) {
+    throw new Error(`Block number "${blockNumber}" cannot be falsly`);
+  }
+  if (!logs.every((elem) => elem.log.blockNumber === blockNumber)) {
+    throw new Error(
+      `Found event log list with inconsistent block numbers. Required number "${blockNumber}"`
+    );
+  }
+
   logs = logs.map(({ metadata, log }) => ({
     address: log.address,
     tokenId: `${BigInt(log.topics[3]).toString(10)}`,
@@ -34,6 +44,9 @@ export function onLine(line) {
   }));
 
   if (logs.length) {
-    return JSON.stringify(logs);
+    return {
+      id: `neume://${name}-transformation/eip155:1/blockNumber:${blockNumber}`,
+      content: JSON.stringify(logs),
+    };
   }
 }
