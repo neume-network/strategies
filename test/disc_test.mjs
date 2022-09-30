@@ -41,7 +41,7 @@ test("interface compliance of transformer strategies", async (t) => {
 test("interface compliance of extractors strategies", async (t) => {
   const extractors = await loadStrategies("./strategies", "extractor.mjs");
   t.truthy(extractors);
-  t.plan(extractors.length * 3 + 1);
+  t.plan(extractors.length * 2 + 1);
   for (const extractor of extractors) {
     t.is(typeof extractor.module.init, "function");
     t.is(typeof extractor.module.update, "function");
@@ -53,7 +53,7 @@ test("test loading & validating extractors", async (t) => {
   const dirs = await getdirdirs(path);
   const extractors = await loadAll(dirs, "extractor.mjs");
   t.truthy(extractors);
-  t.plan(extractors.length * 4 + 1);
+  t.plan(extractors.length * 3 + 1);
   for (const extractor of extractors) {
     t.truthy(extractor.module.name);
     t.is(typeof extractor.module.init, "function");
