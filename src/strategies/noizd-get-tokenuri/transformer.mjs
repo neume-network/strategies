@@ -24,43 +24,38 @@ export function onLine(line) {
   return JSON.stringify({
     version,
     title: datum.name,
-    // TODO
-    //duration: "PT0M",
     artist: {
       version,
-      name: datum.artist_name,
+      name: datum.artist_name
     },
     platform: {
       version,
       name: "Noizd",
-      uri: "https://noizd.com",
+      uri: "https://noizd.com"
     },
     erc721: {
       version,
-      // TODO
-      //address: nft[1],
-      //tokenId: nft[2],
+      // TODO: Stop hard coding this value
+      owner: "0x4456AE02EA5534cEd3A151e41a715bBA685A7CAb",
+      createdAt: obj.metadata.block.number,
+      tokenId: obj.metadata.tokenId,
+      address: obj.metadata.contract.address,
       tokenURI: obj.metadata.tokenURI,
       metadata: {
-        ...datum,
-      },
+        ...datum
+      }
     },
     manifestations: [
       {
         version,
         uri: datum.audio_url,
-        mimetype: "audio",
+        mimetype: "audio"
       },
       {
         version,
         uri: datum.image,
-        mimetype: "image",
-      },
-      {
-        version,
-        uri: datum.animation_url,
-        mimetype: "image",
-      },
-    ],
+        mimetype: "image"
+      }
+    ]
   });
 }
