@@ -34,6 +34,23 @@ To implement a strategy with maximum efficiency, we recommend doing all
 on-chain and off-chain requests using the [extraction Worker
 API](https://github.com/neume-network/extraction-worker#extractor-worker-api).
 
+### content and identification: defining `interface Datum`
+
+neume writes results to flat files. Relationality of datums is expressed
+through directed edges, it's linked data essentially. For this reason, it's
+important that each result of neume is universally identifiable.
+
+```ts
+interface Datum {
+  id: String; // must be globally unique
+  content: String;
+}
+```
+
+neume will take care of writing a `Datum`'s `content` and `id` such that random
+direct and low-memory overhead access within the entire crawl result is
+possible.
+
 ### extractor strategy interface definition
 
 An extractor strategy must implement the following interface:
@@ -41,8 +58,8 @@ An extractor strategy must implement the following interface:
 ```ts
 interface Extractor {
   name: String;
-  init(args...): Object<messages:  Message[], write: String>;
-  update(message: Message): Object<messages: Message[], write: String>;
+  init(args...): Object<messages:  Message[], write: Datum>;
+  update(message: Message): Object<messages: Message[], write: Datum>;
 }
 ```
 
@@ -71,9 +88,9 @@ A transformer strategy must implement the following interface:
 ```ts
 interface Transformer {
   name: String;
-  onLine(line: String): String | null | undefined;
+  onLine(line: String): Datum | null | undefined;
   onError(error: Error): any;
-  onClose(): String | null | undefined;
+  onClose(): Datum | null | undefined;
 }
 ```
 
