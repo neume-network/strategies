@@ -4,7 +4,6 @@ import { decodeParameters } from "eth-fun";
 import logger from "../../logger.mjs";
 
 export const name = "call-contract-owner";
-export const version = "0.0.1";
 const log = logger(name);
 
 export function onClose() {

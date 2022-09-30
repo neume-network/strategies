@@ -5,7 +5,6 @@ import logger from "../../logger.mjs";
 
 export const name = "soundxyz-metadata";
 const log = logger(name);
-export const version = "0.1.0";
 
 export function onClose() {
   log("closed");

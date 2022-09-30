@@ -6,7 +6,6 @@ import { parseJSON } from "../../utils.mjs";
 
 export const name = "logs-to-subgraph";
 const log = logger(name);
-export const version = "0.1.0";
 
 export function onClose() {
   log("closed");

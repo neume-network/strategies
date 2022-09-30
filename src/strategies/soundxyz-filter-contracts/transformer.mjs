@@ -6,7 +6,6 @@ import { parseJSON } from "../../utils.mjs";
 
 export const name = "soundxyz-filter-contracts";
 const log = logger(name);
-export const version = "0.1.0";
 
 export function onClose() {
   log("closed");

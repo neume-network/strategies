@@ -3,7 +3,6 @@ import logger from "../../logger.mjs";
 
 export const name = "get-minter";
 const log = logger(name);
-export const version = "0.0.1";
 
 export function onClose() {
   log("closed");
