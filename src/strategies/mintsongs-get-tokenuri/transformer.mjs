@@ -7,10 +7,7 @@ export const version = "2.0.0";
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -23,10 +20,7 @@ export function onLine(line) {
   try {
     data = JSON.parse(line);
   } catch (err) {
-    return {
-      write: null,
-      messages: [],
-    };
+    return;
   }
   const metadata = data.metadata;
   const datum = data.results;
@@ -40,47 +34,44 @@ export function onLine(line) {
     ).toFixed(0)}S`;
   }
 
-  return {
-    messages: [],
-    write: JSON.stringify({
+  return JSON.stringify({
+    version,
+    title: datum.title,
+    duration,
+    artist: {
       version,
-      title: datum.title,
-      duration,
-      artist: {
-        version,
-        name: artist,
+      name: artist,
+    },
+    platform: {
+      version,
+      name: "Mint Songs",
+      uri: "https://www.mintsongs.com/",
+    },
+    erc721: {
+      // TODO: Remove hardcoded owner value
+      owner: "0x681452d95caef97a88d25a452dc1bc2b62d7f134",
+      version,
+      createdAt: metadata?.block?.number,
+      tokenId: metadata?.tokenId,
+      address: metadata?.contract?.address,
+      tokenURI: metadata?.tokenURI,
+      metadata: {
+        ...datum,
+        name: datum.title,
+        description,
       },
-      platform: {
+    },
+    manifestations: [
+      {
         version,
-        name: "Mint Songs",
-        uri: "https://www.mintsongs.com/",
+        uri: datum.losslessAudio,
+        mimetype: datum.mimeType,
       },
-      erc721: {
-        // TODO: Remove hardcoded owner value
-        owner: "0x681452d95caef97a88d25a452dc1bc2b62d7f134",
+      {
         version,
-        createdAt: metadata?.block?.number,
-        tokenId: metadata?.tokenId,
-        address: metadata?.contract?.address,
-        tokenURI: metadata?.tokenURI,
-        metadata: {
-          ...datum,
-          name: datum.title,
-          description,
-        },
+        uri: datum.artwork.uri,
+        mimetype: datum.artwork.mimeType,
       },
-      manifestations: [
-        {
-          version,
-          uri: datum.losslessAudio,
-          mimetype: datum.mimeType,
-        },
-        {
-          version,
-          uri: datum.artwork.uri,
-          mimetype: datum.artwork.mimeType,
-        },
-      ],
-    }),
-  };
+    ],
+  });
 }

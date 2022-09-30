@@ -9,10 +9,7 @@ const log = logger(name);
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -55,10 +52,7 @@ export function onLine(line, artistRegistryAddress, createEventSelector) {
     logs = parseJSON(line, 100);
   } catch (err) {
     log(err);
-    return {
-      write: "",
-      messages: [],
-    };
+    return "";
   }
   let contracts = {};
   for (const log of logs) {
@@ -72,14 +66,9 @@ export function onLine(line, artistRegistryAddress, createEventSelector) {
     }
   }
 
-  let write;
   if (Object.keys(contracts).length === 0) {
-    write = "";
+    return "";
   } else {
-    write = JSON.stringify(contracts);
+    return JSON.stringify(contracts);
   }
-  return {
-    write,
-    messages: [],
-  };
 }

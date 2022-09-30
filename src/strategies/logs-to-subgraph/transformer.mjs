@@ -9,10 +9,7 @@ const log = logger(name);
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -25,10 +22,7 @@ export function onLine(line) {
   try {
     logs = parseJSON(line, 100);
   } catch (err) {
-    return {
-      write: null,
-      messages: [],
-    };
+    return;
   }
 
   logs = logs.map(({ metadata, log }) => ({
@@ -39,12 +33,7 @@ export function onLine(line) {
     transactionHash: log.transactionHash,
   }));
 
-  let write;
   if (logs.length) {
-    write = JSON.stringify(logs);
+    return JSON.stringify(logs);
   }
-  return {
-    write,
-    messages: [],
-  };
 }

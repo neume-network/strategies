@@ -6,10 +6,7 @@ const log = logger(name);
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -22,18 +19,12 @@ export function onLine(line) {
   try {
     data = JSON.parse(line);
   } catch (err) {
-    return {
-      write: null,
-      messages: [],
-    };
+    return;
   }
 
   const { transactionHash, from } = data;
-  return {
-    messages: [],
-    write: JSON.stringify({
-      transactionHash,
-      from,
-    }),
-  };
+  return JSON.stringify({
+    transactionHash,
+    from,
+  });
 }

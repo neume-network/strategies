@@ -24,7 +24,7 @@ test("decode-solidity-hex-string", async (t) => {
     resultKey: "tokenUri",
   });
 
-  const { write } = onLine(JSON.stringify(line));
+  const write = onLine(JSON.stringify(line));
 
   const expectedLine = { ...line };
   delete expectedLine.results;

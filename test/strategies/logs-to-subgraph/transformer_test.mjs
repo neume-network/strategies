@@ -100,7 +100,7 @@ const logs = [
 ];
 
 test("if event logs are appropriately migrated to web3subgraph compatible NFT IDs", (t) => {
-  const { write } = onLine(JSON.stringify(logs));
+  const write = onLine(JSON.stringify(logs));
   const expected = [
     {
       address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",

@@ -46,7 +46,7 @@ const payload = {
 const sPayload = JSON.stringify(payload);
 
 test("zora transformer", (t) => {
-  const { write } = onLine(sPayload);
+  const write = onLine(sPayload);
   const validate = ajv.compile(track);
   const data = JSON.parse(write);
   const valid = validate(data);

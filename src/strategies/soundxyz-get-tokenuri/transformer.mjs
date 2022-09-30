@@ -10,10 +10,7 @@ export const version = "0.1.0";
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -24,49 +21,46 @@ export function onError(error) {
 export function onLine(line) {
   const obj = JSON.parse(line);
   const datum = obj.results;
-  return {
-    messages: [],
-    write: JSON.stringify({
+  return JSON.stringify({
+    version,
+    title: datum.name,
+    // TODO
+    //duration: "PT0M",
+    artist: {
       version,
-      title: datum.name,
+      name: datum.artist_name,
+    },
+    platform: {
+      version,
+      name: "Sound",
+      uri: "https://sound.xyz",
+    },
+    erc721: {
+      version,
       // TODO
-      //duration: "PT0M",
-      artist: {
-        version,
-        name: datum.artist_name,
+      //address: nft[1],
+      //tokenId: nft[2],
+      tokenURI: obj.metadata.tokenURI,
+      metadata: {
+        ...datum,
       },
-      platform: {
+    },
+    manifestations: [
+      {
         version,
-        name: "Sound",
-        uri: "https://sound.xyz",
+        uri: datum.audio_url,
+        mimetype: "audio",
       },
-      erc721: {
+      {
         version,
-        // TODO
-        //address: nft[1],
-        //tokenId: nft[2],
-        tokenURI: obj.metadata.tokenURI,
-        metadata: {
-          ...datum,
-        },
+        uri: datum.image,
+        mimetype: "image",
       },
-      manifestations: [
-        {
-          version,
-          uri: datum.audio_url,
-          mimetype: "audio",
-        },
-        {
-          version,
-          uri: datum.image,
-          mimetype: "image",
-        },
-        {
-          version,
-          uri: datum.animation_url,
-          mimetype: "image",
-        },
-      ],
-    }),
-  };
+      {
+        version,
+        uri: datum.animation_url,
+        mimetype: "image",
+      },
+    ],
+  });
 }

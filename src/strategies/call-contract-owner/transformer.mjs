@@ -7,10 +7,7 @@ export const name = "call-contract-owner";
 const log = logger(name);
 
 export function onClose() {
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -25,10 +22,7 @@ export function onLine(line) {
     obj = JSON.parse(line);
   } catch (err) {
     log(err.toString());
-    return {
-      messages: [],
-      write: null,
-    };
+    return;
   }
 
   let decodedOutput;
@@ -36,16 +30,10 @@ export function onLine(line) {
     [decodedOutput] = decodeParameters(["address"], obj.results);
   } catch (err) {
     log(err.toString());
-    return {
-      messages: [],
-      write: null,
-    };
+    return;
   }
-  return {
-    messages: [],
-    write: JSON.stringify({
-      metadata: obj.metadata,
-      owner: decodedOutput,
-    }),
-  };
+  return JSON.stringify({
+    metadata: obj.metadata,
+    owner: decodedOutput,
+  });
 }

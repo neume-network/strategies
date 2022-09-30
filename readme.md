@@ -71,9 +71,9 @@ A transformer strategy must implement the following interface:
 ```ts
 interface Transformer {
   name: String;
-  onLine(line: String): Object<messages:  Message[], write: String>;
+  onLine(line: String): String | null | undefined;
   onError(error: Error): any;
-  onClose(): Object<messages:  Message[], write: String>;
+  onClose(): String | null | undefined;
 }
 ```
 

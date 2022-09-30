@@ -39,7 +39,7 @@ test("catalog-get-tokenuri transformer", async (t) => {
     },
   };
 
-  const { write } = onLine(JSON.stringify(payload));
+  const write = onLine(JSON.stringify(payload));
 
   const validate = ajv.compile(track);
   const data = JSON.parse(write);

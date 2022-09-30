@@ -8,10 +8,7 @@ const log = logger(name);
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -40,10 +37,7 @@ export function onLine(line) {
       results
     );
   } catch (err) {
-    return {
-      messages: [],
-      write: null,
-    };
+    return;
   }
 
   // map editionMetaDataArray to editionMetadataObject
@@ -58,16 +52,10 @@ export function onLine(line) {
     editionMetadataObject.presaleQuantity = editionMetadataArray[7];
     editionMetadataObject.signerAddress = editionMetadataArray[8];
   } catch (err) {
-    return {
-      messages: [],
-      write: null,
-    };
+    return;
   }
-  return {
-    messages: [],
-    write: JSON.stringify({
-      results: editionMetadataObject,
-      metadata: metadata,
-    }),
-  };
+  return JSON.stringify({
+    results: editionMetadataObject,
+    metadata: metadata,
+  });
 }

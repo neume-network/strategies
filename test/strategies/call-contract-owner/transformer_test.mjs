@@ -14,7 +14,7 @@ const snapshot = JSON.parse(
 );
 
 test("call-contract-owner transformer", (t) => {
-  const { write } = onLine(snapshot.expect.write);
+  const write = onLine(snapshot.expect.write);
   const expected = {
     metadata: {
       block: {

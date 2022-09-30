@@ -7,10 +7,7 @@ export const version = "1.0.0";
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -23,10 +20,7 @@ export function onLine(line) {
   try {
     data = JSON.parse(line);
   } catch (err) {
-    return {
-      write: null,
-      messages: [],
-    };
+    return;
   }
   const metadata = data.metadata;
   const datum = data.results;
@@ -42,46 +36,43 @@ export function onLine(line) {
     ).toFixed(0)}S`;
   }
 
-  return {
-    messages: [],
-    write: JSON.stringify({
+  return JSON.stringify({
+    version,
+    title,
+    duration,
+    artist: {
       version,
-      title,
-      duration,
-      artist: {
-        version,
-        name: artist,
+      name: artist,
+    },
+    platform: {
+      version,
+      name: "Catalog",
+      uri: "https://beta.catalog.works",
+    },
+    erc721: {
+      version,
+      // TODO
+      //address: nft[1],
+      //tokenId: nft[2],
+      tokenURI: metadata.tokenURI,
+      metadata: {
+        ...datum,
+        name: title,
+        description,
       },
-      platform: {
+    },
+    manifestations: [
+      {
         version,
-        name: "Catalog",
-        uri: "https://beta.catalog.works",
+        // TODO: Zora's file URL can be retrieved when calling tokenURI
+        //uri: "https://example.com/file",
+        //mimetype: datum.body.mimeType,
       },
-      erc721: {
+      {
         version,
-        // TODO
-        //address: nft[1],
-        //tokenId: nft[2],
-        tokenURI: metadata.tokenURI,
-        metadata: {
-          ...datum,
-          name: title,
-          description,
-        },
+        uri: artwork,
+        mimetype: "image",
       },
-      manifestations: [
-        {
-          version,
-          // TODO: Zora's file URL can be retrieved when calling tokenURI
-          //uri: "https://example.com/file",
-          //mimetype: datum.body.mimeType,
-        },
-        {
-          version,
-          uri: artwork,
-          mimetype: "image",
-        },
-      ],
-    }),
-  };
+    ],
+  });
 }

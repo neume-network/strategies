@@ -12,10 +12,7 @@ export const decodeSolidityHexStringFactory = (props) => {
   const log = logger(strategyName);
 
   function onClose() {
-    return {
-      write: null,
-      messages: [],
-    };
+    return;
   }
 
   function onError(error) {
@@ -30,10 +27,7 @@ export const decodeSolidityHexStringFactory = (props) => {
       obj = JSON.parse(line);
     } catch (err) {
       log(err.toString());
-      return {
-        messages: [],
-        write: null,
-      };
+      return;
     }
 
     let decodedOutput;
@@ -41,18 +35,12 @@ export const decodeSolidityHexStringFactory = (props) => {
       [decodedOutput] = decodeParameters(["string"], obj.results);
     } catch (err) {
       log(err.toString());
-      return {
-        messages: [],
-        write: null,
-      };
+      return;
     }
-    return {
-      messages: [],
-      write: JSON.stringify({
-        metadata: obj.metadata,
-        [resultKey]: decodedOutput,
-      }),
-    };
+    return JSON.stringify({
+      metadata: obj.metadata,
+      [resultKey]: decodedOutput,
+    });
   }
 
   return {

@@ -85,24 +85,21 @@ export async function transform(strategy, sourcePath, outputPath, args) {
 
   let buffer = [];
   rl.on("line", async (line) => {
-    const { write, messages } = strategy.module.onLine(line, ...args);
+    const write = strategy.module.onLine(line, ...args);
     if (write) {
       appendFileSync(outputPath, `${write}\n`);
     }
-    buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   });
   // TODO: Figure out how `onError` shall be handled.
   rl.on("error", (error) => {
-    const { write, messages } = strategy.module.onError(error);
-    buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
+    const write = strategy.module.onError(error);
   });
 
   await once(rl, "close");
-  const { write, messages } = strategy.module.onClose();
+  const write = strategy.module.onClose();
   if (write) {
     appendFileSync(outputPath, `${write}\n`);
   }
-  buffer = [...buffer, ...prepareMessages(messages, strategy.module.name)];
   return buffer;
 }
 

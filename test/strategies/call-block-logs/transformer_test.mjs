@@ -149,9 +149,9 @@ test("call-block-logs transformer", (t) => {
   const res0 = onLine(JSON.stringify(snapshot0), contracts);
   const res1 = onLine(JSON.stringify(snapshot1), contracts);
 
-  t.truthy(res0.write);
-  t.truthy(res1.write);
-  const parsed = [...JSON.parse(res0.write), ...JSON.parse(res1.write)];
+  t.truthy(res0);
+  t.truthy(res1);
+  const parsed = [...JSON.parse(res0), ...JSON.parse(res1)];
   t.plan(parsed.length * 6 + 5);
   t.is(parsed.length, 5);
   t.is(parsed[4].log.address, "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c");

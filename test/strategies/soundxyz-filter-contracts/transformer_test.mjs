@@ -149,8 +149,8 @@ test("soundxyz-filter-contracts transformer", (t) => {
     artistRegistryAddress,
     createEventSelector
   );
-  t.deepEqual(JSON.parse(res0.write), {
+  t.deepEqual(JSON.parse(res0), {
     "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c": { name: "sound" },
   });
-  t.is(res1.write, "");
+  t.is(res1, "");
 });

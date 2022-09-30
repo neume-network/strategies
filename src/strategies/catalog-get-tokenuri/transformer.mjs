@@ -7,10 +7,7 @@ export const version = "2.0.0";
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -23,10 +20,7 @@ export function onLine(line) {
   try {
     data = JSON.parse(line);
   } catch (err) {
-    return {
-      write: null,
-      messages: [],
-    };
+    return;
   }
   const metadata = data.metadata;
   const datum = data.results;
@@ -38,47 +32,44 @@ export function onLine(line) {
     ).toFixed(0)}S`;
   }
 
-  return {
-    messages: [],
-    write: JSON.stringify({
+  return JSON.stringify({
+    version,
+    title: datum.title,
+    duration,
+    artist: {
       version,
-      title: datum.title,
-      duration,
-      artist: {
-        version,
-        name: datum.artist,
+      name: datum.artist,
+    },
+    platform: {
+      version,
+      name: "Catalog",
+      uri: "https://beta.catalog.works",
+    },
+    erc721: {
+      // TODO: Stop hard coding this value
+      owner: "0x489e043540ff11ec22226ca0a6f6f8e3040c7b5a",
+      version,
+      createdAt: metadata?.block?.number,
+      tokenId: metadata?.tokenId,
+      address: metadata?.contract?.address,
+      tokenURI: metadata?.tokenURI,
+      metadata: {
+        ...datum,
+        name: datum.name,
+        description: datum.description,
       },
-      platform: {
+    },
+    manifestations: [
+      {
         version,
-        name: "Catalog",
-        uri: "https://beta.catalog.works",
+        uri: datum.image,
+        mimetype: "image",
       },
-      erc721: {
-        // TODO: Stop hard coding this value
-        owner: "0x489e043540ff11ec22226ca0a6f6f8e3040c7b5a",
+      {
         version,
-        createdAt: metadata?.block?.number,
-        tokenId: metadata?.tokenId,
-        address: metadata?.contract?.address,
-        tokenURI: metadata?.tokenURI,
-        metadata: {
-          ...datum,
-          name: datum.name,
-          description: datum.description,
-        },
+        uri: datum.losslessAudio,
+        mimetype: datum.mimeType,
       },
-      manifestations: [
-        {
-          version,
-          uri: datum.image,
-          mimetype: "image",
-        },
-        {
-          version,
-          uri: datum.losslessAudio,
-          mimetype: datum.mimeType,
-        },
-      ],
-    }),
-  };
+    ],
+  });
 }
