@@ -4,7 +4,7 @@ import { decodeLog } from "eth-fun";
 import logger from "../../logger.mjs";
 import { parseJSON } from "../../utils.mjs";
 
-export const name = "newsound-filter-contracts";
+export const name = "sound-protocol-filter-contracts";
 const log = logger(name);
 
 export function onClose() {
@@ -67,7 +67,7 @@ export function onLine(line, editionCreatedSelector) {
   for (const log of logs) {
     if (log.topics[0] === editionCreatedSelector) {
       contracts[decodeContractAddress(log)] = {
-        name: "newsound",
+        name: "sound-protocol",
       };
     }
   }

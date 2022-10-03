@@ -1,7 +1,7 @@
 //@format
 import test from "ava";
 
-import { onLine } from "../../../src/strategies/newsound-filter-contracts/transformer.mjs";
+import { onLine } from "../../../src/strategies/sound-protocol-filter-contracts/transformer.mjs";
 
 const snapshot0 = [
   {
@@ -224,7 +224,7 @@ const snapshot1 = [
   },
 ];
 
-test("newsound-filter-contracts transformer", (t) => {
+test("sound-protocol-filter-contracts transformer", (t) => {
   const editionCreatedSelector =
     "0x405098db99342b699216d8150e930dbbf2f686f5a43485aed1e69219dafd4935";
   const res0 = onLine(JSON.stringify(snapshot0), editionCreatedSelector);
@@ -232,7 +232,7 @@ test("newsound-filter-contracts transformer", (t) => {
 
   t.deepEqual(JSON.parse(res0), {
     "0xdc01dc4ccfca6238ec697c2cd29a1408c675d79e": {
-      name: "newsound",
+      name: "sound-protocol",
     },
   });
   t.is(res1, "");
