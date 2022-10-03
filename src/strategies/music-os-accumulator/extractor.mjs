@@ -119,6 +119,16 @@ const strategies = [
       };
     },
   },
+  {
+    files: ["noizd-get-tokenuri-transformation"],
+    map: [],
+    accumulator: (list) => {
+      return (line) => {
+        const data = JSON.parse(line);
+        list.push(data);
+      };
+    },
+  },
 ];
 
 async function lineReader(filePath, accumulator) {
@@ -205,6 +215,7 @@ export async function init() {
   let trackList = Array.from(tracks.values());
   trackList = [...trackList, ...strategies[3].map];
   trackList = [...trackList, ...strategies[4].map];
+  trackList = [...trackList, ...strategies[5].map];
   // NOTE: See: https://github.com/neume-network/strategies/issues/246#issuecomment-1240365903
   trackList = uniqWith(trackList, isUnique);
   return {
