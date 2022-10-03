@@ -46,7 +46,7 @@ test("if zora-drops-filter-contracts transformer emits new edition contract addr
     createEventSelector
   );
 
-  t.deepEqual(JSON.parse(res.write), {
+  t.deepEqual(JSON.parse(res), {
     [editionContractAddressDec]: { name: "zora-drops" },
   });
 });
@@ -72,5 +72,5 @@ test("if zora-drops-filter-contracts transformer ignores unrelated logs", (t) =>
     createEventSelector
   );
 
-  t.is(res.write, "");
+  t.is(res, "");
 });

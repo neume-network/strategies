@@ -10,10 +10,7 @@ export const version = "0.1.0";
 
 export function onClose() {
   log("closed");
-  return {
-    write: null,
-    messages: [],
-  };
+  return;
 }
 
 export function onError(error) {
@@ -61,10 +58,7 @@ export function onLine(line, editionsFactoryAddress, createEventSelector) {
     logs = parseJSON(line, 100);
   } catch (err) {
     log(err);
-    return {
-      write: "",
-      messages: [],
-    };
+    return;
   }
   let contracts = {};
   for (const log of logs) {
@@ -79,14 +73,8 @@ export function onLine(line, editionsFactoryAddress, createEventSelector) {
     }
   }
 
-  let write;
   if (Object.keys(contracts).length === 0) {
-    write = "";
-  } else {
-    write = JSON.stringify(contracts);
+    return "";
   }
-  return {
-    write,
-    messages: [],
-  };
+  return JSON.stringify(contracts);
 }
