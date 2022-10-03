@@ -25,8 +25,22 @@ const strategies = [
       return (line) => {
         const data = JSON.parse(line);
 
-        data.tokenURI = normalifyTokenURI(data.tokenURI);
+        if (
+          data.tokenURI.includes("https://") &&
+          data.tokenURI.includes("ipfs")
+        ) {
+          const parts = data.tokenURI.split("/");
+          const hash = parts.pop();
+          data.tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
+        }
 
+        const IPFSIANAScheme = "ipfs://";
+        if (data.erc721.tokenURI.includes(IPFSIANAScheme)) {
+          data.tokenURI = data.tokenURI.replace(
+            IPFSIANAScheme,
+            env.IPFS_HTTPS_GATEWAY
+          );
+        }
         map.set(data.erc721.tokenURI, data);
       };
     },
@@ -46,8 +60,22 @@ const strategies = [
           data.metadata.tokenId
         );
 
-        data.tokenURI = normalifyTokenURI(data.tokenURI);
+        if (
+          data.tokenURI.includes("https://") &&
+          data.tokenURI.includes("ipfs")
+        ) {
+          const parts = data.tokenURI.split("/");
+          const hash = parts.pop();
+          data.tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
+        }
 
+        const IPFSIANAScheme = "ipfs://";
+        if (data.tokenURI.includes(IPFSIANAScheme)) {
+          data.tokenURI = data.tokenURI.replace(
+            IPFSIANAScheme,
+            env.IPFS_HTTPS_GATEWAY
+          );
+        }
         map.set(id, data);
         map.set(data.tokenURI, data);
       };
@@ -64,8 +92,19 @@ const strategies = [
           data.metadata.tokenId
         );
 
-        data.tokenURI = normalifyTokenURI(data.tokenURI);
+        if (data.tokenURI.includes("https://")) {
+          const parts = data.tokenURI.split("/");
+          const hash = parts.pop();
+          data.tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
+        }
 
+        const IPFSIANAScheme = "ipfs://";
+        if (data.tokenURI.includes(IPFSIANAScheme)) {
+          data.tokenURI = data.tokenURI.replace(
+            IPFSIANAScheme,
+            env.IPFS_HTTPS_GATEWAY
+          );
+        }
         map.set(id, data);
         map.set(data.tokenURI, data);
       };
@@ -110,17 +149,6 @@ async function lineReader(filePath, accumulator) {
     accumulator(line);
   }
   return;
-}
-
-function normalifyTokenURI(tokenURI) {
-  if (tokenURI.includes("https://"))
-    return `${env.IPFS_HTTPS_GATEWAY}${tokenURI.split("/").pop()}`;
-
-  const IPFSIANAScheme = "ipfs://";
-  if (tokenURI.includes(IPFSIANAScheme))
-    return tokenURI.replace(IPFSIANAScheme, env.IPFS_HTTPS_GATEWAY);
-
-  return tokenURI;
 }
 
 function caip19(address, tokenId) {
