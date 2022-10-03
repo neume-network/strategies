@@ -18,21 +18,11 @@ const strategies = [
     files: [
       "zora-get-tokenuri-transformation",
       "soundxyz-get-tokenuri-transformation",
-      "noizd-get-tokenuri-transformation",
     ],
     map: new Map(),
     accumulator: (map) => {
       return (line) => {
         const data = JSON.parse(line);
-
-        if (
-          data.tokenURI.includes("https://") &&
-          data.tokenURI.includes("ipfs")
-        ) {
-          const parts = data.tokenURI.split("/");
-          const hash = parts.pop();
-          data.tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
-        }
 
         const IPFSIANAScheme = "ipfs://";
         if (data.erc721.tokenURI.includes(IPFSIANAScheme)) {
@@ -49,7 +39,6 @@ const strategies = [
     files: [
       "zora-call-tokenmetadatauri-transformation",
       "soundxyz-call-tokenuri-transformation",
-      "noizd-call-tokenuri-transformation",
     ],
     map: new Map(),
     accumulator: (map) => {
@@ -205,10 +194,7 @@ export async function init() {
         metadata.manifestations[0].mimetype = "audio";
         tracks.set(tokenURI, metadata);
       }
-    } else if (
-      metadata.platform.name === "Sound" ||
-      metadata.platform.name === "Noizd"
-    ) {
+    } else if (metadata.platform.name === "Sound") {
       const chainData = data.uris.get(tokenURI);
       metadata.erc721.createdAt = chainData.metadata.block.number;
       metadata.erc721.address = chainData.metadata.contract.address;
