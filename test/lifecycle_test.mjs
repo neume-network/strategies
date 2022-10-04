@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import EventEmitter from "events";
 import test from "ava";
 
-import { loadStrategies } from "../src/disc.mjs";
+import { fileExists, loadStrategies } from "../src/disc.mjs";
 import {
   extract,
   transform,
@@ -369,6 +369,35 @@ test("if extract() resolves the promise and removes the listener on no message f
   t.is(code, EXTRACTOR_CODES.SHUTDOWN_IN_INIT);
   t.deepEqual(router.eventNames(), []);
   t.pass();
+});
+
+test("if extract function can write to the correct output path", async (t) => {
+  const outputPath = resolve(__dirname, "./fixtures/file3.output");
+
+  const mockStrategy = {
+    module: {
+      name: mockMessageCommissioner,
+      init: () => {
+        return { messages: [], write: "some-test-data" };
+      },
+      update: () => {
+        return null;
+      },
+    },
+  };
+
+  class Worker extends EventEmitter {
+    postMessage(message) {
+      return router.emit(`${message.commissioner}-extraction`, message);
+    }
+  }
+
+  const worker = new Worker();
+  const router = new EventEmitter();
+
+  await extract(mockStrategy, worker, router, outputPath);
+  t.is(await fileExists(outputPath), true);
+  await unlink(outputPath);
 });
 
 test("if prepareMessages filters invalid message and prepare message for worker", async (t) => {
