@@ -130,7 +130,13 @@ export function generatePath(name, type) {
   return path.resolve(dataDir, `${name}-${type}`);
 }
 
-export function extract(strategy, worker, messageRouter, args = []) {
+export function extract(
+  strategy,
+  worker,
+  messageRouter,
+  outputPath,
+  args = []
+) {
   return new Promise(async (resolve, reject) => {
     let numberOfMessages = 0;
     const type = "extraction";
@@ -153,12 +159,11 @@ export function extract(strategy, worker, messageRouter, args = []) {
     }
 
     if (result.write) {
-      const filePath = generatePath(strategy.module.name, type);
       try {
-        appendFileSync(filePath, `${result.write}\n`);
+        appendFileSync(outputPath, `${result.write}\n`);
       } catch (err) {
         const error = new Error(
-          `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+          `Couldn't write to file after update. Filepath: "${outputPath}", Content: "${result.write}"`
         );
         error.code = EXTRACTOR_CODES.FAILURE;
         clearInterval(interval);
@@ -207,12 +212,11 @@ export function extract(strategy, worker, messageRouter, args = []) {
           }
 
           if (result.write) {
-            const filePath = generatePath(strategy.module.name, type);
             try {
-              appendFileSync(filePath, `${result.write}\n`);
+              appendFileSync(outputPath, `${result.write}\n`);
             } catch (err) {
               const error = new Error(
-                `Couldn't write to file after update. Filepath: "${filePath}", Content: "${result.write}"`
+                `Couldn't write to file after update. Filepath: "${outputPath}", Content: "${result.write}"`
               );
               error.code = EXTRACTOR_CODES.FAILURE;
               messageRouter.off(`${strategy.module.name}-${type}`, callback);
@@ -287,6 +291,10 @@ export async function init(worker, crawlPath) {
     for await (const strategy of segment) {
       if (strategy.extractor) {
         const extractStrategy = finder("extraction", strategy.name);
+        const outputPath = generatePath(
+          strategy.extractor.outputFilename ?? extractStrategy.module.name,
+          "extraction"
+        );
         log(
           `Starting extractor strategy with name "${
             extractStrategy.module.name
@@ -296,6 +304,7 @@ export async function init(worker, crawlPath) {
           extractStrategy,
           worker,
           messageRouter,
+          outputPath,
           strategy.extractor.args
         );
         log(
@@ -312,7 +321,7 @@ export async function init(worker, crawlPath) {
           strategy.transformer.args?.[0] ??
           generatePath(transformStrategy.module.name, "extraction");
         const outputPath = generatePath(
-          transformStrategy.module.name,
+          strategy.transformer.outputFilename ?? transformStrategy.module.name,
           "transformation"
         );
         await transform(
