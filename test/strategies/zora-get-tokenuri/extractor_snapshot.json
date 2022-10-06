@@ -3,7 +3,7 @@
   "expect": {
     "write": {
       "lines": [
-        "{\"metadata\":{\"tokenURI\":\"https://neume.infura-ipfs.io/ipfs/bafybeifpxcq2hhbzuy2ich3duh7cjk4zk4czjl6ufbpmxep247ugwzsny4\",\"block\":{\"number\":11565275},\"contract\":{\"address\":\"0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7\"},\"tokenId\":\"1\"},\"results\":{\"description\":\"\",\"mimeType\":\"text/plain\",\"name\":\"\",\"version\":\"zora-20210101\"}}"
+        "{\"metadata\":{\"tokenURI\":\"https://cloudflare-ipfs.com/ipfs/bafybeifpxcq2hhbzuy2ich3duh7cjk4zk4czjl6ufbpmxep247ugwzsny4\",\"block\":{\"number\":11565275},\"contract\":{\"address\":\"0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7\"},\"tokenId\":\"1\"},\"results\":{\"description\":\"\",\"mimeType\":\"text/plain\",\"name\":\"\",\"version\":\"zora-20210101\"}}"
       ]
     }
   }
