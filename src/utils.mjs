@@ -20,3 +20,28 @@ export function parseJSON(value, distance = 10) {
   }
   return parsed;
 }
+
+export function anyIpfsToNativeIpfs(ipfsUri) {
+  const IPFSIANAScheme = "ipfs://";
+  const pathGatewayPattern = /^https?:\/\/[^/]+\/ipfs\/([^/?#]+)(.*)/;
+  const subdomainGatewayPattern = /^https?:\/\/([^/]+)\.ipfs\.[^/?#]+(.*)/;
+
+  if (typeof ipfsUri !== "string")
+    throw new Error("Given IPFS URI should be of type string");
+
+  if (ipfsUri.startsWith(IPFSIANAScheme)) return ipfsUri;
+
+  const pathGatewayMatch = ipfsUri.match(pathGatewayPattern);
+  if (pathGatewayMatch) {
+    const [_, hash, path] = pathGatewayMatch;
+    return `${IPFSIANAScheme}${hash}${path}`;
+  }
+
+  const subdomainGatewayMatch = ipfsUri.match(subdomainGatewayPattern);
+  if (subdomainGatewayMatch) {
+    const [_, hash, path] = subdomainGatewayMatch;
+    return `${IPFSIANAScheme}${hash}${path}`;
+  }
+
+  throw new Error(`Couldn't convert ${ipfsUri} to native IPFS URI`);
+}
