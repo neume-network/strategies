@@ -10,11 +10,7 @@ export const getIpfsTokenUriFactory = (props) => {
   const { strategyName, options, version, schema } = props;
   const log = logger(strategyName);
 
-  if (env.IPFS_HTTPS_GATEWAY_KEY) {
-    options.headers = {
-      Authorization: `Bearer ${env.IPFS_HTTPS_GATEWAY_KEY}`,
-    };
-  }
+  // TODO: Add IPFS_HTTP_GATEWAY_KEY if needed
 
   const init = async function (filePath) {
     if (!(await fileExists(filePath))) {
@@ -41,16 +37,6 @@ export const getIpfsTokenUriFactory = (props) => {
       const { metadata } = data;
       let tokenURI = data.tokenURI;
 
-      if (tokenURI.includes("https://")) {
-        const parts = tokenURI.split("/");
-        const hash = parts.pop();
-        tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
-      }
-
-      const IPFSIANAScheme = "ipfs://";
-      if (tokenURI.includes(IPFSIANAScheme)) {
-        tokenURI = tokenURI.replace(IPFSIANAScheme, env.IPFS_HTTPS_GATEWAY);
-      }
       messages.push({ ...makeRequest(tokenURI), metadata });
     }
     return {
@@ -61,16 +47,13 @@ export const getIpfsTokenUriFactory = (props) => {
 
   const makeRequest = function (tokenURI) {
     return {
-      type: "https",
+      type: "ipfs",
       version,
       options: {
-        url: tokenURI,
-        method: "GET",
-        headers: options.headers,
+        uri: tokenURI,
+        gateway: env.IPFS_HTTPS_GATEWAY,
       },
-      results: null,
       schema,
-      error: null,
     };
   };
 
