@@ -48,7 +48,7 @@ export function anyIpfsToNativeIpfs(ipfsUri) {
 
 export function ifIpfsConvertToNativeIpfs(uri) {
   try {
-    anyIpfsToNativeIpfs(uri);
+    return anyIpfsToNativeIpfs(uri);
   } catch {
     return uri;
   }
