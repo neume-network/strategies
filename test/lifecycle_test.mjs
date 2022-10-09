@@ -27,10 +27,8 @@ const mockMessageCommissioner = "mockCommissioner";
 const mockMessage = {
   type: "https",
   version: "0.0.1",
-  error: null,
-  results: null,
   options: {
-    url: "",
+    url: "https://neume.network",
     method: "GET",
   },
 };
