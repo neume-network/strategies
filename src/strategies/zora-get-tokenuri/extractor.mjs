@@ -1,5 +1,6 @@
 // @format
 import { getIpfsTokenUriFactory } from "../../strategy-factories/get-ipfs-tokenuri/extractor.mjs";
+import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 import { zoraTokenUriSchema } from "./schemas.mjs";
 
 export const version = "0.0.1";
@@ -9,6 +10,7 @@ export const props = {
   version,
   options: {},
   schema: zoraTokenUriSchema,
+  transformTokenUri: ifIpfsConvertToNativeIpfs,
 };
 
 export const { init, update } = getIpfsTokenUriFactory(props);
