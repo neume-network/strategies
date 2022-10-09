@@ -64,7 +64,7 @@ export const getIpfsTokenUriFactory = (props) => {
       write: JSON.stringify({
         metadata: {
           ...message.metadata,
-          tokenURI: message.options.url,
+          tokenURI: message.options.uri,
         },
         results: message.results,
       }),
