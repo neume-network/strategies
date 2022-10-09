@@ -37,8 +37,6 @@ export function makeRequest(to, blockNumber) {
     ],
     version,
     options,
-    results: null,
-    error: null,
   };
 }
 

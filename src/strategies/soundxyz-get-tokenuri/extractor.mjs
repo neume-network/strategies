@@ -49,8 +49,6 @@ export function makeRequest(tokenURI) {
       url: tokenURI,
       method: "GET",
     },
-    results: null,
-    error: null,
   };
 }
 
