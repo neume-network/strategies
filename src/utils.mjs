@@ -45,3 +45,11 @@ export function anyIpfsToNativeIpfs(ipfsUri) {
 
   throw new Error(`Couldn't convert ${ipfsUri} to native IPFS URI`);
 }
+
+export function ifIpfsConvertToNativeIpfs(uri) {
+  try {
+    anyIpfsToNativeIpfs(uri);
+  } catch {
+    return uri;
+  }
+}

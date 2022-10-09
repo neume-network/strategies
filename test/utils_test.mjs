@@ -68,7 +68,7 @@ test("anyIpfsToNativeIpfs should throw error on invalid IPFS URI", (t) => {
 });
 
 test("anyIpfsToNativeIpfs should throw error on non string URI", (t) => {
-  t.throws(() => anyIpfsToNativeIpfs({}), {
+  t.throws(() => anyIpfsToNativeIpfs(undefined), {
     message: "Given IPFS URI should be of type string",
   });
 });

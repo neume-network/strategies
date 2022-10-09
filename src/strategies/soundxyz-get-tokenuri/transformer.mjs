@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { env } from "process";
 
 import logger from "../../logger.mjs";
+import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 
 export const name = "soundxyz-get-tokenuri";
 const log = logger(name);
@@ -48,17 +49,17 @@ export function onLine(line) {
     manifestations: [
       {
         version,
-        uri: datum.audio_url,
+        uri: ifIpfsConvertToNativeIpfs(datum.audio_url),
         mimetype: "audio",
       },
       {
         version,
-        uri: datum.image,
+        uri: ifIpfsConvertToNativeIpfs(datum.image),
         mimetype: "image",
       },
       {
         version,
-        uri: datum.animation_url,
+        uri: ifIpfsConvertToNativeIpfs(datum.animation_url),
         mimetype: "image",
       },
     ],
