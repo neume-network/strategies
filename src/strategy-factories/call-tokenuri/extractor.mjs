@@ -95,9 +95,7 @@ export const callTokenUriFactory = (props) => {
         },
         tokenId,
       },
-      results: null,
       schema: eth_callSchema,
-      error: null,
     };
   }
 
