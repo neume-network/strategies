@@ -6,8 +6,10 @@ import EventEmitter, { once } from "events";
 import { env } from "process";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { workerMessage } from "@neume-network/message-schema";
-import { crawlPath as crawlPathSchema } from "@neume-network/schema";
+import {
+  crawlPath as crawlPathSchema,
+  workerMessage,
+} from "@neume-network/schema";
 import util from "util";
 
 import { NotFoundError } from "./errors.mjs";

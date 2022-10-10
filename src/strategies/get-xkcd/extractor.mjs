@@ -24,8 +24,6 @@ export function init(start = 1) {
           url: templateURI(start),
           method: "GET",
         },
-        results: null,
-        error: null,
       },
     ],
   };
@@ -77,8 +75,6 @@ export function update(message) {
         type: "https",
         version,
         options: options,
-        results: null,
-        error: null,
       },
     ],
   };

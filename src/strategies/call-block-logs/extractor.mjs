@@ -32,9 +32,7 @@ function blockNumber(start, end) {
     },
     version,
     options,
-    results: null,
     schema: eth_blockNumberSchema,
-    error: null,
   };
 }
 
@@ -51,9 +49,7 @@ function callBlockLogs(number) {
     ],
     version,
     options,
-    results: null,
     schema: eth_getLogsSchema,
-    error: null,
   };
 }
 

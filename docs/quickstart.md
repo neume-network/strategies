@@ -30,8 +30,6 @@ The `init` function message should provide the starting state of the crawling. F
           header: null,
           body: null
         },
-        results: null,
-        error: null,
       },
     ],
   };
@@ -135,8 +133,6 @@ return {
         type: "https",
         version,
         options: options,
-        results: null,
-        error: null,
       },
     ],
   };

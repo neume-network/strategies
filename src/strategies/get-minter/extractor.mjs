@@ -26,8 +26,6 @@ function makeRequest(log) {
     version,
     method: "eth_getTransactionReceipt",
     params: [log.transactionHash, log.blockNumber],
-    results: null,
-    error: null,
   };
 }
 

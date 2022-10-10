@@ -68,9 +68,7 @@ export const getIpfsTokenUriFactory = (props) => {
         method: "GET",
         headers: options.headers,
       },
-      results: null,
       schema,
-      error: null,
     };
   };
 

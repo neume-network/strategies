@@ -97,8 +97,6 @@ export function makeRequest(tokenId, blockNumber) {
       },
       tokenId,
     },
-    results: null,
-    error: null,
   };
 }
 
@@ -146,8 +144,6 @@ export function update(message) {
             },
             tokenId: message.metadata.tokenId,
           },
-          results: null,
-          error: null,
         },
       ],
       write: null,
