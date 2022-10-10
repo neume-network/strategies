@@ -23,6 +23,7 @@ export function parseJSON(value, distance = 10) {
 
 export function anyIpfsToNativeIpfs(ipfsUri) {
   const IPFSIANAScheme = "ipfs://";
+  // Modified from is-ipfs package at https://github.com/ipfs-shipyard/is-ipfs/blob/393859af921ef52d786c0f14bf772eeda7f8930b/src/index.js#L12
   const pathGatewayPattern = /^https?:\/\/[^/]+\/ipfs\/([^/?#]+)(.*)/;
   const subdomainGatewayPattern = /^https?:\/\/([^/]+)\.ipfs\.[^/?#]+(.*)/;
 

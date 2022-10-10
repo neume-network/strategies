@@ -10,6 +10,8 @@ export const props = {
   version,
   options: {},
   schema: zoraTokenUriSchema,
+  // Early Zora tokenIDs don't return ipfs://
+  // they return ipfs.fleek.co
   transformTokenUri: ifIpfsConvertToNativeIpfs,
 };
 
