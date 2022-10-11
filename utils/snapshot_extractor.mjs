@@ -30,7 +30,8 @@ export default async function snapshotExtractor(extractor, { inputs }) {
 
   let writeResult = "";
   const write = (string) => {
-    writeResult += string + "\n";
+    if (extractor.write) writeResult = extractor.write(writeResult, string);
+    else writeResult += string + "\n";
   };
 
   worker.on("message", (message) => {
