@@ -35,7 +35,19 @@ export function onLine(line) {
     tokenURIs = tokenURIs.filter(
       (tokenURI) => tokenURI.split("/").length === 4
     );
+  } catch (err) {
+    log(err.toString());
+    return;
+  }
+
+  try {
     tokenURIs.sort((a, b) => extractTokenId(a) - extractTokenId(b));
+  } catch (err) {
+    log(err.toString());
+    return;
+  }
+
+  try {
     tokenURIs.forEach((tokenURI) => {
       const tokenId = extractTokenId(tokenURI);
       const url = tokenURI.split("/")[2];
@@ -56,7 +68,12 @@ export function onLine(line) {
         });
       }
     });
+  } catch (err) {
+    log(err.toString());
+    return;
+  }
 
+  try {
     result = result.map(
       (item) =>
         `ar://${item.url}/[${item.min
@@ -67,6 +84,7 @@ export function onLine(line) {
     log(err.toString());
     return;
   }
+
   return JSON.stringify({
     metadata: obj.metadata,
     tokenURI: result,

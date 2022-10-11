@@ -110,6 +110,7 @@ function makeRequest(blockNumber, address) {
 }
 
 export function update(message) {
+  // The nextTokenId call returns 1 field each of 32 bytes. Hence, the result contains 32*1*1 characters. Additional two characters for 0x prefix.
   const LENGTH_OF_NEXT_TOKENID = 66;
   if (message.results.length === LENGTH_OF_NEXT_TOKENID) {
     const nextTokenId = parseInt(
