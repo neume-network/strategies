@@ -7,10 +7,8 @@ import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
 
 export const getIpfsTokenUriFactory = (props) => {
-  const { strategyName, options, version, schema, transformTokenUri } = props;
+  const { strategyName, version, schema, transformTokenUri } = props;
   const log = logger(strategyName);
-
-  // TODO: Add IPFS_HTTP_GATEWAY_KEY if needed
 
   const init = async function (filePath) {
     if (!(await fileExists(filePath))) {
@@ -48,12 +46,19 @@ export const getIpfsTokenUriFactory = (props) => {
   };
 
   const makeRequest = function (tokenURI) {
+    let headers;
+    if (env.IPFS_HTTPS_GATEWAY_KEY) {
+      headers = {
+        Authorization: `Bearer ${env.IPFS_HTTPS_GATEWAY_KEY}`,
+      };
+    }
     return {
       type: "ipfs",
       version,
       options: {
         uri: tokenURI,
         gateway: env.IPFS_HTTPS_GATEWAY,
+        headers,
       },
       schema,
     };
