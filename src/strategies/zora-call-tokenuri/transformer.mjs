@@ -1,8 +1,6 @@
 // @format
-import { resolve } from "path";
-import { env } from "process";
-
 import { decodeSolidityHexStringFactory } from "../../strategy-factories/decode-solidity-hex-string-factory/transformer.mjs";
+import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 
 export const name = "zora-call-tokenuri";
 export const version = "0.1.0";
@@ -12,6 +10,9 @@ const { onClose, onError, onLine } = decodeSolidityHexStringFactory({
   strategyName: name,
   version,
   resultKey,
+  // Early Zora tokenIDs don't return ipfs://
+  // they return ipfs.fleek.co
+  transformResult: ifIpfsConvertToNativeIpfs,
 });
 
 export { onClose, onError, onLine };

@@ -7,7 +7,7 @@ import { decodeParameters } from "eth-fun";
 import logger from "../../logger.mjs";
 
 export const decodeSolidityHexStringFactory = (props) => {
-  const { strategyName, version, resultKey } = props;
+  const { strategyName, version, resultKey, transformResult } = props;
 
   const log = logger(strategyName);
 
@@ -33,6 +33,9 @@ export const decodeSolidityHexStringFactory = (props) => {
     let decodedOutput;
     try {
       [decodedOutput] = decodeParameters(["string"], obj.results);
+      decodedOutput = transformResult
+        ? transformResult(decodedOutput)
+        : decodedOutput;
     } catch (err) {
       log(err.toString());
       return;

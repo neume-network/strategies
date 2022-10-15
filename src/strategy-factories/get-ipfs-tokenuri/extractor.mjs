@@ -7,14 +7,8 @@ import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
 
 export const getIpfsTokenUriFactory = (props) => {
-  const { strategyName, options, version, schema } = props;
+  const { strategyName, version, schema, transformTokenUri } = props;
   const log = logger(strategyName);
-
-  if (env.IPFS_HTTPS_GATEWAY_KEY) {
-    options.headers = {
-      Authorization: `Bearer ${env.IPFS_HTTPS_GATEWAY_KEY}`,
-    };
-  }
 
   const init = async function (filePath) {
     if (!(await fileExists(filePath))) {
@@ -39,18 +33,10 @@ export const getIpfsTokenUriFactory = (props) => {
 
       const data = JSON.parse(line);
       const { metadata } = data;
-      let tokenURI = data.tokenURI;
+      let tokenURI = transformTokenUri
+        ? transformTokenUri(data.tokenURI)
+        : data.tokenURI;
 
-      if (tokenURI.includes("https://")) {
-        const parts = tokenURI.split("/");
-        const hash = parts.pop();
-        tokenURI = `${env.IPFS_HTTPS_GATEWAY}${hash}`;
-      }
-
-      const IPFSIANAScheme = "ipfs://";
-      if (tokenURI.includes(IPFSIANAScheme)) {
-        tokenURI = tokenURI.replace(IPFSIANAScheme, env.IPFS_HTTPS_GATEWAY);
-      }
       messages.push({ ...makeRequest(tokenURI), metadata });
     }
     return {
@@ -60,13 +46,19 @@ export const getIpfsTokenUriFactory = (props) => {
   };
 
   const makeRequest = function (tokenURI) {
+    let headers;
+    if (env.IPFS_HTTPS_GATEWAY_KEY) {
+      headers = {
+        Authorization: `Bearer ${env.IPFS_HTTPS_GATEWAY_KEY}`,
+      };
+    }
     return {
-      type: "https",
+      type: "ipfs",
       version,
       options: {
-        url: tokenURI,
-        method: "GET",
-        headers: options.headers,
+        uri: tokenURI,
+        gateway: env.IPFS_HTTPS_GATEWAY,
+        headers,
       },
       schema,
     };
@@ -79,7 +71,7 @@ export const getIpfsTokenUriFactory = (props) => {
       write: JSON.stringify({
         metadata: {
           ...message.metadata,
-          tokenURI: message.options.url,
+          tokenURI: message.options.uri,
         },
         results: message.results,
       }),
