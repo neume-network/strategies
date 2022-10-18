@@ -97,9 +97,7 @@ function makeRequest(tokenId, blockNumber, address, signature) {
       },
       tokenId,
     },
-    results: null,
     schema: eth_callSchema,
-    error: null,
   };
 }
 
