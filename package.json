@@ -55,6 +55,9 @@
     "eth-fun": ">=0.9.1"
   },
   "ava": {
+    "files": [
+      "**/*_test.mjs"
+    ],
     "timeout": "30s",
     "environmentVariables": {
       "IPFS_HTTPS_GATEWAY": "https://cloudflare-ipfs.com/ipfs/"
