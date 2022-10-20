@@ -60,7 +60,8 @@ async function init(filePath, signature, filterFunc) {
             BigInt(log.topics[3]).toString(10),
             parseInt(log.blockNumber, 16),
             log.address,
-            signature
+            signature,
+            log.transactionHash
           )
         ),
     ];
@@ -71,7 +72,13 @@ async function init(filePath, signature, filterFunc) {
   };
 }
 
-function makeRequest(tokenId, blockNumber, address, signature) {
+function makeRequest(
+  tokenId,
+  blockNumber,
+  address,
+  signature,
+  transactionHash
+) {
   const data = encodeFunctionCall(signature, [tokenId]);
 
   const from = null;
@@ -89,6 +96,7 @@ function makeRequest(tokenId, blockNumber, address, signature) {
       toHex(Math.max(blockNumber, BLOCK_NUMBER)),
     ],
     metadata: {
+      transactionHash,
       block: {
         number: blockNumber,
       },
