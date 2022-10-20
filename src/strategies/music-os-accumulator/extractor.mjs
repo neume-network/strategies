@@ -92,6 +92,23 @@ const strategies = [
       };
     },
   },
+  {
+    files: ["sound-protocol-get-tokenuri-transformation"],
+    map: new Map(),
+    accumulator: (map) => {
+      return (line) => {
+        const data = JSON.parse(line);
+        const id = caip19(
+          data.erc721.metadata.address,
+          data.erc721.metadata.trackNumber
+        );
+        // parsing unique songs
+        const song = map.get(id) || [];
+        song.push(data);
+        map.set(id, song);
+      };
+    },
+  },
 ];
 
 async function lineReader(filePath, accumulator) {
@@ -179,6 +196,7 @@ export async function init() {
   trackList = [...trackList, ...strategies[3].map];
   trackList = [...trackList, ...strategies[4].map];
   trackList = [...trackList, ...strategies[5].map];
+  trackList = [...trackList, ...Array.from(strategies[6].map.values())];
   // NOTE: See: https://github.com/neume-network/strategies/issues/246#issuecomment-1240365903
   trackList = uniqWith(trackList, isUnique);
   return {
