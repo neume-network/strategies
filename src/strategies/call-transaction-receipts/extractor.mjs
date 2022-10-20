@@ -3,7 +3,7 @@ import { createReadStream } from "fs";
 import { env } from "process";
 
 const version = "0.0.1";
-export const name = "get-minter";
+export const name = "call-transaction-receipts";
 import logger from "../../logger.mjs";
 
 const log = logger(name);
@@ -18,7 +18,7 @@ if (env.RPC_API_KEY) {
   };
 }
 
-function makeRequest(log) {
+function makeRequest({ log }) {
   const from = null;
   return {
     type: "json-rpc",
@@ -29,7 +29,9 @@ function makeRequest(log) {
   };
 }
 
-export async function init(filePath) {
+// `filePath` must point to a call-block-logs-transformation file
+// `address` is one Ethereum address that the logs are filtered by
+export async function init(filePath, address) {
   const rl = createInterface({
     input: createReadStream(filePath),
     crlfDelay: Infinity,
@@ -39,7 +41,8 @@ export async function init(filePath) {
   for await (const line of rl) {
     // NOTE: We're ignoring empty lines
     if (line === "") continue;
-    const logs = JSON.parse(line);
+    let logs = JSON.parse(line);
+    logs = logs.filter(({ log }) => log.address === address.toLowerCase());
 
     txs = [...txs, ...logs.map(makeRequest)];
   }
