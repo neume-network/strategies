@@ -98,14 +98,12 @@ const strategies = [
     accumulator: (map) => {
       return (line) => {
         const data = JSON.parse(line);
+        // unique each song by sound edition contract address and trackNumber
         const id = caip19(
-          data.erc721.metadata.address,
+          data.erc721.address,
           data.erc721.metadata.trackNumber
         );
-        // parsing unique songs
-        const song = map.get(id) || [];
-        song.push(data);
-        map.set(id, song);
+        !map.get(id) && map.set(id, data);
       };
     },
   },
