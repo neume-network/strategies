@@ -103,7 +103,7 @@ const strategies = [
           data.erc721.address,
           data.erc721.metadata.trackNumber
         );
-        !map.get(id) && map.set(id, data);
+        !map.has(id) && map.set(id, data);
       };
     },
   },
