@@ -79,9 +79,7 @@ test("reading a file by line using the line reader", async (t) => {
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter(
     (strategy) =>
-      strategy &&
-      strategy.module &&
-      strategy.module.name === "soundxyz-call-tokenuri"
+      strategy && strategy.module && strategy.module.name === "call-tokenuri"
   );
   const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
   await transform({ module: strategy }, sourcePath, outputPath, []);
@@ -96,9 +94,7 @@ test("applying transformation strategies to a file", async (t) => {
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter(
     (strategy) =>
-      strategy &&
-      strategy.module &&
-      strategy.module.name === "soundxyz-call-tokenuri"
+      strategy && strategy.module && strategy.module.name === "call-tokenuri"
   );
   await transform(strategies[0], sourcePath, outputPath, []);
   try {
@@ -124,9 +120,7 @@ test("strategy transformer should receive inputs", async (t) => {
     await loadStrategies("./strategies", "transformer.mjs")
   ).filter(
     (strategy) =>
-      strategy &&
-      strategy.module &&
-      strategy.module.name === "soundxyz-call-tokenuri"
+      strategy && strategy.module && strategy.module.name === "call-tokenuri"
   );
   const strategy = { ...strategies[0].module, onLine: lineHandlerMock };
   await transform({ module: strategy }, sourcePath, outputPath, ["arg1"]);
