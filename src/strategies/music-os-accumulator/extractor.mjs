@@ -92,6 +92,21 @@ const strategies = [
       };
     },
   },
+  {
+    files: ["sound-protocol-get-tokenuri-transformation"],
+    map: new Map(),
+    accumulator: (map) => {
+      return (line) => {
+        const data = JSON.parse(line);
+        // In the sound-protocol a song can be represented by multiple NFTs where the differentiating factor is within the NFT's metadata, the `trackNumber` property. We're hence generating a unique identifier from the contract's address and the track's number to then filter out potential token duplicates.
+        const id = caip19(
+          data.erc721.address,
+          data.erc721.metadata.trackNumber
+        );
+        !map.has(id) && map.set(id, data);
+      };
+    },
+  },
 ];
 
 async function lineReader(filePath, accumulator) {
@@ -179,6 +194,7 @@ export async function init() {
   trackList = [...trackList, ...strategies[3].map];
   trackList = [...trackList, ...strategies[4].map];
   trackList = [...trackList, ...strategies[5].map];
+  trackList = [...trackList, ...Array.from(strategies[6].map.values())];
   // NOTE: See: https://github.com/neume-network/strategies/issues/246#issuecomment-1240365903
   trackList = uniqWith(trackList, isUnique);
   return {
