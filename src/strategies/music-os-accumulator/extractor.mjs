@@ -6,6 +6,7 @@ import { resolve } from "path";
 
 import uniqWith from "lodash.uniqwith";
 
+import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
 
@@ -23,7 +24,7 @@ const strategies = [
     accumulator: (map) => {
       return (line) => {
         const data = JSON.parse(line);
-        map.set(data.erc721.tokenURI, data);
+        map.set(ifIpfsConvertToNativeIpfs(data.erc721.tokenURI), data);
       };
     },
   },
@@ -42,7 +43,7 @@ const strategies = [
         );
 
         map.set(id, data);
-        map.set(data.tokenURI, data);
+        map.set(ifIpfsConvertToNativeIpfs(data.tokenURI), data);
       };
     },
   },
@@ -58,7 +59,7 @@ const strategies = [
         );
 
         map.set(id, data);
-        map.set(data.tokenURI, data);
+        map.set(ifIpfsConvertToNativeIpfs(data.tokenURI), data);
       };
     },
   },
@@ -158,11 +159,15 @@ export async function init() {
 
   const tracks = new Map();
   for (let [tokenURI, metadata] of data.metadata) {
+    tokenURI = ifIpfsConvertToNativeIpfs(tokenURI);
     if (
       metadata.platform.name === "Catalog" &&
       metadata.platform.version === "1.0.0"
     ) {
       const chainData = data.uris.get(tokenURI);
+      if (!chainData) {
+        continue;
+      }
       metadata.erc721.address = chainData.metadata.contract.address;
       metadata.erc721.tokenId = chainData.metadata.tokenId;
       metadata.erc721.createdAt = chainData.metadata.block.number;
