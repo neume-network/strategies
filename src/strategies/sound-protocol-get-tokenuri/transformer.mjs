@@ -48,7 +48,7 @@ export function onLine(line) {
     manifestations: [
       {
         version,
-        uri: datum.audio_url,
+        uri: datum.losslessAudio,
         mimetype: "audio",
       },
       {

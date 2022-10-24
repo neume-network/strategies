@@ -47,7 +47,7 @@ export function makeRequest(tokenURI) {
     version,
     options: {
       uri: tokenURI,
-      gateway: "https://arweave.net",
+      gateway: env.ARWEAVE_HTTPS_GATEWAY,
     },
   };
 }
