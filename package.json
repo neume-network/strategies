@@ -61,7 +61,8 @@
     "timeout": "30s",
     "environmentVariables": {
       "IPFS_HTTPS_GATEWAY": "https://cloudflare-ipfs.com/ipfs/",
-      "IPFS_HTTPS_GATEWAY_KEY": ""
+      "IPFS_HTTPS_GATEWAY_KEY": "",
+      "ARWEAVE_HTTPS_GATEWAY": "https://arweave.net"
     }
   }
 }
