@@ -26,7 +26,7 @@ export function onLine(line) {
     title: datum.name,
     artist: {
       version,
-      name: datum.artist_name,
+      name: datum.artist,
     },
     platform: {
       version,
