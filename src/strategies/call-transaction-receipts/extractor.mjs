@@ -30,7 +30,8 @@ function makeRequest({ log }) {
 }
 
 // `filePath` must point to a call-block-logs-transformation file
-// `address` is one Ethereum address that the logs are filtered by
+// `address` is one Ethereum address that the logs are filtered by. It's
+// optional.
 export async function init(filePath, address) {
   const rl = createInterface({
     input: createReadStream(filePath),
@@ -42,7 +43,9 @@ export async function init(filePath, address) {
     // NOTE: We're ignoring empty lines
     if (line === "") continue;
     let logs = JSON.parse(line);
-    logs = logs.filter(({ log }) => log.address === address.toLowerCase());
+    if (address) {
+      logs = logs.filter(({ log }) => log.address === address.toLowerCase());
+    }
 
     txs = [...txs, ...logs.map(makeRequest)];
   }
@@ -53,6 +56,15 @@ export async function init(filePath, address) {
 }
 
 export function update(message) {
+  if (message.results) {
+    // NOTE: The maximum size of files we can add to neume-network/data on
+    // GitHub is 100MB and the results of running this strategy on all music
+    // NFT mints was bigger. So I made the decision to shave of the biggest
+    // parts of the payloads by removing logs and logsBloom for now. But this
+    // isn't great TBH. We shouldn't transform in a extractor strategy.
+    delete message.results.logs;
+    delete message.results.logsBloom;
+  }
   return {
     write: JSON.stringify(message.results),
     messages: [],
