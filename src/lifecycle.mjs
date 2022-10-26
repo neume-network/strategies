@@ -333,6 +333,30 @@ export async function init(worker, crawlPath) {
         log(
           `Ending transformer strategy with name "${transformStrategy.module.name}"`
         );
+
+        if (strategy.transformer?.output?.resolve) {
+          const resolverStrategy = finder("extraction", "resolver");
+          log(
+            `Starting resolver strategy with name "${resolverStrategy.module.name}"`
+          );
+          const args = [
+            generatePath(transformStrategy.module.name, "transformation"),
+          ];
+          const outputPath = generatePath(
+            transformStrategy.module.name,
+            "transformation-resolved"
+          );
+          await extract(
+            resolverStrategy,
+            worker,
+            messageRouter,
+            outputPath,
+            args
+          );
+          log(
+            `Ending resolver strategy with name "${resolverStrategy.module.name}"`
+          );
+        }
       }
     }
   }
