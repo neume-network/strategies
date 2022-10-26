@@ -47,12 +47,25 @@ export function onLine(line, contracts) {
         Object.keys(contracts).includes(log.address)
       );
     })
-    .map((log) => ({
-      metadata: {
-        platform: contracts[log.address],
-      },
-      log,
-    }));
+    .map((log) => {
+      return {
+        platform: {
+          ...contracts[log.address],
+        },
+        erc721: {
+          createdAt: parseInt(log.blockNumber, 16),
+          address: log.address,
+          tokens: [
+            {
+              minting: {
+                transactionHash: log.transactionHash,
+              },
+              id: BigInt(log.topics[3]).toString(10),
+            },
+          ],
+        },
+      };
+    });
 
   if (logs.length) {
     return JSON.stringify(logs);

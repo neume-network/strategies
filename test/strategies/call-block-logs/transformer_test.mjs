@@ -152,22 +152,96 @@ test("call-block-logs transformer", (t) => {
   t.truthy(res0);
   t.truthy(res1);
   const parsed = [...JSON.parse(res0), ...JSON.parse(res1)];
-  t.plan(parsed.length * 6 + 5);
-  t.is(parsed.length, 5);
-  t.is(parsed[4].log.address, "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c");
-  t.is(parsed[4].metadata.platform.name, "sound");
-  for (let { metadata, log } of parsed) {
-    t.truthy(metadata.platform);
-    t.truthy(metadata.platform.name);
-    t.truthy(log.address);
-    t.truthy(log.topics);
-    t.is(
-      log.topics[0],
-      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-    );
-    t.is(
-      log.topics[1],
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
-  }
+  t.deepEqual(parsed[0], {
+    platform: {
+      name: "zora",
+    },
+    erc721: {
+      createdAt: 14005508,
+      address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
+      tokens: [
+        {
+          minting: {
+            transactionHash:
+              "0x578e40828fa70d7bcb95df6ac42ea5d4367729daac34faa5d8aba839e8196fcc",
+          },
+          id: "7437",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[1], {
+    platform: {
+      name: "catalog",
+      version: "2.0.0",
+    },
+    erc721: {
+      createdAt: 14617046,
+      address: "0x0bc2a24ce568dad89691116d5b34deb6c203f342",
+      tokens: [
+        {
+          minting: {
+            transactionHash:
+              "0x15688480a318ba0c14a6462466a9ed000dd70212b16cf669b627c3eaea5ee4ca",
+          },
+          id: "1",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[2], {
+    platform: {
+      name: "noizd",
+    },
+    erc721: {
+      createdAt: 14602138,
+      address: "0xf5819e27b9bad9f97c177bf007c1f96f26d91ca6",
+      tokens: [
+        {
+          minting: {
+            transactionHash:
+              "0x85496568ab90ac589046d89f5b25ac2739535a2dd146e92a5858ba7deee80296",
+          },
+          id: "40",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[3], {
+    platform: {
+      name: "mintsongs",
+      version: "2.0.0",
+    },
+    erc721: {
+      createdAt: 14837298,
+      address: "0x2b5426a5b98a3e366230eba9f95a24f09ae4a584",
+      tokens: [
+        {
+          minting: {
+            transactionHash:
+              "0x922fa24135d2d38aea91b43b2d7334063bff3e98a4e63f666a0db1e446f2963c",
+          },
+          id: "18",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[4], {
+    platform: {
+      name: "sound",
+    },
+    erc721: {
+      createdAt: 14757111,
+      address: "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c",
+      tokens: [
+        {
+          minting: {
+            transactionHash:
+              "0x963e9bfc038f87742cc6cd300b178fb8bd33fd6c2de5ee12b37081d23c16af73",
+          },
+          id: "680564733841876926926749214863536422962",
+        },
+      ],
+    },
+  });
 });
