@@ -1,3 +1,20 @@
+// @format
+
+export function deepMapKeys(obj, cb) {
+  Object.keys(obj).map((key) => {
+    const value = obj[key];
+    if (Array.isArray(value)) {
+      for (let elem of value) {
+        deepMapKeys(elem, cb);
+      }
+    } else if (value !== null && typeof value === "object") {
+      deepMapKeys(value, cb);
+    } else {
+      cb(key, value);
+    }
+  });
+}
+
 export function parseJSON(value, distance = 10) {
   let parsed;
   try {
