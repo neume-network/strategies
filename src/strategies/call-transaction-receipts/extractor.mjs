@@ -30,7 +30,8 @@ function makeRequest({ log }) {
 }
 
 // `filePath` must point to a call-block-logs-transformation file
-// `address` is one Ethereum address that the logs are filtered by
+// `address` is one Ethereum address that the logs are filtered by. It's
+// optional.
 export async function init(filePath, address) {
   const rl = createInterface({
     input: createReadStream(filePath),
@@ -42,7 +43,9 @@ export async function init(filePath, address) {
     // NOTE: We're ignoring empty lines
     if (line === "") continue;
     let logs = JSON.parse(line);
-    logs = logs.filter(({ log }) => log.address === address.toLowerCase());
+    if (address) {
+      logs = logs.filter(({ log }) => log.address === address.toLowerCase());
+    }
 
     txs = [...txs, ...logs.map(makeRequest)];
   }
