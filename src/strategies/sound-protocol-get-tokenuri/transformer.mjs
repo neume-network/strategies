@@ -35,12 +35,19 @@ export function onLine(line) {
     },
     erc721: {
       version,
+      tokens: [
+        {
+          minting: {
+            transactionHash: obj.metadata?.transactionHash,
+          },
+          id: obj.metadata?.tokenId,
+          uri: obj.metadata?.tokenURI,
+        },
+      ],
       // TODO: Stop hard coding this value
       // owner: "0x4456AE02EA5534cEd3A151e41a715bBA685A7CAb",
       createdAt: obj.metadata.block.number,
-      tokenId: obj.metadata.tokenId,
       address: obj.metadata.contract.address,
-      tokenURI: obj.metadata.tokenURI,
       metadata: {
         ...datum,
       },

@@ -52,9 +52,14 @@ export function onLine(line) {
     erc721: {
       version,
       // TODO
-      //address: nft[1],
-      //tokenId: nft[2],
-      tokenURI: metadata.tokenURI,
+      tokens: [
+        {
+          minting: {
+            transactionHash: metadata?.transactionHash,
+          },
+          uri: metadata?.tokenURI,
+        },
+      ],
       metadata: {
         ...datum,
         name: title,

@@ -38,10 +38,14 @@ export function onLine(line) {
     },
     erc721: {
       version,
-      // TODO
-      //address: nft[1],
-      //tokenId: nft[2],
-      tokenURI: obj.metadata.tokenURI,
+      tokens: [
+        {
+          minting: {
+            transactionHash: obj.metadata?.transactionHash,
+          },
+          uri: obj.metadata?.tokenURI,
+        },
+      ],
       metadata: {
         ...datum,
       },

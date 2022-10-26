@@ -50,9 +50,16 @@ export function onLine(line) {
       owner: "0x489e043540ff11ec22226ca0a6f6f8e3040c7b5a",
       version,
       createdAt: metadata?.block?.number,
-      tokenId: metadata?.tokenId,
+      tokens: [
+        {
+          minting: {
+            transactionHash: metadata?.transactionHash,
+          },
+          id: metadata?.tokenId,
+          uri: metadata?.tokenURI,
+        },
+      ],
       address: metadata?.contract?.address,
-      tokenURI: metadata?.tokenURI,
       metadata: {
         ...datum,
         name: datum.name,
