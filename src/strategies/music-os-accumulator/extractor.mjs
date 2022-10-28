@@ -99,12 +99,8 @@ const strategies = [
     accumulator: (map) => {
       return (line) => {
         const data = JSON.parse(line);
-        // In the sound-protocol a song can be represented by multiple NFTs where the differentiating factor is within the NFT's metadata, the `trackNumber` property. We're hence generating a unique identifier from the contract's address and the track's number to then filter out potential token duplicates.
-        const id = caip19(
-          data.erc721.address,
-          data.erc721.metadata.trackNumber
-        );
-        !map.has(id) && map.set(id, data);
+        const id = caip19(data.erc721.address, data.erc721.tokenId);
+        map.set(id, data);
       };
     },
   },
