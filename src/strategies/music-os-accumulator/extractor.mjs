@@ -3,10 +3,9 @@ import { createInterface } from "readline";
 import { createReadStream } from "fs";
 import { env } from "process";
 import { resolve } from "path";
-
+import { ifIpfsConvertToNativeIpfs } from "ipfs-uri-utils";
 import uniqWith from "lodash.uniqwith";
 
-import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 import logger from "../../logger.mjs";
 import { fileExists } from "../../disc.mjs";
 

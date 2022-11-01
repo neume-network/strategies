@@ -1,9 +1,7 @@
 // @format
-import { resolve } from "path";
-import { env } from "process";
+import { ifIpfsConvertToNativeIpfs } from "ipfs-uri-utils";
 
 import logger from "../../logger.mjs";
-import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 
 export const name = "soundxyz-get-tokenuri";
 const log = logger(name);

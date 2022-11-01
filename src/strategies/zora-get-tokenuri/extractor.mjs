@@ -1,6 +1,5 @@
 // @format
 import { getIpfsTokenUriFactory } from "../../strategy-factories/get-ipfs-tokenuri/extractor.mjs";
-import { ifIpfsConvertToNativeIpfs } from "../../utils.mjs";
 import { zoraTokenUriSchema } from "./schemas.mjs";
 
 export const version = "0.0.1";
