@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@neume-network/schema": "0.8.1",
+    "ipfs-uri-utils": "1.0.0",
     "lodash.uniqwith": "4.5.0",
     "sha3": "2.1.4"
   },
