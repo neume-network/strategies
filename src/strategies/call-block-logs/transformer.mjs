@@ -43,11 +43,11 @@ export function onLine(line, contracts) {
     .filter((log) => {
       return (
         log.topics[0] === transferEventSelector &&
-        log.topics[1] === emptyB32 &&
         Object.keys(contracts).includes(log.address)
       );
     })
     .map((log) => {
+      const isMinting = log.topics[1] === emptyB32;
       return {
         platform: {
           ...contracts[log.address],
@@ -57,7 +57,7 @@ export function onLine(line, contracts) {
           address: log.address,
           tokens: [
             {
-              minting: {
+              [isMinting ? "minting" : "transfer"]: {
                 transactionHash: log.transactionHash,
               },
               id: BigInt(log.topics[3]).toString(10),

@@ -115,6 +115,66 @@ const snapshot1 = [
     logIndex: "0x123",
     removed: false,
   },
+  {
+    address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
+    topics: [
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "0x000000000000000000000000fc4852b5e3af65058cdfe1d1dce26946c0c1975f",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000f6f",
+    ],
+    data: "0x",
+    blockNumber: "0xc323cd",
+    blockHash:
+      "0xa575edf0bd4e34b875538d8e4631047ef778471b59665f5b4e40fed6b82c7c39",
+    timeStamp: "0x60e755da",
+    gasPrice: "0x98bca5a00",
+    gasUsed: "0xe812",
+    logIndex: "0xb6",
+    transactionHash:
+      "0x205115cf8383aca6957c4345c0e117f56d367378d619227d58cefb4aa11eb470",
+    transactionIndex: "0xc2",
+  },
+  {
+    address: "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c",
+    topics: [
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "0x0000000000000000000000008523f4a82bc03f2a5c9d1905150b47f0ef7ad29b",
+      "0x0000000000000000000000002c8f3de28dbb323b823efaa56528eb85cdbe9408",
+      "0x0000000000000000000000000000000000000000000000000000000000000013",
+    ],
+    data: "0x",
+    blockNumber: "0xf188c2",
+    blockHash:
+      "0x95e204c58b95c21d229d637acfe6e7e952c8ebd1ad47d0e31763f0b03ed62563",
+    timeStamp: "0x635897cf",
+    gasPrice: "0x2ec7a045c",
+    gasUsed: "0x11470",
+    logIndex: "0x1e8",
+    transactionHash:
+      "0x207fc9dab9c8b167b590334d110edae20ef7e76d432d7b57db825e684a48a6eb",
+    transactionIndex: "0xf6",
+  },
+  {
+    address: "0x0bc2a24ce568dad89691116d5b34deb6c203f342",
+    topics: [
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "0x00000000000000000000000026ef03a20aaeda8aafcee4e146dc6b328195947c",
+      "0x000000000000000000000000e468ce99444174bd3bbbed09209577d25d1ad673",
+      "0x0000000000000000000000000000000000000000000000000000000000000188",
+    ],
+    data: "0x",
+    blockNumber: "0xee1d83",
+    blockHash:
+      "0xe84da0227f79e2f91e9093abde1ebc4a2399299d7d97115bb98ff00a50abd62a",
+    timeStamp: "0x632f51c3",
+    gasPrice: "0x134880723",
+    gasUsed: "0x35a3e",
+    logIndex: "0xdd",
+    transactionHash:
+      "0x73bdfed03b92bd8393a236a181e7c0db53b7a6ac241df9f2737a8ea44a716b36",
+    transactionIndex: "0xde",
+  },
 ];
 
 test("if call-block-logs transformer throws when passing in upper-cased contract addresses", (t) => {
@@ -240,6 +300,61 @@ test("call-block-logs transformer", (t) => {
               "0x963e9bfc038f87742cc6cd300b178fb8bd33fd6c2de5ee12b37081d23c16af73",
           },
           id: "680564733841876926926749214863536422962",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[5], {
+    platform: {
+      name: "zora",
+    },
+    erc721: {
+      createdAt: 12788685,
+      address: "0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7",
+      tokens: [
+        {
+          transfer: {
+            transactionHash:
+              "0x205115cf8383aca6957c4345c0e117f56d367378d619227d58cefb4aa11eb470",
+          },
+          id: "3951",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[6], {
+    platform: {
+      name: "sound",
+    },
+    erc721: {
+      createdAt: 15829186,
+      address: "0xca13eaa6135d719e743ffebb5c26de4ce2f9600c",
+      tokens: [
+        {
+          transfer: {
+            transactionHash:
+              "0x207fc9dab9c8b167b590334d110edae20ef7e76d432d7b57db825e684a48a6eb",
+          },
+          id: "19",
+        },
+      ],
+    },
+  });
+  t.deepEqual(parsed[7], {
+    platform: {
+      name: "catalog",
+      version: "2.0.0",
+    },
+    erc721: {
+      createdAt: 15605123,
+      address: "0x0bc2a24ce568dad89691116d5b34deb6c203f342",
+      tokens: [
+        {
+          transfer: {
+            transactionHash:
+              "0x73bdfed03b92bd8393a236a181e7c0db53b7a6ac241df9f2737a8ea44a716b36",
+          },
+          id: "392",
         },
       ],
     },
